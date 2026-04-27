@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from impulso import Circuit, Resistor, Capacitor, NPN, DCVoltageSource, SinusoidalVoltageSource, ac_sweep, freq_pivot_and_select
+
+
+plt.rcParams['axes.xmargin'] = 0
+
+
+Vcc = DCVoltageSource(9, id='Vcc')
+Vin = SinusoidalVoltageSource(1, ac_source=True, id='Vin')
+C1 = Capacitor(1e-6, id='C1')
+R1 = Resistor(8000, id='R1')
+R2 = Resistor(1000, id='R2')
+Rc = Resistor(3000, id='Rc')
+Re = Resistor(1000, id='Re')
+Q1 = NPN(id='Q1')
+
+circuit = Circuit(ground_node='GND')
+circuit.add(Vcc, ['GND', 'VCC'])
+circuit.add(Vin, ['GND', 'VIN'])
+circuit.add(C1, ['VIN', 'Q1_B'])
+circuit.add(R1, ['VCC', 'Q1_B'])
+circuit.add(R2, ['Q1_B', 'GND'])
+circuit.add(Rc, ['VCC', 'Q1_C'])
+circuit.add(Re, ['Q1_E', 'GND'])
+circuit.add(Q1, ['Q1_E', 'Q1_B', 'Q1_C'])
+
+freqs = np.logspace(1, 10, 500)
+results = ac_sweep(circuit,freqs)
+
+freqs, node_voltages, _c = freq_pivot_and_select(results, 
+                                            voltage_nodes=['Q1_C'], 
+                                            current_components=[],
+                                            to_return='MP')
+vout = node_voltages['Q1_C'][0]
+phase = node_voltages['Q1_C'][1]
+    
+fig, axL = plt.subplots()
+axR = axL.twinx()
+plt.title('Frequency response of NPN transistor amplifier')
+axL.plot(freqs,vout,'k')
+axL.grid()
+axR.plot(freqs,phase,'k--')
+axL.set_xscale('log')
+axL.set_xlabel('Frequency (Hz)')
+axL.set_ylabel('Voltage at Q1_C (V)')
+plt.show()
+    
