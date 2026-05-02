@@ -9,7 +9,7 @@ packages = ["src/impulso"]
 include = ["src/impulso"]
 
 [project]
-name = "impulso"
+name = "impulso_mna"
 version = "0.1"
 authors = [
   { name="kvdijken", email="sla_nippers_0x@icloud.com" },
