@@ -20,7 +20,7 @@ dependencies = [
 
 description = "A package for the simulation of analog electronic circuits using Modified Nodal Analysis"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -32,6 +32,9 @@ examples=[
 "matplotlib",
 "quantiphy",
 "labellines"
+]
+test=[
+  "pytest"
 ]
 
 [project.urls]

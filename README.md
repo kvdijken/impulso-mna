@@ -94,7 +94,7 @@ Generates a family of curves (Ic vs Vce) for different base currents.
 
   * BJT modeling (e.g. Ebers–Moll)
   * Parameter sweeps
-* Output: characteristic transistor curves including saturation behavior
+* Output: characteristic transistor curves including saturation behavior and output resistance (Early voltage).
 
 ![Alt text](images/npn-curves.png)
 

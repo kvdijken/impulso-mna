@@ -143,7 +143,6 @@ class Solver_ACDC():
         Return the indices of the nodes connected to the given component in the MNA matrix.
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
         '''
-#        return [self.node_index.get(n, None) for n in self.nodes[comp]]
         return [self.node_index.get(n, None) for n in self.get_nodes(comp)]
     
 
@@ -165,14 +164,6 @@ class Solver_ACDC():
     def all_components(self) -> List[Component]:
         """Return a list of all components in the circuit."""
         return self.component.values()
-    
-    
-    def all_component_types(self) -> List[Type[Component]]:
-        '''Return a list of all component types in the circuit.'''
-        types = set()
-        for c in self.all_components():
-            types.add(type(c))
-        return list(types)
     
     
     def node_administration(self):
@@ -307,27 +298,11 @@ class Solver_ACDC():
     
     
     def check_convergence(self) -> bool:
-        if False:
-            v_tol = 1e-6
-            v_indices = self.voltage_indices()
-            arr = (self.x - x_prev)[v_indices]
-            v_err = np.linalg.norm(arr)
-            if v_err >= v_tol:
-                return False
-
-            i_tol = 1e-6
-            i_indices = self.current_indices()
-            arr = (self.x - x_prev)[i_indices]
-            i_err = np.linalg.norm(arr)
-            if i_err >= i_tol:
-                return False
-        else:
-            dx = self.ctx.x - self.x_prev
-            tol = 1e-6
-            err = np.max(np.abs(dx))
-            if err >= tol:
-                return False
-
+        dx = self.ctx.x - self.x_prev
+        tol = 1e-6
+        err = np.max(np.abs(dx))
+        if err >= tol:
+            return False
         return True
     
     
@@ -343,14 +318,8 @@ class Solver_ACDC():
     def extract_node_voltages(self) -> Dict[int, complex]: # dict node id -> voltage
         '''
         '''
-        if True:
-#            voltages = {node: self.x[self.node_index[node]] for node in self.node_index.keys()}
-            voltages = {node: self.ctx.x[i] for node, i in self.node_index.items()}
-            voltages[self.ground_node] = 0.0
-        else:
-            voltages = {self.ground_node: 0.0}
-            for node in self.node_index.keys():
-                voltages[node] = self.x[self.node_index[node]]
+        voltages = {node: self.ctx.x[i] for node, i in self.node_index.items()}
+        voltages[self.ground_node] = 0.0
         return voltages
     
 
@@ -408,73 +377,11 @@ class Solver_ACDC():
         return N
     
     
-    def list_of_all(self, component_type):
-        '''
-        Return a list of all components of the given type in the circuit.
-        '''
-        return [c for c in self.all_components() 
-                if isinstance(c, component_type)]
-
-
-    @cache
-    def indices(self,
-                query: List[int] | Component | int,
-                nodes = False,
-                augm = True
-                ) -> List[int] | int | None:
-        '''
-        Return the indices of 
-        - the circuit nodes (if query is a list of node numbers).
-          For a ground node, None is returned.
-        - the component (if query is a Component instance)
-        '''
-        # Make sure query is a [int] or a Component instance
-        if isinstance(query, int):
-            query = [query]
-        elif isinstance(query, tuple):
-            query = list(query)
-            
-        if isinstance(query, list):
-            return [self.node_index.get(n, None) for n in query]
-        
-        elif isinstance(query, Component):
-            
-            nodes = nodes or not query.augments() # if not augments, then we want node indices by default
-            if nodes:
-                idx = self.get_node_indices(query)
-            augm = augm and query.augments()
-            if augm:
-                augm_idx = self.augm_idx[query]
-            if nodes and augm:
-                return idx, augm_idx
-            elif nodes:
-                return idx
-            elif augm:
-                return augm_idx
-        return None
-
-
     def stamp(self, ctx: Context = None):
         for comp in self.all_components():
             comp.stamp(ctx)
 
 
-    def node_voltages(self, comp: Component) -> Tuple[complex, complex]:
-        '''
-        Return the voltages at the nodes connected to the given component.
-        If a node is the ground node, return 0 for its voltage.
-        '''
-        i1, i2 = self.get_node_indices(comp)
-        if i1 is None:
-            v1 = 0.0
-        else:
-            v1 = self.ctx.x[i1]
-        if i2 is None:
-            v2 = 0.0
-        else:
-            v2 = self.ctx.x[i2]
-        return v1, v2
-    
     
 def _solve_acdc(circuit: Circuit,
                freq: float, 
@@ -510,6 +417,6 @@ def solve_ac(circuit: Circuit,
     # TODO Check is there is at least one AC source in the circuit, and if not, raise a warning that the results may be meaningless since there is no excitation at the given frequency.
     if ctx is None:
         ctx = Context()
-    ctx.analysis_type = "AC"
+    ctx.analysis_type = Analysis.AC
     return _solve_acdc(circuit, freq, ctx)
 

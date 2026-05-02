@@ -9,14 +9,14 @@ class PulseVoltageSource(PowerSource):
     '''
     '''
     def __init__(self,
-                 v1: float,
-                 v2: float,
-                 delay: float,
-                 rise_time: float,
-                 fall_time: float,
-                 pulse_width: float,
-                 period: float,
-                 n_periods: Optional[int] = None,
+                 v1: float,          # low voltage level
+                 v2: float,          # high voltage level
+                 delay: float,       # signal train starts after delay
+                 rise_time: float,   # time to rise from low to high level
+                 fall_time: float,   # time to drop from high to low level
+                 pulse_width: float, # time to stay on high level
+                 period: float,      # rise-time + pulse-width + fall-time + time on low level
+                 n_periods: Optional[int] = None, # number of pulses
                  id: Optional[str] = None):
         super().__init__(id=id)
         self.v1 = v1
@@ -47,10 +47,13 @@ class PulseVoltageSource(PowerSource):
         
         time_in_period = (t - self.delay) % self.period
         if time_in_period < self.rise_time:
+            # Still in rise-time
             return self.v1 + (self.v2 - self.v1) * (time_in_period / self.rise_time)
         elif time_in_period < self.rise_time + self.pulse_width:
+            # After rise, but before fall
             return self.v2
         elif time_in_period < self.rise_time + self.pulse_width + self.fall_time:
+            # In fall-time
             return self.v2 - (self.v2 - self.v1) * ((time_in_period - self.rise_time - self.pulse_width) / self.fall_time)
         else:
             return self.v1
@@ -61,9 +64,8 @@ class PulseVoltageSource(PowerSource):
     def stamp(self, ctx: Context):
         assert ctx.analysis_type == Analysis.TRANSIENT, "PulseVoltageSource is only valid for transient analysis"
         v = self.voltage_at_time(ctx.t)
-        idx = ctx.idx_query_fn(self)
+        i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)
-        i, j = idx
         if i is not None:
             ctx.Y[i, augm] += 1
             ctx.Y[augm, i] -= 1
