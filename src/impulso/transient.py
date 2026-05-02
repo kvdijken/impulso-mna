@@ -126,9 +126,9 @@ def solve_transient(circuit: Circuit,
                     ) -> Tuple[np.ndarray,          # time
                                Dict[int,            # node
                                     List[float]],   # voltage over time
-                               Dict[str|Component], # component
+                               Dict[str|Component, # component
                                     List[float]     # current over time
-                               ]:
+                               ]]:
                                 
     def transpose(data:List[Dict[Any,float]]) -> Dict[Any,List[float]]:
         result = defaultdict(list)

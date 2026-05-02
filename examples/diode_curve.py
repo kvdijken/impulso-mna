@@ -27,4 +27,5 @@ plt.ylabel('Id (A)')
 plt.title('Diode I-V Curve')
 plt.grid()
 plt.show()
-    
+
+

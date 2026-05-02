@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Dict, List, Tuple, Optional, Type, Any, Callable
 import uuid
 import abc
 from dataclasses import dataclass
@@ -22,22 +22,22 @@ class CircuitItem(abc.ABC):
 class Context():
     ground_node: int
     analysis_type: Analysis
-    x: NDArray[np.complex] # previous solution vector (node voltages)
-    Y: NDArray[np.complex] # augmented admittance matrix
-    z: NDArray[np.complex] # RHS vector
+    x: NDArray[complex] # previous solution vector (node voltages)
+    Y: NDArray[complex] # augmented admittance matrix
+    z: NDArray[complex] # RHS vector
 
     # query index into admittance matrix for a given circuit item
-    idx_query_fn: callable[[CircuitItem |     # query circuit item
+    idx_query_fn: Callable[[CircuitItem |     # query circuit item
                             int |             # query node
                             list[int] |       # query list of nodes
                             Tuple[int, ...]], # query tuple of nodes
                            Tuple[int, ...]]   # returns list of indices into admittance matrix
 
     # query augmentation index for a given circuit item (if it augments the system)
-    augm_query_fn: callable[CircuitItem, int]
+    augm_query_fn: Callable[CircuitItem, int]
     
     # query nodes of a circuit item (e.g. component)
-    nodes_query_fn: callable[CircuitItem, Tuple[int, ...]]
+    nodes_query_fn: Callable[CircuitItem, Tuple[int, ...]]
     
     # This dataclass can be extended with additional fields as needed.
     #

@@ -1,4 +1,3 @@
-from numba import jit
 from typing import Dict, List, Tuple, Optional, Type, Any
 
 from .component import Component, Context

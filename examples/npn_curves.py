@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from labellines import labelLines
+#from labellines import labelLines
 
 from impulso import profile, NPN, Circuit, DCVoltageSource, DCCurrentSource, solve_dc
 
@@ -43,7 +43,7 @@ def main():
     plt.title('NPN Transistor Output Characteristics')
     plt.xlabel(f'Vce (V)')
     plt.ylabel(f'Ic (mA)')
-    labelLines(plt.gca().get_lines())
+#    labelLines(plt.gca().get_lines())
 
 if __name__ == "__main__":
     main()
