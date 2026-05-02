@@ -1,3 +1,126 @@
+# =========================
+# Python bytecode
+# =========================
 __pycache__/
-/dist/*
-/.venv
+*.py[cod]
+*$py.class
+
+# =========================
+# C extensions / compiled
+# =========================
+*.so
+*.pyd
+*.dll
+*.dylib
+
+# =========================
+# Distribution / packaging
+# =========================
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# =========================
+# Virtual environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Installer logs
+# =========================
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
+# Unit test / coverage
+# =========================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+
+# =========================
+# Type checkers / linters
+# =========================
+.mypy_cache/
+.pyre/
+.ruff_cache/
+.pytype/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# VSCode
+# =========================
+.vscode/
+*.code-workspace
+
+# =========================
+# OS / editor junk
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# =========================
+# Logs & runtime files
+# =========================
+*.log
+logs/
+
+# =========================
+# Profiling / performance
+# =========================
+*.prof
+*.lprof
+*.pstats
+profile/
+profiling/
+
+# =========================
+# Temporary / scratch
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Documentation builds
+# =========================
+docs/_build/
+
+# =========================
+# IDEs (optional extras)
+# =========================
+.idea/
+
+# =========================
+# Local config / secrets
+# =========================
+.env
+.env.*
+*.local
+
+# =========================
+# Editable installs edge cases
+# =========================
+*.egg-link

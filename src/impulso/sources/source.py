@@ -5,7 +5,16 @@ from ..components.capacitor import Capacitor
 
 class PowerSource(Component):
     """Base class for power sources (voltage and current)."""
-    pass
+    
+    def __init__(self, 
+                 ac_source: bool = False,
+                 id: Optional[str] = None):
+        self.id = id or uuid.uuid4().hex
+        self.ac_source = ac_source
+        
+    def is_ac(self) -> bool:
+        """Return True if this source is an AC source."""
+        return self.ac_source
 
 
 class VoltageSource(PowerSource):

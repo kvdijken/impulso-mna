@@ -7,6 +7,7 @@ from functools import cache
 from .base import Analysis
 from .components.component import Component, Context
 from .circuit import Circuit
+from .sources.source import PowerSource
 
 
 class Stamper():
@@ -414,7 +415,10 @@ def solve_ac(circuit: Circuit,
     '''
     Convenience function to solve a circuit for AC analysis.
     '''
-    # TODO Check is there is at least one AC source in the circuit, and if not, raise a warning that the results may be meaningless since there is no excitation at the given frequency.
+    all_sources = circuit.all_of_type(PowerSource)
+    ac_sources = [src for src in all_sources if src.is_ac()]
+    assert(len(ac_sources) > 0), "No AC sources found in the circuit. The results may be meaningless."
+
     if ctx is None:
         ctx = Context()
     ctx.analysis_type = Analysis.AC

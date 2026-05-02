@@ -81,20 +81,9 @@ class Circuit:
         
         return _nodes_int + _nodes_str
     
-    
-    def remove_component(self, component_id: str) -> bool:
-        """
-        Remove component by ID.
-
-        Returns:
-            True if component was found and removed, False otherwise
-        """
-        for i, comp in enumerate(self.component.values()):
-            if comp.spec.id == component_id:
-                del self.component[component_id] # ???
-                self._invalidate_cache()
-                return True
-        return False
+    def all_of_type(self, _type: CircuitItem) -> List[CircuitItem]:
+        all = [c for c in self.component.values() if isinstance(c, _type)]
+        return all
 
     def validate(self):
         # TODO Check if there is a component connected to ground

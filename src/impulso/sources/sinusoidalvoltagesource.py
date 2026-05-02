@@ -18,12 +18,11 @@ class SinusoidalVoltageSource(PowerSource):
                  dc: float = 0.0,          # DC offset
                  ac_source: bool = False,     # whether this source should be included in AC analysis
                  id: Optional[str] = None):
-        super().__init__(id=id)
+        super().__init__(ac_source=ac_source, id=id)
         self.frequency = frequency
         self.amplitude = amplitude
         self.phase = phase
         self.dc = dc
-        self.ac_source = ac_source
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf

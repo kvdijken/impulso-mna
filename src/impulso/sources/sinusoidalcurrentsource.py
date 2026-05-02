@@ -31,8 +31,7 @@ class SinusoidalCurrentSource(PowerSource):
         self.amplitude = amplitude
         self.phase = phase
         self.dc = dc
-        self.ac_source = ac_source
-        super().__init__(id)
+        super().__init__(ac_source=ac_source, id=id)
 
     def set_amplitude(self, current: float):
         self.amplitude = current

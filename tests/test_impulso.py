@@ -746,6 +746,20 @@ class Test_AC:
         assert(within(np.abs(currents[VCCS1]), 1.9976, 0.001))
         assert(within(np.abs(currents[VCCS1.id]), 1.9976, 0.001))
         
+    def test_11(self):
+        # Test if a circuit without AC source in an AC simulation will be trapped.
+        V1 = DCVoltageSource(1.0)
+        R1 = Resistor(1e3)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1,0])
+        try:
+            voltages, currents = solve_ac(circuit,freq=1e3)
+            assert False, 'Expected an exception for a circuit without AC source in an AC simulation'
+        except Exception as e:
+            print('AC_test_11, expected exception:', e)
+            assert True
+
         
 class Test_transient:
     
