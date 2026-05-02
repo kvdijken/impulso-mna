@@ -84,13 +84,8 @@ class Solver_ACDC():
     all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
     nodes: Dict[Component, List[int]]  # component -> connected nodes
     component: Dict[str, Component]  # component_id -> Component instance  
-#    ground_node: int | str
     node_index: Dict[int, int] = {} # node number -> index in MNA matrix
-#    Y: Any # augmented MNA matrix
-#    z: Any # augmented MNA RHS vector
-#    x: Any # solution vector from MNA solver
     ground_node: int = 0
-#    s: complex # complex frequency for AC analysis
     augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for 
                                         # augmented variables (currents through 
                                         # voltage sources, etc.)
@@ -225,7 +220,6 @@ class Solver_ACDC():
         if self.stamper is None:
             self.stamper = Stamper(self)
 
-#        self.ensure_context(freq) # make sure that there is a context
         self.ctx.s = 1j * 2 * np.pi * freq
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
@@ -286,16 +280,6 @@ class Solver_ACDC():
             if not comp.linear():
                 return True
         return False
-    
-    
-    def voltage_indices(self) -> List[int]:
-        """Return the indices of the voltage variables in the MNA solution vector."""
-        return list(self.node_index.values())
-    
-    
-    def current_indices(self) -> List[int]:
-        """Return the indices of the current variables in the MNA solution vector."""
-        return list(self.augm_idx.values())
     
     
     def check_convergence(self) -> bool:
