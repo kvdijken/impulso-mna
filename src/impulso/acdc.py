@@ -10,75 +10,6 @@ from .circuit import Circuit
 from .sources.source import PowerSource
 
 
-class Stamper():
-    ''' 
-    A simple stamper class that iterates through
-    all components and calls their stamp method.
-    
-    More clever methods may be invented and
-    implemented in subclasses, for example to only
-    stamp a subset of components in each iteration, or to
-    stamp components in a certain order.
-    
-    The Stamper class is separate from the Solver_ACDC
-    class to allow for different stamping strategies
-    without needing to modify the core solver logic.
-    
-    The Stamper subclasses can be injected into
-    Solver_ACDC via its constructor, or via set_stamper(),
-    allowing for flexible stamping strategies
-    '''
-    
-    def __init__(self, solver: 'Solver_ACDC'):
-        self.solver = solver
-
-    def stamp(self, ctx: Context):
-        for comp in self.solver.all_components():
-            comp.stamp(ctx)
-        
-
-class Stamper_NonLinearOnly(Stamper):
-    ''' 
-    A stamper that only stamps nonlinear components, which can be useful for
-    iterative nonlinear solvers where the linear components do not change 
-    between iterations.
-    
-    The stamper can be reset to stamp the linear components again if needed.
-    
-    Users of this class must take care to call reset() if they want to stamp
-    the linear components again.
-    '''
-    
-    non_linear_components: List[Component]
-    first_stamp: bool
-    
-    def __init__(self, solver: 'Solver_ACDC'):
-        self.solver = solver
-        self.non_linear_components = [comp 
-                                      for comp in self.solver.all_components() 
-                                      if not comp.linear()]
-        self.first_stamp = True
-
-    def stamp(self, ctx: Context):
-        if self.first_stamp:
-             # Stamp linear components only in the first iteration
-            for comp in self.solver.all_components():
-                if comp.linear():
-                    comp.stamp(ctx)
-            self.Y_linear = ctx.Y.copy() # save the stamped linear part of the MNA matrix  
-            self.z_linear = ctx.z.copy() # save the stamped linear part of the RHS vector
-            self.first_stamp = False
-        else:
-             # Restore the stamped linear part of the MNA matrix and RHS vector
-            ctx.Y[:] = self.Y_linear
-            ctx.z[:] = self.z_linear            
-        for comp in self.non_linear_components:
-            comp.stamp(ctx)
-
-    def reset(self):
-        self.first_stamp = True
-        
-
 class Solver_ACDC():
 
     all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
@@ -103,7 +34,6 @@ class Solver_ACDC():
         self.nodes = nodes
         self.component = component
         self.ground_node = ground_node
-        self.stamper = None
         self.reuse_solution = reuse_solution
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.debug = False
@@ -217,9 +147,6 @@ class Solver_ACDC():
                               Dict[str | Component, complex]]:
         converged = False
 
-        if self.stamper is None:
-            self.stamper = Stamper(self)
-
         self.ctx.s = 1j * 2 * np.pi * freq
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
@@ -237,7 +164,7 @@ class Solver_ACDC():
         while not converged:
             self.ctx.Y = self.zero_MNA_matrix(self.N)
             self.ctx.z = self.zero_RHS(self.N)
-            self.stamper.stamp(self.ctx)
+            self.stamp(self.ctx)
             self.x_prev = self.ctx.x
             self.ctx.x = self.solve_matrix_equation()
             if return_real:
@@ -256,6 +183,11 @@ class Solver_ACDC():
         if self.debug:
             self.print_currents(currents)
         return voltages, currents
+
+
+    def stamp(self, ctx: Context):
+        for comp in self.all_components():
+            comp.stamp(ctx)
 
 
     def print_voltages(self, voltages: Dict[int, complex]):

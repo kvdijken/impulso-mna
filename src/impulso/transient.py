@@ -5,7 +5,7 @@ import numpy as np
 
 from .components.component import *
 from .sources.source import *
-from .acdc import Solver_ACDC, Stamper_NonLinearOnly
+from .acdc import Solver_ACDC
 from .components.capacitor import Capacitor
 from .components.inductor import Inductor
 from .sources.sinusoidalvoltagesource import SinusoidalVoltageSource
@@ -76,14 +76,6 @@ class Solver_Transient(Solver_ACDC):
         self.ctx.voltage_history = [voltage.copy()]
         self.ctx.current_history = [current.copy()]
 
-        # TODO: Make this not permanent, but configurable by the user, 
-        # and also make it possible to use different stampers for 
-        # different time steps, for example if we want to switch 
-        # from backward Euler to trapezoidal at some point, or if 
-        # we want to use a more accurate nonlinear stamper at some 
-        # points and a faster but less accurate one at other points.
-        self.stamper = Stamper_NonLinearOnly(self) # Do not forget to reset between time steps.
-
         # Get the initial voltages for the other nodes
         self.ctx.t = times[0]
         voltage, current = self.solve_mna(return_real=True)
@@ -109,14 +101,9 @@ class Solver_Transient(Solver_ACDC):
             voltage, current = self.solve_mna(return_real=True)
             self.ctx.voltage_history.append(voltage.copy())
             self.ctx.current_history.append(current.copy())
-            try:
-                self.stamper.reset() # reset the nonlinear only stamper for the next time step
-            except AttributeError:
-                pass
 
         # TODO: check capacitor current
         # TODO: describe why we do not return entire history (we return history[:-1] because the last entry is after the last time step)
-        # TODO why :-2 for current? 
         return times, self.ctx.voltage_history[:-1], self.ctx.current_history[:-1]
 
 

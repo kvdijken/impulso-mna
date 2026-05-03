@@ -1,4 +1,4 @@
-from .acdc import Stamper, Stamper_NonLinearOnly, Solver_ACDC, solve_ac, solve_dc
+from .acdc import Solver_ACDC, solve_ac, solve_dc
 from .circuit import Circuit
 from .components.bjt import BJT, NPN, PNP
 from .components.capacitor import Capacitor
