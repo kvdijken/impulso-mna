@@ -10,15 +10,16 @@ plt.rcParams['axes.xmargin'] = 0
 
 GROUND = 0
 
+emitter = GROUND
+base = 1
+collector = 2
+
+
 def circuit(ib:float, vce: float) -> Circuit:
     npn = NPN(id='Q1')
     is_b = DCCurrentSource(ib, id='Ib')
     vs_ce = DCVoltageSource(vce,id='Vce')
 
-    emitter = GROUND
-    base = 1
-    collector = 2
-    
     c = Circuit(ground_node=GROUND)
     c.add(npn, [emitter, base, collector])
     c.add(is_b, [GROUND,base])
@@ -36,8 +37,8 @@ def main():
         for vce in vce_:
             c = circuit(ib/1000,vce)
             v, i = solve_dc(c)
-            ic.append(-np.real(i['Q1'][2])*1000)
-        plt.plot(vce_, ic, 'k', lw=0.75, label=f"Ib={ib:.2f}mA")    
+            ic.append(-np.real(i['Q1'][collector])*1000)
+        plt.plot(vce_, ic, 'k', lw=0.75, label=f"Ib={ib:.2f}mA")
 
     plt.grid()
     plt.title('NPN Transistor Output Characteristics')

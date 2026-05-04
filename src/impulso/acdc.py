@@ -14,11 +14,11 @@ class Solver_ACDC():
 
     all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
     nodes: Dict[Component, List[int]]  # component -> connected nodes
-    component: Dict[str, Component]  # component_id -> Component instance  
+    component: Dict[str, Component]  # component_id -> Component instance
     node_index: Dict[int, int] = {} # node number -> index in MNA matrix
     ground_node: int = 0
-    augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for 
-                                        # augmented variables (currents through 
+    augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for
+                                        # augmented variables (currents through
                                         # voltage sources, etc.)
     reuse_solution: bool # whether to reuse the solution from the previous
                          # solve as the initial guess for the next solve,
@@ -26,7 +26,7 @@ class Solver_ACDC():
                          # circuits when sweeping over frequencies or other parameters
 
     def __init__(self,
-                 nodes: Dict[Component, List[int]], 
+                 nodes: Dict[Component, List[int]],
                  component: Dict[str, Component],
                  ground_node: int | str,
                  reuse_solution: bool = True
@@ -62,7 +62,7 @@ class Solver_ACDC():
 
 
     @cache
-    def get_node_indices(self, 
+    def get_node_indices(self,
                      comp: Component
     ) -> List[int]:
         '''
@@ -70,7 +70,7 @@ class Solver_ACDC():
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
         '''
         return [self.node_index.get(n, None) for n in self.get_nodes(comp)]
-    
+
 
     def solve(self,
               freq: float
@@ -90,28 +90,28 @@ class Solver_ACDC():
     def all_components(self) -> List[Component]:
         """Return a list of all components in the circuit."""
         return self.component.values()
-    
-    
+
+
     def node_administration(self):
         # --- Separate components ---
         self.all = {} # dict component_type -> list of components of that type
         self.all = defaultdict(list)
         for comp in self.all_components():
             self.all[type(comp)].append(comp)
-    
+
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
-    
-    
+
+
     def all_nodes(self) -> List[int]:
         """Return a list of all nodes in the circuit."""
         return self.node_index.keys()
-    
-    
+
+
     def solve_mna(self,
                   freq: float = 0,
                   return_real: bool = False
-                  ) -> Tuple[Dict[int, complex], 
+                  ) -> Tuple[Dict[int, complex],
                              Dict[str | Component, complex]]:
         """
         AC & DC small-signal MNA solver.
@@ -132,25 +132,25 @@ class Solver_ACDC():
                 for comp in self.all_components():
                     if hasattr(comp, 'reset'):
                         comp.reset()
-                        
+
                 # Try again without reusing the previous solution, which can help
                 # if the previous solution was a bad initial guess for the nonlinear solver.
                 return self._solve_mna(freq, return_real)
             else:
                 raise e
-                
-                
+
+
     def _solve_mna(self,
                    freq: float = 0,
                    return_real: bool = False
-                   ) -> Tuple[Dict[int, complex], 
+                   ) -> Tuple[Dict[int, complex],
                               Dict[str | Component, complex]]:
         converged = False
 
         self.ctx.s = 1j * 2 * np.pi * freq
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
-        
+
         # Set up the intial solution vector. This is used
         # for nonlinear iteration, and can be reused from
         # the previous solve if desired (reuse_solution == True).
@@ -158,7 +158,7 @@ class Solver_ACDC():
             self.ctx.x = self.x_prev
         else:
             self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
-            
+
         times = 1
         n_times = 1 # number of iterations to perform before checking for convergence
         while not converged:
@@ -179,7 +179,7 @@ class Solver_ACDC():
         voltages = self.extract_node_voltages()
         if self.debug:
             self.print_voltages(voltages)
-        currents = self.extract_currents()                
+        currents = self.extract_currents()
         if self.debug:
             self.print_currents(currents)
         return voltages, currents
@@ -195,16 +195,16 @@ class Solver_ACDC():
         for node, voltage in voltages.items():
             print(f"Node {node}: {voltage} V")
         print()
-            
-            
+
+
     def print_currents(self, currents: Dict[str | Component, complex]):
         print("Currents through components:")
         for comp, current in currents.items():
             if isinstance(comp, Component):
                 print(f"Component {comp.id}: {current} A")
         print()
-        
-            
+
+
     @cache
     def has_nonlinear_components(self) -> bool:
         """Check if the circuit contains any nonlinear components."""
@@ -212,8 +212,8 @@ class Solver_ACDC():
             if not comp.linear():
                 return True
         return False
-    
-    
+
+
     def check_convergence(self) -> bool:
         dx = self.ctx.x - self.x_prev
         tol = 1e-6
@@ -221,8 +221,8 @@ class Solver_ACDC():
         if err >= tol:
             return False
         return True
-    
-    
+
+
     def extract_currents(self) -> dict:
         currents = {}
         for comp in self.all_components():
@@ -238,7 +238,7 @@ class Solver_ACDC():
         voltages = {node: self.ctx.x[i] for node, i in self.node_index.items()}
         voltages[self.ground_node] = 0.0
         return voltages
-    
+
 
     def solve_matrix_equation(self):
         '''
@@ -264,7 +264,7 @@ class Solver_ACDC():
         # --- Collect nodes ---
         all_nodes = set()
         for comp in self.all_components():
-            # Check if this is only a simulation directve, 
+            # Check if this is only a simulation directve,
             # without nodes, that should not be included
             # in the node administration
             try:
@@ -278,13 +278,13 @@ class Solver_ACDC():
         # Node administration for the MNA matrix:
         node_list = list(all_nodes - {self.ground_node})
         node_index = {n: i for i, n in enumerate(node_list)} # index from node number into its location in the MNA matrix
-        num_nodes = len(node_list)        
+        num_nodes = len(node_list)
         return num_nodes, node_index
-    
-    
+
+
     def assign_augmented_slots(self, N) -> int:
         '''
-        Assign a slot to all components that require one in the 
+        Assign a slot to all components that require one in the
         MNA matrix (voltage sources, VCVS, CCVS, Wires, Inductors, Opamps)
         '''
         for comp in self.all_components():
@@ -292,16 +292,16 @@ class Solver_ACDC():
                 self.augm_idx[comp] = N
                 N = N + 1
         return N
-    
-    
+
+
     def stamp(self, ctx: Context = None):
         for comp in self.all_components():
             comp.stamp(ctx)
 
 
-    
+
 def _solve_acdc(circuit: Circuit,
-               freq: float, 
+               freq: float,
                ctx: Context = None
                ) -> Tuple[Dict[int | str, complex], # node voltages
                           Dict[str | Component, complex]]: # currents through components
@@ -314,17 +314,20 @@ def _solve_acdc(circuit: Circuit,
 
 
 def solve_dc(circuit: Circuit,
-             aux = None
+             ctx: Context = None
              ) -> Tuple[Dict[int | str, complex], # node voltages
                         Dict[str | Component, complex]]: # currents through components
     '''
     Convenience function to solve a circuit for DC analysis.
     '''
-    return _solve_acdc(circuit, 0, aux)
+    if ctx is None:
+        ctx = Context()
+    ctx.analysis_type = Analysis.DC
+    return _solve_acdc(circuit, 0, ctx)
 
 
 def solve_ac(circuit: Circuit,
-             freq: float, 
+             freq: float,
              ctx: Context = None
              ) -> Tuple[Dict[int | str, complex], # node voltages
                         Dict[str | Component, complex]]: # currents through components
