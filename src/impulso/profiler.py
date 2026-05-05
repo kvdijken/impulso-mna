@@ -9,7 +9,7 @@ def profile(fn):
         pr.disable()
         s = io.StringIO()
         ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-        ps.print_stats()
+        ps.print_stats(25)
         print(s.getvalue())
         return result
     return inner
