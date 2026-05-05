@@ -28,10 +28,6 @@ class Solver_Transient(Solver_ACDC):
         self.ctx.dt = self.dt
 
 
-    def get_nodes(self, comp: Component):
-        return self.nodes[comp]
-
-
     def solve(self,
               t_stop: float,
               dt: float
