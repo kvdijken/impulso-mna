@@ -17,15 +17,15 @@ def print_currents_voltages(circuit, voltages, currents):
 
 
 class Test_general:
-    
+
     def test_1(self):
         # Test the within function
         assert(within(1.00099, 1, 0.1))
-        
+
     def test_2(self):
         # Test the within function with a value that is outside the range
         assert(not within(1.0011, 1, 0.1))
-        
+
     def test_3(self):
         # Test if a negative resistance is caught
         try:
@@ -68,9 +68,9 @@ class Test_general:
         except (ValueError, AssertionError) as e:
             pass
 
- 
+
 class Test_Circuit:
-    
+
     def test_1(self):
         # Test if a circuit with no components can be simulated
         circuit = Circuit()
@@ -80,7 +80,7 @@ class Test_Circuit:
         except:
             pass
         assert(True)
-        
+
     def test_2(self):
         circuit = Circuit()
         V1 = DCVoltageSource(1)
@@ -95,7 +95,7 @@ class Test_Circuit:
         except:
             pass
         assert(True)
-            
+
     def test_3(self):
         # Loose end resistor, other end connected to ground
         circuit = Circuit()
@@ -112,7 +112,7 @@ class Test_Circuit:
         assert(np.abs(IR2) < 1e-6)
 
 class Test_DC:
-    
+
     def test_1a(self):
         # 1 volt over a 1kOhm resistor, current should be 1mA
         # test positive direction of current
@@ -210,7 +210,7 @@ class Test_DC:
         # 1 volt over a 1kOhm resistor, current should be 1mA
         # test positive direction of current
         # Same as test_1, but check if we can get
-        # the current by using the component reference 
+        # the current by using the component reference
         # instead of the component id.
         circuit = Circuit()
         V1 = DCVoltageSource(1, id='V1')
@@ -244,7 +244,7 @@ class Test_DC:
         V3 = voltages[3]
         print_currents_voltages(circuit, voltages, currents)
         assert(within(V12,233.333,0.1))
-        assert(within(V3, 593.333, 0.1))        
+        assert(within(V3, 593.333, 0.1))
 
     def test_9(self):
         # Test a CCVS with the controlling current through a resistor
@@ -268,7 +268,7 @@ class Test_DC:
         print_currents_voltages(circuit, voltages, currents)
         V12 = voltages[1] - voltages[2]
         assert(within(V12, 2, 0.1))
-        
+
     def test_10(self):
         # Test a CCVS with the controlling current through a zero volt voltage source
         I1 = DCCurrentSource(1,id='I1')
@@ -294,7 +294,7 @@ class Test_DC:
         print_currents_voltages(circuit, voltages, currents)
         print('DC_test_11 V12 = ',V12)
         assert(within(V12, -2, 0.1))
-       
+
     def test_11(self):
         # Test a CCCS with the controlling current through a resistor
         I1 = DCCurrentSource(1,id='I1')
@@ -361,7 +361,7 @@ class Test_DC:
             print('DC_test_11 voltage node',n,':',voltages[n])
         iV2 = currents[V2]
         assert(within(iV2, 0.001, 0.1))
-        
+
     def test_14(self):
         I1 = DCCurrentSource(0.001, id='I1')
         R1 = Resistor(1e3, id='R1')
@@ -378,7 +378,7 @@ class Test_DC:
             print('DC_test_14 node ',n,':',voltages[n])
         iV2 = currents[V2]
         assert(within(iV2, 0.001, 0.1))
-        
+
     def test_15_1(self):
         R1 = Resistor(1e3, id='R1')
         V1 = DCVoltageSource(1, id='V1')
@@ -394,7 +394,7 @@ class Test_DC:
         assert(within(currents[R1], 0.0005, 0.1))
         assert(within(currents[R2], 0.0005, 0.1))
         assert(within(currents[V1], 0.0005, 0.1))
-        
+
     def test_15_2(self):
         R1 = Resistor(1e3, id='R1')
         V1 = DCVoltageSource(1, id='V1')
@@ -410,7 +410,7 @@ class Test_DC:
         assert(within(currents[R1], -0.0005, 0.1))
         assert(within(currents[R2], -0.0005, 0.1))
         assert(within(currents[V1], 0.0005, 0.1))
-        
+
     def test_16(self):
         V1 = DCVoltageSource(1, id='V1')
         I1 = DCCurrentSource(2, id='I1')
@@ -426,22 +426,7 @@ class Test_DC:
         assert(within(currents[V1], -2, 0.1))
         assert(within(currents[I1], 2, 0.1))
         assert(within(currents[R1], -2, 0.1))
-        
-    def tt_17(self):
-        I1 = DCCurrentSource(1, id='I1')
-        I2 = DCCurrentSource(1, id='I2')
-        R1 = Resistor(1e3, id='R1')
-        circuit = Circuit()
-        circuit.add(I1,[1,0])
-        circuit.add(I2,[2,0])
-        circuit.add(R1,[1,2])
-        voltages, currents = solve_dc(circuit)
-        print_currents_voltages(circuit, voltages, currents)
-        assert(within(voltages[1], 0.0, 0.1))
-        assert(within(voltages[2], 0.0, 0.1))
-        assert(within(currents[I1], 1, 0.1))
-        assert(within(currents[I2], 1, 0.1))
-        
+
     def test_18(self):
         # Test current direction through a zero volts voltage source
         V1 = DCVoltageSource(1, id='V1')
@@ -457,7 +442,7 @@ class Test_DC:
         assert(voltages[2] < 1e-6)
         assert(within(currents[V1], 0.001, 0.1))
         assert(within(currents[V2], 0.001, 0.1))
-        
+
     def test_19(self):
         # Test current direction through a zero volts voltage source
         V1 = DCVoltageSource(1, id='V1')
@@ -473,36 +458,36 @@ class Test_DC:
         assert(voltages[2] < 1e-6)
         assert(within(currents[V1], 0.001, 0.1))
         assert(within(currents[V2], -0.001, 0.1))
-        
+
     def test_20(self):
         # Opamp
         V1 = DCVoltageSource(1, id='V1')
         OA1 = Opamp(id='OA1')
         R1 = Resistor(1e3, id='R1')
         R2 = Resistor(1e3, id='R2')
-        
+
         pos = 1
         neg = 3
         out = 2
-        
+
         circuit = Circuit()
         circuit.add(V1,[0,pos])
         circuit.add(R1,[out,neg])
         circuit.add(R2,[neg,0])
         circuit.add(OA1,[pos,neg,out]) # order is pos, neg, out
-        
+
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[pos], 1.0, 0.1))
         assert(within(voltages[neg], 1.0, 0.1))
         assert(within(voltages[out], 2.0, 0.1))
-        
+
         # Test output current
         Iout = currents[OA1]
         print('DC_test_20, Iout=',Iout)
         assert(within(Iout, 0.001, 0.1))
-                
-                
+
+
     def test_21(self):
         cccs1 = CCCS(A=2, id='CCCS1')
         V1 = DCVoltageSource(1, id='V1')
@@ -515,7 +500,7 @@ class Test_DC:
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(currents[cccs1], 0.002, 0.1))
-        
+
     def test_22(self):
         cs1 = DCCurrentSource(1, id='CS1')
         v1 = DCVoltageSource(1, id='V1')
@@ -526,20 +511,20 @@ class Test_DC:
         print_currents_voltages(circuit, voltages, currents)
         assert(within(currents[cs1], 1, 0.1))
         assert(within(currents[v1], 1, 0.1))
-        
+
     def tt_23(self):
         vs_be = DCVoltageSource(0.6,id='Vbe')
         vs_ce = DCVoltageSource(9,id='Vce')
         d1 = Diode(id='D1')
         v0 = DCVoltageSource(0, id='V0')
         cccs1 = CCCS(A=1, id='CCCS1')
-        
+
         ground = 0
         emitter = ground
         base = 1
         collector = 2
         emitter0 = 3
-        
+
         circuit = Circuit()
         circuit.add(vs_be, [ground,base])
         circuit.add(d1, [base, emitter0])
@@ -547,12 +532,12 @@ class Test_DC:
         circuit.add(vs_ce, [ground,collector])
         circuit.add(cccs1, [collector, emitter])
         cccs1.connect(v0)
-        
+
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
 
         assert True
-     
+
     def test_24(self):
         ''' test NPN in saturation '''
         Q1 = NPN(id='Q1')
@@ -573,9 +558,152 @@ class Test_DC:
         v, i = solve_dc(circuit)
         print_currents_voltages(circuit, v, i)
         assert(v[4]>0)
-        
+
+    def test_25(self):
+        # RL network with 1 volt DC source
+        # Run with AC simulation
+        V1 = DCVoltageSource(1.0, id='V1')
+        R1 = Resistor(1000)
+        L1 = Inductor(1e-3)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1, 2])
+        circuit.add(L1,[2, 0])
+        voltages, currents = solve_dc(circuit)
+        # The voltage at node 1 should be 1 volt, as the inductor should not affect the DC voltage.
+        assert(within(np.abs(voltages[1]), 1.0, 0.1))
+        # No phase shift for DC voltage, so the imaginary part should be close to zero.
+        assert(np.imag(voltages[1]) < 1e-6)
+        # The voltage at node 2 should be 0 volts, as the inductor should be a short for DC current.
+        assert(np.abs(voltages[2]) < 1e-6)
+        # Current should be 1mA, as the inductor should be a short for DC current.
+        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
+
+    def test_26(self):
+        # R and C in series with 1 volt DC source
+#        V1 = SinusoidalVoltageSource(amplitude=1.0, ac_source=True, id='V1')
+        V1 = DCVoltageSource(1.0, id='V1')
+        R1 = Resistor(1000)
+        C1 = Capacitor(1e-6)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1, 2])
+        circuit.add(C1,[2, 0])
+        voltages, currents = solve_dc(circuit)
+        print_currents_voltages(circuit, voltages, currents)
+        # Voltage at top of resistor should be 1 volt, as the capacitor is an open the DC voltage.
+        assert(within(np.abs(voltages[1]),1,0.1))
+        # Voltage at top of capacitor should be 1 volts, as the capacitor is an open the DC voltage.
+        assert(within(np.abs(voltages[2]),1,0.1))
+        # Phase angle at top of resistor should be 0, as the capacitor is an open the DC voltage.
+        assert(np.imag(voltages[1]) < 1e-6)
+        # Phase angle at top of capacitor should be 0, as the capacitor is an open the DC voltage.
+        assert(np.imag(voltages[2]) < 1e-6)
+        # Current should be 0, as the capacitor is an open the DC voltage.
+        assert(np.abs(currents[R1.id]) < 1e-6)
+
+    def test_27(self):
+        # Is a zero volt voltage source equivalent to a short?
+        V1 = DCVoltageSource(1.0)
+        V2 = DCVoltageSource(0.0)
+        R1 = Resistor(1000)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(V2,[1,2])
+        circuit.add(R1,[2,0])
+        voltages, currents = solve_dc(circuit)
+        assert(within(np.abs(voltages[2]), 1.0, 0.1))
+        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
+        assert(within(np.abs(currents[V2.id]), 0.001, 0.1))
+
+    def test_28(self):
+        # Test a wire with zero resistance, should be a short circuit
+        V1 = DCVoltageSource(1.0)
+        R1 = Resistor(1e3)
+        W1 = Wire(id='W1')
+        circuit=Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1, 2])
+        circuit.add(W1,[2, 0])
+        voltages, currents = solve_dc(circuit)
+        assert(within(np.abs(voltages[1]), 1.0, 0.1))
+        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
+        assert(np.abs(voltages[2]) < 1e-6)
+        assert(within(np.abs(currents[W1.id]), 0.001, 0.1))
+        assert(within(np.abs(currents[W1]), 0.001, 0.1))
+
+    def test_29(self):
+        # Test a wire with zero resistance, should be a short circuit
+        V1 = DCVoltageSource(1.0)
+        R1 = Resistor(1e3)
+        W1 = Wire(id='W1')
+        circuit=Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1, 2])
+        circuit.add(W1,[2, 0])
+        voltages, currents = solve_dc(circuit)
+        print_currents_voltages(circuit, voltages, currents)
+        assert(within(np.abs(voltages[1]), 1.0, 0.1))
+        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
+        assert(np.abs(voltages[2]) < 1e-6)
+        assert(within(np.abs(currents[W1.id]), 0.001, 0.1))
+        assert(within(np.abs(currents[W1]), 0.001, 0.1))
+
+    def test_30(self):
+        # Test a VCCS
+        V1 = DCVoltageSource(1.0)
+        VCCS1 = VCCS(gm=2.5, id='VCCS1')
+        R1 = Resistor(1e3)
+        R2 = Resistor(1e3)
+        R3 = Resistor(1e3)
+        circuit=Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1,0])
+        circuit.add(R2,[1,2])
+        circuit.add(R3,[3,0])
+        circuit.add(VCCS1,[2,3,1,0]) # order is (out-, out+, in-, in+)
+        _, currents = solve_dc(circuit)
+        assert(within(np.abs(currents[R3]), 2.5, 0.1))
+
+    def test_31(self):
+        # Test a VCCS
+        V1 = DCVoltageSource(1.0)
+        VCCS1 = VCCS(gm=2.5, id='VCCS1')
+        R1 = Resistor(1e3)
+        R2 = Resistor(1e3)
+        R3 = Resistor(1e3)
+        circuit=Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(R2,[1,2])
+        circuit.add(R1,[2,0])
+        circuit.add(R3,[3,0])
+        circuit.add(VCCS1,[2,3,2,0])
+        _, currents = solve_dc(circuit)
+        assert(within(np.abs(currents[R3]), 0.001, 0.1))
+
+    def test_32(self):
+        # Test a VCCS
+        I1 = DCCurrentSource(1)
+        VCCS1 = VCCS(gm=2.5, id='VCCS1')
+        R1 = Resistor(1e3)
+        R2 = Resistor(1e3)
+        R3 = Resistor(1e3)
+        circuit=Circuit()
+        circuit.add(I1,[0,1])
+        circuit.add(R1,[1,0])
+        circuit.add(R2,[1,2])
+        circuit.add(R3,[2,0])
+        circuit.add(VCCS1,[2,0,0,1])
+        _, currents = solve_dc(circuit)
+        print('AC_test_10, currents[R3]=',currents[R3])
+        assert(within(np.abs(currents[R3]), 0.9984, 0.001))
+        print('AC_test_10, currents[VCCS1]=',currents[VCCS1])
+        assert(within(np.abs(currents[VCCS1]), 1.9976, 0.001))
+        assert(within(np.abs(currents[VCCS1.id]), 1.9976, 0.001))
+
+
 class Test_AC:
-    
+
     def test_1(self):
         # Two 1 volt voltages sources, in counter phase, over a 1kOhm resistor.
         # Current through R1 should be 0
@@ -603,150 +731,8 @@ class Test_AC:
         _, currents = solve_ac(circuit,freq=1e3)
         IR1 = np.abs(currents[R1])
         assert(within(IR1, 0.002, 0.1))
-        
+
     def test_3(self):
-        # RL network with 1 volt DC source
-        # Run with AC simulation
-        V1 = DCVoltageSource(1.0, id='V1')
-        R1 = Resistor(1000)
-        L1 = Inductor(1e-3)
-        circuit = Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R1,[1, 2])
-        circuit.add(L1,[2, 0])
-        voltages, currents = solve_dc(circuit)
-        # The voltage at node 1 should be 1 volt, as the inductor should not affect the DC voltage.
-        assert(within(np.abs(voltages[1]), 1.0, 0.1))
-        # No phase shift for DC voltage, so the imaginary part should be close to zero.
-        assert(np.imag(voltages[1]) < 1e-6)
-        # The voltage at node 2 should be 0 volts, as the inductor should be a short for DC current.
-        assert(np.abs(voltages[2]) < 1e-6)
-        # Current should be 1mA, as the inductor should be a short for DC current.
-        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
-        
-    def test_4(self):
-        # R and C in series with 1 volt DC source
-#        V1 = SinusoidalVoltageSource(amplitude=1.0, ac_source=True, id='V1')
-        V1 = DCVoltageSource(1.0, id='V1')
-        R1 = Resistor(1000)
-        C1 = Capacitor(1e-6)
-        circuit = Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R1,[1, 2])
-        circuit.add(C1,[2, 0])
-        voltages, currents = solve_dc(circuit)
-        print_currents_voltages(circuit, voltages, currents)
-        # Voltage at top of resistor should be 1 volt, as the capacitor is an open the DC voltage.
-        assert(within(np.abs(voltages[1]),1,0.1))
-        # Voltage at top of capacitor should be 1 volts, as the capacitor is an open the DC voltage.
-        assert(within(np.abs(voltages[2]),1,0.1))
-        # Phase angle at top of resistor should be 0, as the capacitor is an open the DC voltage.
-        assert(np.imag(voltages[1]) < 1e-6)
-        # Phase angle at top of capacitor should be 0, as the capacitor is an open the DC voltage.
-        assert(np.imag(voltages[2]) < 1e-6)
-        # Current should be 0, as the capacitor is an open the DC voltage.
-        assert(np.abs(currents[R1.id]) < 1e-6)
-        
-    def test_5(self):
-        # Is a zero volt voltage source equivalent to a short? 
-        V1 = DCVoltageSource(1.0)
-        V2 = DCVoltageSource(0.0)
-        R1 = Resistor(1000)
-        circuit = Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(V2,[1,2])
-        circuit.add(R1,[2,0])
-        voltages, currents = solve_dc(circuit)
-        assert(within(np.abs(voltages[2]), 1.0, 0.1))
-        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
-        assert(within(np.abs(currents[V2.id]), 0.001, 0.1))
-                
-    def test_6(self):
-        # Test a wire with zero resistance, should be a short circuit
-        V1 = DCVoltageSource(1.0)
-        R1 = Resistor(1e3)
-        W1 = Wire(id='W1')
-        circuit=Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R1,[1, 2])
-        circuit.add(W1,[2, 0])
-        voltages, currents = solve_dc(circuit)
-        assert(within(np.abs(voltages[1]), 1.0, 0.1))
-        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
-        assert(np.abs(voltages[2]) < 1e-6)
-        assert(within(np.abs(currents[W1.id]), 0.001, 0.1))
-        assert(within(np.abs(currents[W1]), 0.001, 0.1))
-        
-    def test_7(self):
-        # Test a wire with zero resistance, should be a short circuit
-        V1 = DCVoltageSource(1.0)
-        R1 = Resistor(1e3)
-        W1 = Wire(id='W1')
-        circuit=Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R1,[1, 2])
-        circuit.add(W1,[2, 0])
-        voltages, currents = solve_dc(circuit)
-        print_currents_voltages(circuit, voltages, currents)
-        assert(within(np.abs(voltages[1]), 1.0, 0.1))
-        assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
-        assert(np.abs(voltages[2]) < 1e-6)
-        assert(within(np.abs(currents[W1.id]), 0.001, 0.1))
-        assert(within(np.abs(currents[W1]), 0.001, 0.1))
-        
-    def test_8(self):
-        # Test a VCCS
-        V1 = DCVoltageSource(1.0)
-        VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
-        circuit=Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R1,[1,0])
-        circuit.add(R2,[1,2])
-        circuit.add(R3,[3,0])
-        circuit.add(VCCS1,[2,3,1,0]) # order is (out-, out+, in-, in+)
-        _, currents = solve_dc(circuit)
-        assert(within(np.abs(currents[R3]), 2.5, 0.1))
-        
-    def test_9(self):
-        # Test a VCCS
-        V1 = DCVoltageSource(1.0)
-        VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
-        circuit=Circuit()
-        circuit.add(V1,[0,1])
-        circuit.add(R2,[1,2])
-        circuit.add(R1,[2,0])
-        circuit.add(R3,[3,0])
-        circuit.add(VCCS1,[2,3,2,0])
-        _, currents = solve_dc(circuit)
-        assert(within(np.abs(currents[R3]), 0.001, 0.1))
-        
-    def test_10(self):
-        # Test a VCCS
-        I1 = DCCurrentSource(1)
-        VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
-        circuit=Circuit()
-        circuit.add(I1,[0,1])
-        circuit.add(R1,[1,0])
-        circuit.add(R2,[1,2])
-        circuit.add(R3,[2,0])
-        circuit.add(VCCS1,[2,0,0,1])
-        _, currents = solve_dc(circuit)
-        print('AC_test_10, currents[R3]=',currents[R3])
-        assert(within(np.abs(currents[R3]), 0.9984, 0.001))
-        print('AC_test_10, currents[VCCS1]=',currents[VCCS1])
-        assert(within(np.abs(currents[VCCS1]), 1.9976, 0.001))
-        assert(within(np.abs(currents[VCCS1.id]), 1.9976, 0.001))
-        
-    def test_11(self):
         # Test if a circuit without AC source in an AC simulation will be trapped.
         V1 = DCVoltageSource(1.0)
         R1 = Resistor(1e3)
@@ -760,9 +746,9 @@ class Test_AC:
             print('AC_test_11, expected exception:', e)
             assert True
 
-        
+
 class Test_transient:
-    
+
     def test_1(self):
         # 1 volt over 1k resistor.
         # Test node 1 voltage 1 volt with transient analysis
@@ -774,7 +760,7 @@ class Test_transient:
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)
         VR1 = nodes[1][0]
         assert(within(VR1,1,0.1))
-        
+
     def tt_2(self):
         # RC network, test if it follows the timeconstant formula
         r = 1000
@@ -808,12 +794,11 @@ class Test_transient:
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)
         IR1 = comps[R1.id][0]
         assert(within(IR1,0.001,0.1))
-        
-        
-        
+
+
+
 #Test_transient().test_1()
 #Test_AC().test_4()
-Test_DC().test_10()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()
