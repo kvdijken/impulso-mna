@@ -20,21 +20,15 @@ class Solver_ACDC():
     augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for
                                         # augmented variables (currents through
                                         # voltage sources, etc.)
-    reuse_solution: bool # whether to reuse the solution from the previous
-                         # solve as the initial guess for the next solve,
-                         # which can speed up convergence for nonlinear
-                         # circuits when sweeping over frequencies or other parameters
 
     def __init__(self,
                  nodes: Dict[Component, List[int]],
                  component: Dict[str, Component],
-                 ground_node: int | str,
-                 reuse_solution: bool = True
+                 ground_node: int | str
                  ):
         self.nodes = nodes
         self.component = component
         self.ground_node = ground_node
-        self.reuse_solution = reuse_solution
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.debug = False
         self.ctx = self.create_context()
@@ -120,44 +114,13 @@ class Solver_ACDC():
             voltages: dict node -> complex voltage
             currents: dict comp_id | component -> complex current
         """
-        try:
-            return self._solve_mna(freq, return_real)
-        except Exception as e:
-            if self.reuse_solution:
-                if self.debug:
-                    print("Warning: MNA solve failed, retrying without reusing previous solution as initial guess. Error message:", e)
-                # If the solve fails, reset the previous solution to None
-                # to avoid using a potentially bad initial guess in the next solve.
-                self.x_prev = None
-                for comp in self.all_components():
-                    if hasattr(comp, 'reset'):
-                        comp.reset()
-
-                # Try again without reusing the previous solution, which can help
-                # if the previous solution was a bad initial guess for the nonlinear solver.
-                return self._solve_mna(freq, return_real)
-            else:
-                raise e
-
-
-    def _solve_mna(self,
-                   freq: float = 0,
-                   return_real: bool = False
-                   ) -> Tuple[Dict[int, complex],
-                              Dict[str | Component, complex]]:
         converged = False
 
         self.ctx.s = 1j * 2 * np.pi * freq
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
 
-        # Set up the intial solution vector. This is used
-        # for nonlinear iteration, and can be reused from
-        # the previous solve if desired (reuse_solution == True).
-        if self.reuse_solution and self.x_prev is not None:
-            self.ctx.x = self.x_prev
-        else:
-            self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
+        self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 
         times = 1
         n_times = 1 # number of iterations to perform before checking for convergence
