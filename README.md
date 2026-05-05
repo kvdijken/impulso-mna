@@ -34,6 +34,56 @@ import impulso
 
 ---
 
+## 💡 Motivation
+
+**impulso-mna** was created to provide a fully Python-native alternative to existing (semi-)advanced circuit simulation tools.
+
+Many available Python-based circuit simulators rely on external backends (such as SPICE engines). While powerful, these approaches often introduce:
+
+* Additional installation complexity
+* Platform-specific issues
+* Indirect workflows (Python → external simulator → results back to Python)
+
+This can make them harder to use, especially in iterative or programmatic contexts.
+
+---
+
+### 🐍 A pure Python approach
+
+**impulso-mna** is implemented entirely in Python and depends only on `numpy` for numerical computations.
+
+This design choice provides:
+
+* Simple installation and portability
+* Full transparency of the simulation process
+* Direct access to all internal data structures
+
+---
+
+### 🔄 Tight integration with Python workflows
+
+A key goal of this package is to make circuit simulation **a first-class part of Python code**, rather than an external tool.
+
+Simulation results are directly available as Python objects, which makes it straightforward to:
+
+* Integrate simulations into optimization loops
+* Perform parameter sweeps programmatically
+* Couple circuit models with other numerical or scientific workflows
+* Build custom analysis pipelines
+
+These workflows are often cumbersome or inefficient when using traditional simulator integrations.
+
+---
+
+### 🎯 Positioning
+
+* Use **`impulso-mna`** for a minimal, stable foundation
+* Use **`impulsox-mna`** when you need more control, flexibility, or want to experiment with advanced techniques
+
+Together, they aim to provide a clean, Python-first ecosystem for circuit simulation without external dependencies.
+
+---
+
 ## 📦 Installation
 
 ```bash
