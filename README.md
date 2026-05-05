@@ -1,7 +1,9 @@
 
----
-
 # impulso-mna
+
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
+![Focus](https://img.shields.io/badge/focus-minimal%20core-blue)
+![Architecture](https://img.shields.io/badge/architecture-simple-success)
 
 **impulso-mna** is a Python package for circuit simulation based on **Modified Nodal Analysis (MNA)**. It provides a flexible and extensible framework for DC, AC, and transient analysis of electrical circuits, with a strong focus on clarity, composability, and performance.
 
@@ -281,3 +283,82 @@ More advanced functionality and experimental features will be developed separate
 
 ---
 
+## 📦 Requirements
+
+### ▶️ Core (runtime)
+
+The core of **impulso-mna** is intentionally lightweight and depends only on a small set of packages:
+
+* `numpy` — numerical computations and matrix operations
+
+These are the only dependencies required to **use the simulator itself**.
+
+---
+
+### 📊 Optional (examples & visualization)
+
+The following packages are used for running examples and visualizing results:
+
+* `matplotlib` — plotting simulation results
+* `quantiphy` — formatted physical quantities
+
+`matplotlib` brings in several supporting dependencies (e.g. `cycler`, `kiwisolver`, `pillow`, etc.).
+
+---
+
+### 🧪 Development & testing
+
+For development, testing, and contributing:
+
+* `pytest` — test framework
+* `pluggy`, `iniconfig`, `Pygments` — pytest dependencies
+
+---
+
+### 🛠 Build system
+
+* `setuptools`
+* `wheel`
+
+---
+
+### 🔗 Development note on impulso-mna
+
+During development, you may encounter setups that include:
+
+```text
+-e git+https://github.com/kvdijken/impulso-mna.git@<commit>#egg=impulso
+```
+
+This is **only for development and comparison purposes**.
+
+* **impulsox-mna does not depend on impulso-mna**
+* Both packages are fully independent implementations
+
+---
+
+## ⚙️ Installation
+
+### Minimal installation
+
+```bash
+pip install impulso-mna
+```
+
+---
+
+### Development environment
+
+To reproduce the full development setup:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📝 Notes
+
+* Runtime dependencies are intentionally minimal
+* Additional packages are only required for examples, testing, and development
+* Future versions may formalize this split via optional dependency groups (e.g. `extras_require`)
