@@ -13,6 +13,8 @@ from .circuit import Circuit
 
 class Solver_Transient(Solver_ACDC):
 
+    all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
+
     def __init__(self,
                  nodes: Dict[Component, Tuple[int,int]],
                  component: Dict[str, Component],
@@ -26,6 +28,15 @@ class Solver_Transient(Solver_ACDC):
         # augment context for transient analysis
         self.ctx.analysis_type = Analysis.TRANSIENT
         self.ctx.dt = self.dt
+
+
+    def node_administration(self):
+        # --- Separate components ---
+        self.all = {} # dict component_type -> list of components of that type
+        self.all = defaultdict(list)
+        for comp in self.all_components():
+            self.all[type(comp)].append(comp)
+        super().node_administration()
 
 
     def solve(self,

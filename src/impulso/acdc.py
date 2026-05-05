@@ -11,7 +11,6 @@ from .sources.source import PowerSource
 
 class Solver_ACDC():
 
-    all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
     nodes: Dict[Component, List[int]]  # component -> connected nodes
     component: Dict[str, Component]  # component_id -> Component instance
     node_index: Dict[int, int] = {} # node number -> index in MNA matrix
@@ -86,12 +85,6 @@ class Solver_ACDC():
 
 
     def node_administration(self):
-        # --- Separate components ---
-        self.all = {} # dict component_type -> list of components of that type
-        self.all = defaultdict(list)
-        for comp in self.all_components():
-            self.all[type(comp)].append(comp)
-
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
 
