@@ -2,6 +2,9 @@ import numpy as np
 
 from impulso import *
 
+# TODO Write test for inductor initial current, can take LC_tank.py for that
+
+
 def within(value, tobe, perc):
     ratio = value / tobe
     perc = perc / 100
@@ -110,6 +113,74 @@ class Test_Circuit:
         assert(np.abs(VR2) < 1e-6)
         IR2 = comps[R2.id]
         assert(np.abs(IR2) < 1e-6)
+
+    def test_4(self):
+        # test if adding component with illegal node slist is caught
+        circuit = Circuit()
+        V1 = DCVoltageSource(1)
+        try:
+            circuit.add(V1, 1) # should be a list of nodes, not a single node
+            assert(False)
+        except AssertionError:
+            assert(True)
+
+    def test_5(self):
+        # test if adding a component with a duplicate ID is caught
+        circuit = Circuit()
+        V1 = DCVoltageSource(1, id='V1')
+        V2 = DCVoltageSource(1, id='V1') # duplicate ID
+        circuit.add(V1, [0, 1])
+        try:
+            circuit.add(V2, [1, 2])
+            assert(False)
+        except AssertionError:
+            assert(True)
+
+    def test_6(self):
+        # test if adding a component that is not an instance of Component is caught
+        circuit = Circuit()
+        try:
+            circuit.add("not a component", [0, 1])
+            assert(False)
+        except AssertionError:
+            assert(True)
+
+    def test_7(self):
+        # test if a circuit without a component connected to ground is caught
+        circuit = Circuit(ground_node=0)
+        V1 = DCVoltageSource(1)
+        R1 = Resistor(1e3)
+        circuit.add(V1, [3, 1])
+        circuit.add(R1, [1, 2])
+        try:
+            circuit.validate()
+            assert(False)
+        except AssertionError:
+            assert(True)
+
+    def test_8(self):
+        # test if a circuit with a component connected to ground is valid
+        circuit = Circuit(ground_node=0)
+        V1 = DCVoltageSource(1)
+        R1 = Resistor(1e3)
+        circuit.add(V1, [0, 1])
+        circuit.add(R1, [1, 2])
+        try:
+            circuit.validate()
+            assert(True)
+        except AssertionError:
+            assert(False)
+
+    def test_10(self):
+        # test if we can add a component with only one node
+        circuit = Circuit()
+        V1 = DCVoltageSource(1)
+        circuit.add(V1, [0, 1]) # should be fine
+        try:
+            circuit.add(V1, [0]) # should raise an error
+            assert(False)
+        except AssertionError:
+            assert(True)
 
 class Test_DC:
 
@@ -701,6 +772,18 @@ class Test_DC:
         assert(within(np.abs(currents[VCCS1]), 1.9976, 0.001))
         assert(within(np.abs(currents[VCCS1.id]), 1.9976, 0.001))
 
+    def test_33(self):
+        # test if we can get the current through a component by using the component reference instead of the component id
+        circuit = Circuit()
+        V1 = DCVoltageSource(1, id='V1')
+        R1 = Resistor(1e3, id='R1')
+        circuit.add(V1,[0,1])
+        circuit.add(R1,[1,0])
+        result = solve_dc(circuit)
+        IR1_1 = result[1][R1.id]
+        IR1_2 = result[1][R1]
+        assert(IR1_1 == IR1_2)
+
 
 class Test_AC:
 
@@ -796,7 +879,7 @@ class Test_transient:
         assert(within(IR1,0.001,0.1))
 
 
-
+Test_Circuit().test_4()
 #Test_transient().test_1()
 #Test_AC().test_4()
 # Test_DC().test_11()

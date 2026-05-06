@@ -69,7 +69,6 @@ class Solver_Transient(Solver_ACDC):
                 initial_voltages[n1] = -v_initial
 
         # For inductors set initial current at t=0
-        # TODO
         for ind in self.all.get(Inductor, []):
             i_initial = ind.initial_current
             current[ind] = i_initial

@@ -24,15 +24,15 @@ class Inductor(Component):
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
-    
+
     def dc_conductance(self):
         return LARGE_CONDUCTANCE  # treat inductor as short circuit in DC analysis
 
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
-        
+
         def stamp_not_transient():
             idx = ctx.idx_query_fn(self)
             augm = ctx.augm_query_fn(self)
@@ -59,13 +59,13 @@ class Inductor(Component):
             ctx.Y[augm,augm] -= alpha
             i_hist = ctx.current_history[-1][self]
             ctx.z[augm] += -alpha * i_hist
-        
+
         if ctx.analysis_type == Analysis.TRANSIENT:
             stamp_transient()
         else:
             stamp_not_transient()
 
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]
@@ -78,10 +78,10 @@ class MutualInductance(CircuitItem):
     M = k * sqrt(L1 * L2)
     """
 
-    def __init__(self, 
-                 L1: Inductor, 
-                 L2: Inductor, 
-                 coupling: float, 
+    def __init__(self,
+                 L1: Inductor,
+                 L2: Inductor,
+                 coupling: float,
                  id: Optional[str] = None):
 
         assert(0 <= coupling <= 1), f"Coupling coefficient must be between 0 and 1, got {coupling}"
@@ -104,10 +104,10 @@ class MutualInductance(CircuitItem):
 
     def is_directive(self):
         return True
-    
+
     def linear(self) -> bool:
         return True
-    
+
     def stamp(self, ctx: Context):
         idx1 = ctx.augm_query_fn(self.L1)
         idx2 = ctx.augm_query_fn(self.L2)
@@ -115,8 +115,4 @@ class MutualInductance(CircuitItem):
         val = -ctx.s * M
         ctx.Y[idx1, idx2] += val
         ctx.Y[idx2, idx1] += val
-    
-    def current(self, ctx: Context) -> complex:
-        # TODO Cannot be correct
-        return 0
 

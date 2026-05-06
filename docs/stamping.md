@@ -1,3 +1,6 @@
+Ali Hajimiri (Caltech), see: https://youtu.be/E6SWCh33L7U?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z
+
+
 # Nodal Analysis
 
 Nodal analysis of an electric circuit is done by creating a set of linear equations describing the currents entering any node (except the ground node) and solving this system of equations. This is a linear algebra problem for which fast ways to solve them exist.

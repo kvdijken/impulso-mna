@@ -11,8 +11,7 @@ class SinusoidalVoltageSource(PowerSource):
     '''
     '''
     def __init__(self,
-                 amplitude: float,  # amplitude is half Vpp
-                                    # TODO should not be required when ac_source == True
+                 amplitude: float,  # amplitude is half Vpp, not used in AC simulation
                  frequency: float = None,
                  phase: float = 0.0,        # in radians
                  dc: float = 0.0,          # DC offset
@@ -26,16 +25,16 @@ class SinusoidalVoltageSource(PowerSource):
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
-    
+
     def voltage_at_time(self, t) -> float:
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
         ac_analysis = ctx.analysis_type == Analysis.AC
-        
+
         if ac_analysis:
             if self.ac_source:
                 v = np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
@@ -58,9 +57,9 @@ class SinusoidalVoltageSource(PowerSource):
             ctx.Y[j, augm] -= 1
             ctx.Y[augm, j] += 1
         ctx.z[augm] = v # volts
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]
-    
+
 
