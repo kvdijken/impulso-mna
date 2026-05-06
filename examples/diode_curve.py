@@ -21,7 +21,7 @@ v_ = np.linspace(-.1, 1, 100)
 data = current(v_)
 vd_, id_ = data[0], data[1]
 
-plt.plot(vd_,id_,'k')
+plt.plot(np.abs(vd_),np.abs(id_),'k')
 plt.xlabel('Vd (V)')
 plt.ylabel('Id (A)')
 plt.title('Diode I-V Curve')
