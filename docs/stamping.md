@@ -1,4 +1,35 @@
-Ali Hajimiri (Caltech), see: https://youtu.be/E6SWCh33L7U?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & & j \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & \cdots & \cdots & \cdots & \cdots \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \end{array}
+\right]
+$$
+
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & j & p & q \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & \cdots & \cdots & \cdots & \cdots \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \end{array}
+\right]
+$$
+
+
+
+# References
+
+1. Ali Hajimiri (Caltech), https://youtu.be/E6SWCh33L7U?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for resistor)
+2. Ali Hajimiri (Caltech), https://youtu.be/QQCYJnmbXYw?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for VCCS)
 
 
 # Nodal Analysis
@@ -58,7 +89,8 @@ $$
    \vdots  \\
    I_n
    \end{array}
-\right]$$
+\right]
+$$
 
 $\mathbf{Y}$ is called the admittance matrix. $\vec{I}$ is the stimulus vector. This matrix equation can be solved for $\vec{v}$, which is a vector representing the node voltages. $\vec{v}$ is called the solution vector.
 
@@ -72,15 +104,79 @@ Values in $\mathbf{Y}$ can have (frequency dependent) complex values for reactiv
 
 In MNA auxiliary equations (for voltage sources, inductors) diagonal entries are **not admittances**. They are whatever coefficient arises from the constitutive equation.
 
+For some components with time varying behaviour stamping differs for AC and DC analysis
+
+# Conventions
+
+- dependent currents flowing out of a node are positive
+- independent currents $I$ are positive into a node
+
+
+
 
 # Linear Components
 
 ## Resistor
 
+A resistor $R_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & & j \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   i &\cdots & +G_{ij} & \cdots & -G_{ij} & \cdots\\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   j & \cdots & -G_{ij} & \cdots & +G_{ij} & \cdots\\
+   & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   \end{array}
+\right]
+$$
+
+where $G_{ij}=1 / R_{ij}$.
+
+See [1].
+
 
 ## Capacitor
 
+A capacitor $C_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & & j \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   i &\cdots & +G_{ij} & \cdots & -G_{ij} & \cdots\\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   j & \cdots & -G_{ij} & \cdots & +G_{ij} & \cdots\\
+   & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   \end{array}
+\right]
+$$
+
+where $G_{ij}=sC_{ij}$.
+
+
 ## Inductor
+
+An inductor $L_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & & j \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   i &\cdots & +G_{ij} & \cdots & -G_{ij} & \cdots\\
+    & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   j & \cdots & -G_{ij} & \cdots & +G_{ij} & \cdots\\
+   & \cdots & \cdots & \cdots & \cdots & \cdots\\
+   \end{array}
+\right]
+$$
+
+where $G_{ij}=1/sL_{ij}$.
+
 
 
 # Non-linear Components
@@ -95,6 +191,20 @@ In MNA auxiliary equations (for voltage sources, inductors) diagonal entries are
 
 ## Current Source
 
+A current source $I_{ij}$ between nodes $i$ and $j$ with current flowing from $i$ to $j$ stamps the RHS vector $\vec{z}$ as
+
+$$
+\left[
+\begin{array}{ccc}
+   & \vdots \\
+   i: & -I_{ij} \\
+   & \vdots  \\
+   j: & +I_{ij} \\
+   & \vdots
+   \end{array}
+\right]
+$$
+
 
 # Dependent Sources
 
@@ -105,6 +215,28 @@ In MNA auxiliary equations (for voltage sources, inductors) diagonal entries are
 ## CCCS
 
 ## VCCS
+
+A Voltage Controlled Current Source (VCCS) between nodes $i$ and $j$, producing a current flowing from $i$ to $j$ with magnitude $I_{ij}=G_m(V_p-V_q)$ where $V_p$ and $V_q$ are the controlling voltages, produces current
+
+$G_m(V_p-V_q)$
+
+out of node $i$ (negative) into node $j$ (positive). This causes the following additions to the matrix $\mathbf{Y}$:
+
+$$
+\left[
+\begin{array}{c c c c c c}
+   & & i & j & p & q \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i & \cdots & \cdots & \cdots & -G_m & +G_m \\
+   j & \cdots & \cdots & \cdots & +G_m & -G_m \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \end{array}
+\right]
+$$
+
+See [2].
+
 
 # Compound Components
 
