@@ -205,8 +205,9 @@ where $G_{ij}=1/sL_{ij}$.
 
 A voltage source $V_{ij} = V_j-V_i$ produces an extraexpression  in the matrix $\mathbf{Y}$, what makes the nodal analysis an augmented nodal analysis. The extra equation give an extra row and extra column at index $a$ with the following entries:
 
-The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$.
- Stamping the voltage source will be as such:
+The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$. Current through the voltage source flows from the negative pole to the positive pole.
+
+Stamping the voltage source will be as follows:
 
 $$
 \left[
@@ -223,7 +224,7 @@ $$
 \right]
 $$
 
-The row represents the equation $V_{ij}=V_j-V_i$. The column $a$ calculates the current $I_{ij}$.
+Row $a$ represents the equation $V_{ij}=V_j-V_i$. Column $a$ calculates the current $I_{ij}$.
 
 
 ## Current Source
