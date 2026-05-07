@@ -24,13 +24,28 @@ $$
 \right]
 $$
 
+$$
+\left[
+\begin{array}{c c c c c c | c}
+   & & i & j & p & q \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \hline
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \end{array}
+\right]
+$$
+
 
 
 # References
 
 1. Ali Hajimiri (Caltech), https://youtu.be/E6SWCh33L7U?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for resistor)
 2. Ali Hajimiri (Caltech), https://youtu.be/QQCYJnmbXYw?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for VCCS)
-
+3. Ali Hajimiri (Caltech), https://youtu.be/DJcvNUkzWmQ?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for voltage source)
 
 # Nodal Analysis
 
@@ -187,6 +202,28 @@ where $G_{ij}=1/sL_{ij}$.
 # Independent Sources
 
 ## Voltage Source
+
+A voltage source $V_{ij} = V_j-V_i$ produces an extraexpression  in the matrix $\mathbf{Y}$, what makes the nodal analysis an augmented nodal analysis. The extra equation give an extra row and extra column at index $a$ with the following entries:
+
+The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$.
+ Stamping the voltage source will be as such:
+
+$$
+\left[
+\begin{array}{c c c c c c | c}
+   & & i & j & p & q & a\\
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \hline
+   a & \cdots & -1 & +1 & \cdots & \cdots & V_{ij} \\
+   \end{array}
+\right]
+$$
+
+The row represents the equation $V_{ij}=V_j-V_i$. The column $a$ calculates the current $I_{ij}$.
 
 
 ## Current Source
