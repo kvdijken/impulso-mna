@@ -831,7 +831,7 @@ class Test_AC:
 
     def test_4(self):
         # Test a diode in AC simulation
-        V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, id='V1')
+        V1 = SinusoidalVoltageSource(amplitude=.1, ac_source=True, id='V1')
         D1 = Diode(id='D1')
         circuit = Circuit()
         circuit.add(V1,[0,1])

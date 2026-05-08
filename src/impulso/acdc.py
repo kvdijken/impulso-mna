@@ -1,3 +1,5 @@
+import os
+
 from typing import Dict, List, Tuple, Type
 import numpy as np
 from collections import defaultdict
@@ -28,7 +30,6 @@ class Solver_ACDC():
         self.component = component
         self.ground_node = ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
-        self.debug = False
         self.ctx = self.create_context()
 
 
@@ -114,7 +115,7 @@ class Solver_ACDC():
 
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 
-        times = 1
+        times = 0
         n_times = 1 # number of iterations to perform before checking for convergence
         while not converged:
             self.ctx.Y = self.zero_MNA_matrix(self.N)
@@ -125,17 +126,18 @@ class Solver_ACDC():
             if return_real:
                 self.ctx.x = np.real(self.ctx.x)
             if self.has_nonlinear_components():
+                times += 1
                 if times >= n_times:
                     converged = self.check_convergence()
-                else:
-                    times += 1
             else:
                 converged = True
         voltages = self.extract_node_voltages()
-        if self.debug:
-            self.print_voltages(voltages)
         currents = self.extract_currents()
-        if self.debug:
+        if os.environ.get("IMPULSO_DEBUG", '0') == '1':
+            print("Y-matrix:\n", self.ctx.Y,"\n")
+            print("x-vector:\n", self.ctx.x, "\n")
+            print("z-vector:\n", self.ctx.z, "\n")
+            self.print_voltages(voltages)
             self.print_currents(currents)
         return voltages, currents
 

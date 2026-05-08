@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from typing import Dict, List, Tuple, Any
 
@@ -98,7 +99,7 @@ class Solver_Transient(Solver_ACDC):
 
         for t in times:
             self.ctx.t = t
-            if self.debug:
+            if os.environ.get("IMPULSO_DEBUG", '0') == '1':
                 print(f"Time: {t} s\n")
             voltage, current = self.solve_mna(return_real=True)
             self.ctx.voltage_history.append(voltage.copy())

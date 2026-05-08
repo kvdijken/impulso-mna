@@ -37,7 +37,7 @@ class SinusoidalVoltageSource(PowerSource):
 
         if ac_analysis:
             if self.ac_source:
-                v = np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
+                v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
             else:
                 v = 0
         else:

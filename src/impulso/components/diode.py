@@ -41,8 +41,8 @@ class Diode(Component):
 
     def stamp(self, ctx: Context):
         if ctx.analysis_type == Analysis.AC:
-            self.stamp_for_dc(ctx)
-#            self.stamp_for_ac(ctx)
+#            self.stamp_for_dc(ctx)
+            self.stamp_for_ac(ctx)
         else:
             self.stamp_for_dc(ctx)
 
@@ -82,7 +82,7 @@ class Diode(Component):
     #            else:
     #                vd = self.v_old + self.n * self.vt * math.log(_L)
 
-        if True:
+        if True:   # simpler limiting strategy that just caps the voltage difference across the diode
             vd = min(vd, 0.8)   # crude but effective
         else:
             if vd > self.v_old:
@@ -132,6 +132,10 @@ class Diode(Component):
             vj = 0
         else:
             vj = ctx.x[j]
+        # TODO: handle phase correctly when we have AC analysis
+        # current in phase with voltage difference across the diode,
+        # so we can take the real part of the voltage difference for
+        # the exponential calculation
         vd = np.real(vi - vj)
 #        print(f'--> {vd}')
         return self.Is * (math.exp(vd / (self.nvt)) - 1)
