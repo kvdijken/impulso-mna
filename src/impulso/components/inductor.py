@@ -34,9 +34,8 @@ class Inductor(Component):
     def stamp(self, ctx: Context):
 
         def stamp_not_transient():
-            idx = ctx.idx_query_fn(self)
+            i1, i2 = ctx.idx_query_fn(self)
             augm = ctx.augm_query_fn(self)
-            i1, i2 = idx
             if i1 is not None:
                 ctx.Y[i1, augm] += 1
                 ctx.Y[augm, i1] += 1
@@ -46,9 +45,8 @@ class Inductor(Component):
             ctx.Y[augm, augm] -= ctx.s * self.inductance # ohm
 
         def stamp_transient():
-            idx = ctx.idx_query_fn(self)
+            i1, i2 = ctx.idx_query_fn(self)
             augm = ctx.augm_query_fn(self)
-            i1, i2 = idx
             if i1 is not None:
                 ctx.Y[i1, augm] += 1
                 ctx.Y[augm, i1] += 1

@@ -81,7 +81,7 @@ $$
 
 $$
 \left[
-\begin{array}{ccc}
+\begin{array}{cccc}
    Y_{11} & Y_{12} & \cdots & Y_{1n} \\
    Y_{21} & Y_{22} & \cdots & Y_{2n} \\
 
@@ -90,7 +90,7 @@ $$
    \end{array}
 \right] \cdot
 \left[
-\begin{array}{ccc}
+\begin{array}{c}
    v_1 \\
    v_2 \\
    \vdots \\
@@ -98,7 +98,7 @@ $$
    \end{array}
 \right] =
 \left[
-\begin{array}{ccc}
+\begin{array}{c}
    I_1 \\
    I_2 \\
    \vdots  \\
@@ -175,6 +175,10 @@ where $G_{ij}=sC_{ij}$.
 
 ## Inductor
 
+### Simple solution
+
+A very simple way which works for AC analysis (neither DC, nor transient) is the following.
+
 An inductor $L_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
 
 $$
@@ -192,7 +196,76 @@ $$
 
 where $G_{ij}=1/sL_{ij}$.
 
+It does not work for DC because at DC $s=0$ causing numerical problems. A special case would need to be constructed for DC with $G=\mathrm{very large}$.
 
+For transient analysis we need an entirely different way, similar to capacitors in transient analysis.
+
+### Advanced solution
+
+For an inductor L between nodes $i$ and $j$, positive current flowing from node $i$ to node $j$
+
+$$
+v_L(s)=sLi_L
+$$
+
+which can be rewritten as
+
+$$
+v_L(s) = v_i - v_j=sLi_L
+$$
+
+We define an extra unknown, the inductor current $i_L$ so the unknown vector $\vec{z}$ becomes
+
+$$
+\vec{z}=\left[
+\begin{array}{c}
+   v_1 \\
+   v_2 \\
+   \vdots \\
+   i_L
+   \end{array}
+\right]
+$$
+
+Then the KCL controbutions are:
+
+* $+i_L$ for node $i$
+* $-i_L$ for node $j$
+
+This produces
+* $Y[i,i_L]+=1$
+* $Y[j,i_L]-=1$
+
+Now we enforce $v_i - v_j - sLi_L = 0$.
+
+This becomes an extra row in the MNA:
+
+$(+1)v_i + (-1)v_j - sL(i_L) = 0$
+
+which stamps as
+
+$$
+Y[i_L,i] += 1 \\
+Y[i_L,j] -= 1 \\
+Y[i_L,i_L] -= sL
+$$
+
+The full stamping becomes:
+
+$$
+\left[
+\begin{array}{c c c c c c | c}
+   & & i & j &  &  & i_L\\
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \hline
+   i_L & \cdots & +1 & -1 & \cdots & \cdots & -sL \\
+   \end{array}
+\right]
+$$
 
 # Non-linear Components
 
