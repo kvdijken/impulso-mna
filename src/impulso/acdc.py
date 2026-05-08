@@ -258,14 +258,25 @@ class Solver_ACDC():
 
 
 def _solve_acdc(circuit: Circuit,
-               freq: float,
+               freq: float, # frequency for AC analysis, ignored for DC analysis
                ctx: Context = None
                ) -> Tuple[Dict[int | str, complex], # node voltages
                           Dict[str | Component, complex]]: # currents through components
     '''
     Convenience function to solve a circuit without
     needing to create a Solver_ACDC instance.
+
+    Make sure that if doing an AC analysis, the
+    operating point has already been solved and
+    the nonlinear components have their admittance
+    set for AC analysis, otherwise the results may
+    be meaningless.
     '''
+    assert ctx is None or isinstance(ctx, Context), "ctx must be an instance of Context or None"
+    if ctx is not None:
+        if freq > 0:
+            assert ctx.analysis_type in (None, Analysis.AC), "Context analysis type must be AC or None for AC analysis"
+
     solver = Solver_ACDC(circuit.nodes, circuit.component, circuit.ground_node)
     return solver.solve(freq)
 
@@ -284,8 +295,7 @@ def solve_dc(circuit: Circuit,
 
 
 def solve_ac(circuit: Circuit,
-             freq: float,
-             ctx: Context = None
+             freq: float | List[float]
              ) -> Tuple[Dict[int | str, complex], # node voltages
                         Dict[str | Component, complex]]: # currents through components
     '''
@@ -295,8 +305,27 @@ def solve_ac(circuit: Circuit,
     ac_sources = [src for src in all_sources if src.is_ac()]
     assert(len(ac_sources) > 0), "No AC sources found in the circuit. The results may be meaningless."
 
-    if ctx is None:
-        ctx = Context()
+    ctx = Context()
     ctx.analysis_type = Analysis.AC
-    return _solve_acdc(circuit, freq, ctx)
+
+    non_linears = set() # all nonlinear components in the circuit
+    for comp in circuit.component.values():
+        if not comp.linear():
+            non_linears.add(comp)
+
+    if len(non_linears) > 0:
+        # First do a operating point analysis
+        vdc, idc = _solve_acdc(circuit, 0)
+        for comp in non_linears:
+            comp.set_admittance_for_ac(idc[comp])
+
+    if isinstance(freq, float):
+        # single frequency AC analysis
+        return _solve_acdc(circuit, freq, ctx)
+    else:
+        # AC sweep over multiple frequencies
+        results = {}
+        for f in freq:
+            results[f] = _solve_acdc(circuit, f, ctx)
+        return results
 

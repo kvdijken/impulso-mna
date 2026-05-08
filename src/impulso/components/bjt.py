@@ -49,8 +49,6 @@ class Rout(Component):
             # calculate rout
     #        g = ic / self.npn.Va
             g = max(ic, 1e-12) / self.npn.Va
-    #        if aux.t > 0.002:
-    #            print(aux.t, ic, g)
 
         # stamp
         i, j = ctx.idx_query_fn(self)

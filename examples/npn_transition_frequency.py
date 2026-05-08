@@ -8,7 +8,7 @@ plt.rcParams['axes.xmargin'] = 0
 
 
 Vcc = DCVoltageSource(9, id='Vcc')
-Vin = SinusoidalVoltageSource(1, ac_source=True, id='Vin')
+Vin = SinusoidalVoltageSource(.1, ac_source=True, id='Vin')
 C1 = Capacitor(1e-6, id='C1')
 R1 = Resistor(8000, id='R1')
 R2 = Resistor(1000, id='R2')
@@ -29,13 +29,13 @@ circuit.add(Q1, ['Q1_E', 'Q1_B', 'Q1_C'])
 freqs = np.logspace(1, 10, 500)
 results = ac_sweep(circuit,freqs)
 
-freqs, node_voltages, _c = freq_pivot_and_select(results, 
-                                            voltage_nodes=['Q1_C'], 
+freqs, node_voltages, _c = freq_pivot_and_select(results,
+                                            voltage_nodes=['Q1_C'],
                                             current_components=[],
                                             to_return='MP')
 vout = node_voltages['Q1_C'][0]
 phase = node_voltages['Q1_C'][1]
-    
+
 fig, axL = plt.subplots()
 axR = axL.twinx()
 plt.title('Frequency response of NPN transistor amplifier')
@@ -46,4 +46,4 @@ axL.set_xscale('log')
 axL.set_xlabel('Frequency (Hz)')
 axL.set_ylabel('Voltage at Q1_C (V)')
 plt.show()
-    
+

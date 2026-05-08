@@ -41,7 +41,6 @@ class Diode(Component):
 
     def stamp(self, ctx: Context):
         if ctx.analysis_type == Analysis.AC:
-#            self.stamp_for_dc(ctx)
             self.stamp_for_ac(ctx)
         else:
             self.stamp_for_dc(ctx)
@@ -89,7 +88,6 @@ class Diode(Component):
                 vd = min(vd, self.v_old + 0.1)
             else:
                 vd = max(vd, self.v_old - 0.1)
-    #        print(vd, self.v_old)
         self.v_old = vd
 
         # Calculate the diode current and conductance (companion model)
@@ -123,6 +121,28 @@ class Diode(Component):
 
 
     def current(self, ctx: Context) -> complex:
+        if ctx.analysis_type == Analysis.AC:
+            return self.current_ac(ctx)
+        else:
+            return self.current_dc(ctx)
+
+    def current_ac(self, ctx: Context) -> complex:
+        # For AC analysis, we assume the small-signal
+        # current is given by the admittance times the
+        # voltage difference
+        i, j = ctx.idx_query_fn(self)
+        if i is None:
+            vi = 0
+        else:
+            vi = ctx.x[i]
+        if j is None:
+            vj = 0
+        else:
+            vj = ctx.x[j]
+        vd = np.real(vi - vj)
+        return self.admittance_ac * vd  # small-signal current approximation
+
+    def current_dc(self, ctx: Context) -> complex:
         i, j = ctx.idx_query_fn(self)
         if i is None:
             vi = 0

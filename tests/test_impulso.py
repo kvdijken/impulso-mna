@@ -831,7 +831,7 @@ class Test_AC:
 
     def test_4(self):
         # Test a diode in AC simulation
-        V1 = SinusoidalVoltageSource(amplitude=.1, ac_source=True, id='V1')
+        V1 = SinusoidalVoltageSource(amplitude=.5, ac_source=True, id='V1')
         D1 = Diode(id='D1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
@@ -843,7 +843,8 @@ class Test_AC:
         # current through the diode should be equal
         # to the current through the voltage source,
         # as they are in series.
-        assert (within(IV1, ID1, 0.1))
+        assert IV1 == ID1
+#        assert (within(IV1, ID1, 0.1))
 
 class Test_transient:
 

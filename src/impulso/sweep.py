@@ -1,11 +1,10 @@
-from typing import List, Tuple, Dict, Union, Iterable
+from typing import List, Tuple, Dict, Iterable, Any
 from collections import defaultdict
 
 import numpy as np
 
-from .base import Analysis
 from .circuit import Circuit
-from .acdc import _solve_acdc
+from .acdc import _solve_acdc, solve_ac
 from .components.component import Component, Context
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
@@ -13,7 +12,7 @@ from .sources.dccurrentsource import DCCurrentSource
 
 
 
-def ac_sweep(circuit: Circuit, 
+def ac_sweep(circuit: Circuit,
              freqs: List[float]
             ) -> dict[float, # frequency
                       Tuple[Dict[int | str, complex], # node voltages
@@ -24,32 +23,28 @@ def ac_sweep(circuit: Circuit,
     Returns:
         dict freq -> (node_voltage, comp_currents)
     """
-    non_linears = set() # all nonlinear components in the circuit
-    for comp in circuit.component.values():
-        if not comp.linear():
-            non_linears.add(comp)
-
-    if len(non_linears) > 0:
-        # First do a operating point analysis
-        vdc, idc = _solve_acdc(circuit, 0)
-        for comp in non_linears:
-            comp.set_admittance_for_ac(idc[comp])                    
-
-    results = {}
-    ctx = Context()
-    ctx.analysis_type = Analysis.AC
-    for f in freqs:
-        results[f] = _solve_acdc(circuit,f,ctx=ctx)
-        
-    return results
+    return solve_ac(circuit, freqs)
 
 
-def dc_sweep(circuit: Circuit, 
+def dc_sweep(circuit: Circuit,
              dc_source: DCVoltageSource | DCCurrentSource,
              dc_range: Iterable[float]
-             )  -> Tuple[List[complex], List[complex]]:
-    
-    dc_ = []
+             )  -> Tuple[List[Any], # where Any is Dict[int | str, complex] (these are voltages)
+                         List[Any]]: # where Any is Dict[str | Component, complex] (these are currents)
+    '''
+    Run DC sweep over multiple values of a voltage or current source.
+
+    Args:
+        circuit: The circuit to analyze.
+        dc_source: The voltage or current source to sweep.
+        dc_range: The values to sweep the source over.
+
+    Returns:
+        A tuple of two lists: (voltages, currents) where
+        - the first list contains the node voltages
+        - the second list the component currents
+        for each value in dc_range.
+    '''
     vdc_ = []
     idc_ = []
     for dc in dc_range:
@@ -60,7 +55,7 @@ def dc_sweep(circuit: Circuit,
         vdc, idc = _solve_acdc(circuit, 0)
         vdc_.append(vdc)
         idc_.append(idc)
-            
+
     return vdc_, idc_
 
 
