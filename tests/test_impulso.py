@@ -829,6 +829,21 @@ class Test_AC:
             print('AC_test_11, expected exception:', e)
             assert True
 
+    def test_4(self):
+        # Test a diode in AC simulation
+        V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, id='V1')
+        D1 = Diode(id='D1')
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(D1,[1,0])
+        voltages, currents = solve_ac(circuit,freq=1e3)
+        IV1 = currents[V1]
+        ID1 = currents[D1]
+        print_currents_voltages(circuit, voltages, currents)
+        # current through the diode should be equal
+        # to the current through the voltage source,
+        # as they are in series.
+        assert (within(IV1, ID1, 0.1))
 
 class Test_transient:
 
@@ -879,9 +894,9 @@ class Test_transient:
         assert(within(IR1,0.001,0.1))
 
 
-Test_Circuit().test_4()
-#Test_transient().test_1()
-#Test_AC().test_4()
+# Test_Circuit().test_4()
+# Test_transient().test_1()
+Test_AC().test_4()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

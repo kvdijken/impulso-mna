@@ -283,7 +283,7 @@ We will approach the value for $i_D$ by iterating over step $k$ around the curre
 
 $$
 \begin{align}
-i_D^{(k+1)} &\approx i_D^{(k)} +\frac{\delta i_D}{\delta v_D}v_D^{(k)} \\
+i_D^{(k+1)} &\approx i_D^{(k)} +\frac{\delta i_D^{(k)}}{\delta v_D}v_D^{(k)} \\
 &= i_D^k+g_D^{(k)}v_D^{(k)}
 \end{align}
 $$
@@ -291,10 +291,40 @@ $$
 where
 
 $$
-g_D^{(k)} = \frac{\delta i_D}{\delta v_D} = \frac{I_s}{V_T}\mathrm{e}^{v_D^{(k)}/V_T}
+g_D^{(k)} = \frac{\delta i_D^{(k)}}{\delta v_D} = \frac{I_s}{V_T}\mathrm{e}^{v_D^{(k)}/V_T}
 $$
 
-This makes the diode a parallel combination of a current source and a conductance.
+This makes the diode a parallel combination of a current source $i_D^{(k)}$ and a conductance $g_D^{(k)}=\frac{I_s}{V_T}\mathrm{e}^{v_D^{(k)}}/V_T$. For a diode between nodes $i$ and $j$, the complete stamping thus becomes:
+
+$$
+\Delta\mathbf{Y} = \left[
+\begin{array}{c c c c c c}
+   & & i & j & p & q \\
+    & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i &\cdots & +g_D^{(k)} & -g_D^{(k)} & \cdots & \cdots \\
+   j & \cdots & -g_D^{(k)} & +g_D^{(k)} & \cdots & \cdots \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \end{array}
+\right]
+$$
+
+and
+
+$$
+\Delta\vec{z} = \left[
+\begin{array}{ccc}
+   & \vdots \\
+   i: & -i_D^{(k)} \\
+   & \vdots  \\
+   j: & +i_D^{(k)} \\
+   & \vdots
+   \end{array}
+\right]
+$$
+
+
+
 
 
 

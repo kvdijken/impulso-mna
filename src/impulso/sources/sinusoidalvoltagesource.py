@@ -47,9 +47,8 @@ class SinusoidalVoltageSource(PowerSource):
             else:
                 v = self.voltage_at_time(ctx.t)
 
-        idx = ctx.idx_query_fn(self)
+        i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)
-        i, j = idx
         if i is not None:
             ctx.Y[i, augm] += 1
             ctx.Y[augm, i] -= 1
