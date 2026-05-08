@@ -271,6 +271,32 @@ $$
 
 ## Diode
 
+The non-linear diode is linearized using the Newton-Raphson method.
+
+The diode equation
+
+$$
+i_D = I_s(\mathrm{e}^{v_D/V_T}-1)
+$$
+
+We will approach the value for $i_D$ by iterating over step $k$ around the current estimate $v_D^{(k)}$. We approximate the diode current with a first-order Taylor expansion:
+
+$$
+\begin{align}
+i_D^{(k+1)} &\approx i_D^{(k)} +\frac{\delta i_D}{\delta v_D}v_D^{(k)} \\
+&= i_D^k+g_D^{(k)}v_D^{(k)}
+\end{align}
+$$
+
+where
+
+$$
+g_D^{(k)} = \frac{\delta i_D}{\delta v_D} = \frac{I_s}{V_T}\mathrm{e}^{v_D^{(k)}/V_T}
+$$
+
+This makes the diode a parallel combination of a current source and a conductance.
+
+
 
 # Independent Sources
 
