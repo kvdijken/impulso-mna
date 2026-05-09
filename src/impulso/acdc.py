@@ -5,7 +5,7 @@ import numpy as np
 from collections import defaultdict
 from functools import cache
 
-from .base import Analysis
+from .base import Analysis, TopologyError
 from .components.component import Component, Context
 from .circuit import Circuit
 from .sources.source import PowerSource
@@ -277,6 +277,8 @@ def _solve_acdc(circuit: Circuit,
         if freq > 0:
             assert ctx.analysis_type in (None, Analysis.AC), "Context analysis type must be AC or None for AC analysis"
 
+    circuit.validate()
+
     solver = Solver_ACDC(circuit.nodes, circuit.component, circuit.ground_node)
     return solver.solve(freq)
 
@@ -303,7 +305,8 @@ def solve_ac(circuit: Circuit,
     '''
     all_sources = circuit.all_of_type(PowerSource)
     ac_sources = [src for src in all_sources if src.is_ac()]
-    assert(len(ac_sources) > 0), "No AC sources found in the circuit. The results may be meaningless."
+    if not ac_sources:
+        raise TopologyError("No AC sources found in the circuit. The results may be meaningless.")
 
     ctx = Context()
     ctx.analysis_type = Analysis.AC

@@ -7,7 +7,8 @@ class Resistor(Component):
     """Resistor component."""
 
     def __init__(self, resistance: float, id: Optional[str] = None):
-        assert(resistance >= 0), f"Resistance must be non-negative, got {resistance}"
+        if resistance < 0:
+            raise ValueError(f"Resistance must be non-negative, got {resistance}")
         super().__init__(id)
         self.resistance = resistance
 
@@ -16,7 +17,7 @@ class Resistor(Component):
 
     def augments(self):
         return False
-    
+
     def stamp(self, ctx: Context):
         g = 1.0 / self.resistance
         idx = ctx.idx_query_fn(self)
@@ -31,7 +32,7 @@ class Resistor(Component):
         elif j is not None:
             ctx.Y[j, j] += g
 
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.idx_query_fn(self)
         i, j = idx

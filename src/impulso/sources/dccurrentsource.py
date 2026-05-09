@@ -25,17 +25,17 @@ class DCCurrentSource(PowerSource):
             current: current in Amperes
         """
         self._current = current
-        super().__init__(id)
+        super().__init__(id=id)
 
     def set_current(self, current: float):
         self._current = current
-        
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
-    
+
     def augments(self):
         return False
-    
+
     def stamp(self, ctx: Context):
         ac_analysis = ctx.analysis_type == Analysis.AC
         p, q = ctx.idx_query_fn(self)
@@ -46,8 +46,8 @@ class DCCurrentSource(PowerSource):
                 ctx.z[p] -= i # amps
             if q is not None:
                 ctx.z[q] += i # amps
-    
+
     def current(self, ctx: Context) -> complex:
         return self._current
-    
+
 

@@ -25,7 +25,7 @@ class VCCS(PowerSource):
             gm: transconductance in Siemens (A/V)
         """
         self.gm = gm
-        super().__init__(id)
+        super().__init__(id=id)
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0

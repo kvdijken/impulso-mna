@@ -16,7 +16,8 @@ class Inductor(Component):
         initial_current: float = 0.0,
         id: Optional[str] = None,
     ):
-        assert(inductance >= 0), f"Inductance must be non-negative, got {inductance}"
+        if inductance < 0:
+            raise ValueError(f"Inductance must be non-negative, got {inductance}")
         super().__init__(id)
         self.dot_at_node1 = dot_at_node1
         self.inductance = inductance
@@ -82,7 +83,8 @@ class MutualInductance(CircuitItem):
                  coupling: float,
                  id: Optional[str] = None):
 
-        assert(0 <= coupling <= 1), f"Coupling coefficient must be between 0 and 1, got {coupling}"
+        if not (0 <= coupling <= 1):
+            raise ValueError(f"Coupling coefficient must be between 0 and 1, got {coupling}")
         super().__init__(id)
         self.L1 = L1
         self.L2 = L2

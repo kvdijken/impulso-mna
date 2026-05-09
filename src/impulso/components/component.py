@@ -14,11 +14,11 @@ LARGE_CONDUCTANCE = 1e12
 
 class CircuitItem(abc.ABC):
     """Base class for items in the circuit (components and instructions)."""
-    
+
     def __init__(self, id: Optional[str] = None):
         self.id = id or uuid.uuid4().hex
 
-    
+
 class Context():
     ground_node: int
     analysis_type: Analysis
@@ -35,10 +35,10 @@ class Context():
 
     # query augmentation index for a given circuit item (if it augments the system)
     augm_query_fn: Callable[CircuitItem, int]
-    
+
     # query nodes of a circuit item (e.g. component)
     nodes_query_fn: Callable[CircuitItem, Tuple[int, ...]]
-    
+
     # This dataclass can be extended with additional fields as needed.
     #
     # For transient analysis we can add time, dt, previous
@@ -46,7 +46,7 @@ class Context():
     #
     # For AC analysis we can add the complex frequency, etc.
 
-    
+
 class Component(CircuitItem):
     """
     Base class for all circuit components.
@@ -56,32 +56,45 @@ class Component(CircuitItem):
     def admittance(self, s: Optional[complex] = None) -> complex:
         """Calculate admittance (1/impedance) for AC analysis."""
         pass
-        
+
     @abc.abstractmethod
     def augments(self) -> None:
         pass
-    
+
     def linear(self) -> bool:
         return True
-    
+
     @abc.abstractmethod
     def stamp(self, ctx: Context):
         pass
-    
+
     @abc.abstractmethod
     def current(self, ctx: Context) -> complex:
         pass
-    
-    
+
+
 
 class CompoundComponent(Component):
     """
     A component that contains other components (e.g. subcircuit).
     """
-    
+
     def before_add(self,
                    circuit: 'Circuit'
                    ) -> Tuple[bool, bool]:
         #                     ^add  ^current
-        """Hook called before adding to circuit. Can be used to modify the circuit."""
+        """
+        Hook called before adding to circuit. Can be used to modify the circuit.
+
+        Returns:
+            tuple of:
+
+            should_add_component: whether the component itself should be added to the circuit
+            (e.g. for a BJT, we do NOT add the BJT component itself, but its internal resistors,
+            diodes and capacitors).
+
+            should_add_current: whether the component can return a current (e.g. for a BJT,
+            we want to be able to query the collector current from the BJT component itself,
+            not from its internal components).
+        """
         return False, True

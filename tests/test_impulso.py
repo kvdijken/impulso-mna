@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from impulso import *
 
@@ -9,6 +10,8 @@ def within(value, tobe, perc):
     ratio = value / tobe
     perc = perc / 100
     return (ratio > 1-perc) and (ratio < 1+perc)
+
+
 
 
 def print_currents_voltages(circuit, voltages, currents):
@@ -31,45 +34,30 @@ class Test_general:
 
     def test_3(self):
         # Test if a negative resistance is caught
-        try:
+        with pytest.raises(ValueError):
             R1 = Resistor(-1)
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_4(self):
         # Test if a negative capacitance is caught
-        try:
+        with pytest.raises(ValueError):
             C1 = Capacitor(-1)
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_5(self):
         # Test if a negative inductance is caught
-        try:
+        with pytest.raises(ValueError):
             I1 = Inductor(-1)
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_6(self):
         # Test if a coupling factor outside < 0 is caught
-        try:
-            L1 = Inductor(1e-3)
-            L2 = Inductor(1e-3)
+        L1 = Inductor(1e-3)
+        L2 = Inductor(1e-3)
+        with pytest.raises(ValueError):
             K1 = MutualInductance(L1, L2, -1)
-            assert(False)
-        except (ValueError, AssertionError) as e:
-            pass
         # Test if a coupling factor outside > 1 is caught
-        try:
+        with pytest.raises(ValueError):
             L1 = Inductor(1e-3)
             L2 = Inductor(1e-3)
             K1 = MutualInductance(L1, L2, +2)
-            assert(False)
-        except (ValueError, AssertionError) as e:
-            pass
 
 
 class Test_Circuit:
@@ -77,12 +65,8 @@ class Test_Circuit:
     def test_1(self):
         # Test if a circuit with no components can be simulated
         circuit = Circuit()
-        try:
-            result = solve_dc(circuit,0)
-            assert(False)
-        except:
-            pass
-        assert(True)
+        with pytest.raises(TopologyError):
+            result = solve_dc(circuit)
 
     def test_2(self):
         circuit = Circuit()
@@ -92,12 +76,8 @@ class Test_Circuit:
         circuit.add(V1,[0, 1])
         circuit.add(R1,[1, 0])
         circuit.add(R2,[2, 3])
-        try:
+        with pytest.raises(np.linalg.LinAlgError):
             result = solve_dc(circuit)
-            assert(False)
-        except:
-            pass
-        assert(True)
 
     def test_3(self):
         # Loose end resistor, other end connected to ground
@@ -115,14 +95,11 @@ class Test_Circuit:
         assert(np.abs(IR2) < 1e-6)
 
     def test_4(self):
-        # test if adding component with illegal node slist is caught
+        # test if adding component with illegal nodes list is caught
         circuit = Circuit()
         V1 = DCVoltageSource(1)
-        try:
+        with pytest.raises(TypeError):
             circuit.add(V1, 1) # should be a list of nodes, not a single node
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_5(self):
         # test if adding a component with a duplicate ID is caught
@@ -130,20 +107,14 @@ class Test_Circuit:
         V1 = DCVoltageSource(1, id='V1')
         V2 = DCVoltageSource(1, id='V1') # duplicate ID
         circuit.add(V1, [0, 1])
-        try:
+        with pytest.raises(TopologyError):
             circuit.add(V2, [1, 2])
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_6(self):
         # test if adding a component that is not an instance of Component is caught
         circuit = Circuit()
-        try:
+        with pytest.raises(TypeError):
             circuit.add("not a component", [0, 1])
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_7(self):
         # test if a circuit without a component connected to ground is caught
@@ -152,11 +123,8 @@ class Test_Circuit:
         R1 = Resistor(1e3)
         circuit.add(V1, [3, 1])
         circuit.add(R1, [1, 2])
-        try:
+        with pytest.raises(TopologyError):
             circuit.validate()
-            assert(False)
-        except AssertionError:
-            assert(True)
 
     def test_8(self):
         # test if a circuit with a component connected to ground is valid
@@ -165,22 +133,46 @@ class Test_Circuit:
         R1 = Resistor(1e3)
         circuit.add(V1, [0, 1])
         circuit.add(R1, [1, 2])
-        try:
-            circuit.validate()
-            assert(True)
-        except AssertionError:
-            assert(False)
+        circuit.validate()
 
     def test_10(self):
         # test if we can add a component with only one node
         circuit = Circuit()
         V1 = DCVoltageSource(1)
         circuit.add(V1, [0, 1]) # should be fine
-        try:
-            circuit.add(V1, [0]) # should raise an error
-            assert(False)
-        except AssertionError:
-            assert(True)
+
+        V2 = DCVoltageSource(1)
+        with pytest.raises(ValueError):
+            circuit.add(V2, [0]) # should raise an error
+
+    def test_11(self):
+        # Test if a CCVS with illegal controlling component is caught
+        circuit = Circuit()
+        CCVS1 = CCVS(rm=2, id='CCVS1')
+        circuit.add(CCVS1, [0, 1])
+
+        with pytest.raises(TypeError):
+            CCVS1.connect("not a component")
+
+        with pytest.raises(TypeError):
+            CCVS1.connect(CCVS1) # should not be able to connect to itself
+
+        R1 = Resistor(1e3, id='R1')
+        circuit.add(R1, [1, 0])
+        CCVS1.connect(R1) # Should connect to a resistor
+
+        C1 = Capacitor(1e-6, id='C1')
+        circuit.add(C1, [1, 0])
+        CCVS1.connect(C1) # Should connect to a resistor
+
+        V1 = DCVoltageSource(1, id='V1')
+        circuit.add(V1, [1, 0])
+        CCVS1.connect(V1) # Should connect to a resistor
+
+        L1 = Inductor(1e-3, id='L1')
+        with pytest.raises(TypeError):
+            CCVS1.connect(L1) # should not be able to connect to an inductor
+
 
 class Test_DC:
 
@@ -822,12 +814,8 @@ class Test_AC:
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
-        try:
+        with pytest.raises(TopologyError):
             voltages, currents = solve_ac(circuit,freq=1e3)
-            assert False, 'Expected an exception for a circuit without AC source in an AC simulation'
-        except Exception as e:
-            print('AC_test_11, expected exception:', e)
-            assert True
 
     def test_4(self):
         # Test a diode in AC simulation
@@ -897,7 +885,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_AC().test_4()
+Test_Circuit().test_5()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

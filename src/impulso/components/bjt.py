@@ -47,7 +47,6 @@ class Rout(Component):
             ic = -self.npn.v0c.current(ctx)
 
             # calculate rout
-    #        g = ic / self.npn.Va
             g = max(ic, 1e-12) / self.npn.Va
 
         # stamp

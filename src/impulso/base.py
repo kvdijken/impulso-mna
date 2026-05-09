@@ -5,3 +5,7 @@ class Analysis(Enum):
     AC = 2
     TRANSIENT = 3
 
+class TopologyError(Exception):
+    pass
+
+

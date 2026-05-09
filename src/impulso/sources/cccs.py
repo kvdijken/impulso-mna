@@ -10,23 +10,23 @@ from ..components.capacitor import Capacitor
 
 class CCCS(PowerSource):
     # Current Controlled Current Source
-    
+
     def __init__(self,
                  A: float,
                  id: Optional[str] = None):
         self.A = A
-        super().__init__(id)
+        super().__init__(id=id)
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
-    
+
     def connect(self, component: Component):
         assert(isinstance(component, (Resistor, Capacitor, DCVoltageSource)))
         self.component = component
 
     def augments(self):
         return False
-    
+
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self) # indices for this CCCS
         control = self.component # controlling component
@@ -52,7 +52,7 @@ class CCCS(PowerSource):
                     ctx.Y[i,q] += self.A * Ypq
                 if j is not None:
                     ctx.Y[j,q] -= self.A * Ypq
-    
+
     def current(self, ctx: Context) -> complex:
-        return self.A * self.component.current(ctx) 
+        return self.A * self.component.current(ctx)
 

@@ -1,4 +1,5 @@
 from .acdc import Solver_ACDC, solve_ac, solve_dc
+from .base import TopologyError, Analysis
 from .circuit import Circuit
 from .components.bjt import BJT, NPN, PNP
 from .components.capacitor import Capacitor

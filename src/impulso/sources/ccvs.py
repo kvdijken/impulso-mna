@@ -10,18 +10,28 @@ from .dcvoltagesource import DCVoltageSource
 
 class CCVS(PowerSource):
     # Current Controlled Voltage Source
-    
+
     def __init__(self,
                  rm: float, # transresistance gain in Ohms (V/A)
                  id: Optional[str] = None):
         self.rm = rm
-        super().__init__(id)
+        super().__init__(id=id)
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
-    
+
     def connect(self, component: Component):
-#        assert(isinstance(component, (Resistor,Capacitor,DCVoltageSource)))
+        # Test the component is valid for connection
+        if not isinstance(component, (Resistor,Capacitor,DCVoltageSource)):
+            raise TypeError(f"CCVS can only be connected to a Resistor, Capacitor, or DCVoltageSource, got {type(component)}")
+        # Note that it is still possible to connect to a component that is not
+        # in the circuit, but this will be caught during stamping, with a more
+        # ugly error message. We could also choose to catch this here, but it
+        # would require passing the circuit object to the CCVS, which seems less clean.
+        # Or upon adding a component to the circuit, we could notify
+        # the component that it has been added to the circuit, and then the CCVS can check if the
+        # component it is connected to has been added to the circuit. But this seems
+        # like a lot of extra complexity for a check that will be caught during stamping anyway.
         self.component = component
 
     def voltage(self,
@@ -32,7 +42,7 @@ class CCVS(PowerSource):
 
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)
@@ -57,9 +67,9 @@ class CCVS(PowerSource):
             ctx.Y[augm, augm_vs] -= self.rm
 
 
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]
-    
+
 

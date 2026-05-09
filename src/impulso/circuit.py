@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Type, Any
 
+from .base import TopologyError
 from .sources.source import *
 from .components.inductor import MutualInductance
 
@@ -38,19 +39,23 @@ class Circuit:
 
         def check():
             """ Perform checks on the component and nodes before adding to the circuit. """
-            assert(isinstance(component, Component)), f"Expected component to be an instance of Component, got {type(component)}"
+            if not isinstance(component, Component):
+                raise TypeError(f"Expected component to be an instance of Component, got {type(component)}")
 
-            assert (isinstance(nodes, list)), f"Expected nodes to be a list, got {type(nodes)}"
+            if not (isinstance(nodes, list)):
+                raise TypeError(f"Expected nodes to be a list, got {type(nodes)}")
 
             assert(not isinstance(component, MutualInductance))
 
             # Duplicate ID check
-            assert(self.component.get(component.id) is None), f"Component ID {component.id} already exists in the circuit."
+            if self.component.get(component.id) is not None:
+                raise TopologyError(f"Component ID {component.id} already exists in the circuit.")
 
             # Node connection check, at least 2 nodes
-            assert(len(nodes) >= 2), f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}"
+            if len(nodes) < 2:
+                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
 
-            
+
         try:
             do_add, current = component.before_add(self, nodes)
         except AttributeError:
@@ -91,6 +96,9 @@ class Circuit:
         return all
 
     def validate(self):
-        assert self.ground_node in self.all_nodes(), f"Ground node {self.ground_node} is not connected to any component in the circuit."
+        if not self.ground_node in self.all_nodes():
+            raise TopologyError(f"Ground node {self.ground_node} is not connected to any component in the circuit.")
+        if len(self.component) == 0:
+            raise TopologyError("Circuit must contain at least one component.")
 
 
