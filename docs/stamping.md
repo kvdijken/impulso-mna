@@ -377,6 +377,114 @@ $$
 
 ## CCVS
 
+### Measuring current through a resistor or capacitor
+
+The voltage between nodes $i$ and $j$ is controlled by the current $i_c$ through the component $c$ between nodes $p$ and $q$. The gain factor is $R_m$.
+
+$\begin{align}
+v_j-v_i &= R_m \cdot i_c \\
+&= R_m \cdot (v_q-v_p) \cdot G_{pq}
+\end{align}$
+
+So the equation to be stamped is:
+$
+\begin{align}
+v_j-v_i-G_{pq}R_mv_q+G_{pq}R_mv_p=0
+\end{align}
+$
+
+$$
+\left[
+\begin{array}{c | c c c c c : c}
+\; & j & \; & i & p & q & I_{V_{cc}} \\
+\hline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots  \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   \hdashline
+   V_{cc} & +1 & \cdots & -1 & +G_{pq}R_m & -G_{pq}R_m & 0 \\
+   \end{array}
+\right]
+\cdot
+\left[
+\begin{array}{c}
+   vv_1 \\
+   v_2 \\
+   \vdots \\
+   v_n \\
+   \hdashline
+   I_{v_{source}}
+\end{array}
+\right] =
+\left[
+\begin{array}{c}
+   II_1 \\
+   I_2 \\
+   \vdots  \\
+   I_n \\
+   \hdashline
+   0
+   \end{array}
+\right]
+$$
+
+$G_{pq}R_m$ is dimensionless.
+
+>[!mistake]
+>CCVS current I<sub>Vcc</sub> flows from i to j, so **enters** j, so coefficient should be -1, not +1. Similar for i.
+>
+>So: flip signs for [i,I<sub>Vcc</sub>] and [j,I<sub>Vcc</sub>].
+
+
+### Measuring current through a zero volts voltage source
+
+With a zero volt voltage source the process is as follows. The zero volt voltage source $V_0$ is connected between nodes $p$ and $q$. The node equation is $V_q-V_p=V_0=0$.
+
+The current controlled voltage $V_{cc}=R_m \cdot I_{V_0}$, where $I_{V_0}$ is the controlling current. The voltage $V_{cc}$ is between nodes $i$ and $j$, so $V_{cc} = V_j-V_i$, which makes the matrix equation $V_j-V_i-R_m \cdot I_{V_0}=0$.
+
+$$
+\left[
+\begin{array}{c | c c c c c :c c}
+\; & j & \; & i & p & q & I_{V_0} & I_{V_{cc}}\\
+\hline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & -1 & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & +1 & \cdots \\
+   \hdashline
+   V_0 & \cdots & \cdots & \cdots & -1 & +1 & \cdots & \cdots \\
+   V_{cc} & +1 & \cdots & -1 & \cdots & \cdots & -R_m & \cdots \\
+   \end{array}
+\right] \cdot
+\left[
+\begin{array}{c}
+   vv_j \\
+   \vdots \\
+   v_i \\
+   v_p \\
+   v_q \\
+   \hdashline
+   I_{V_{0}} \\
+   I_{V_{cc}}
+   \end{array}
+\right] =
+\left[
+\begin{array}{c}
+   00 \\
+   0 \\
+   0 \\
+   0 \\
+   0 \\
+   \hdashline
+   0 \\
+   0
+   \end{array}
+\right]$$
+
+
 ## VCVS
 
 ## CCCS
