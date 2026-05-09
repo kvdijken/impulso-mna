@@ -17,8 +17,8 @@ collector = 2
 
 def circuit(ib:float, vce: float) -> Circuit:
     npn = NPN(id='Q1')
-    is_b = DCCurrentSource(ib, id='Ib')
-    vs_ce = DCVoltageSource(vce,id='Vce')
+    is_b = DCCurrentSource(current=ib, id='Ib')
+    vs_ce = DCVoltageSource(voltage=vce, id='Vce')
 
     c = Circuit(ground_node=GROUND)
     c.add(npn, [emitter, base, collector])

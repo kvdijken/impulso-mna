@@ -9,9 +9,9 @@ from impulso import *
 plt.rcParams['axes.xmargin'] = 0
 
 
-V1 = SinusoidalVoltageSource(1,1,0,id='V1')
-R1 = Resistor(1000, id='R1')
-C1 = Capacitor(1e-3,id='C1',initial_voltage=-2)
+V1 = SinusoidalVoltageSource(amplitude=1, frequency=1, phase=0, id='V1')
+R1 = Resistor(resistance=1000, id='R1')
+C1 = Capacitor(capacitance=1e-3, id='C1', initial_voltage=-2)
 
 circuit = Circuit()
 circuit.add(V1,[0,1])

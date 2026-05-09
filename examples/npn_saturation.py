@@ -8,13 +8,13 @@ plt.rcParams['axes.xmargin'] = 0
 
 
 Q1 = NPN(id='Q1')
-R1 = Resistor(9000, id='R1')
-R2 = Resistor(1000, id='R2')
-Rc = Resistor(3000, id='Rc')
-Re = Resistor(100, id = 'Re')
-C1 = Capacitor(1e-6, id='C1')
-Vcc = DCVoltageSource(10, id='Vcc')
-Vin = SinusoidalVoltageSource(.1, 1000, id='Vin')
+R1 = Resistor(resistance=9000, id='R1')
+R2 = Resistor(resistance=1000, id='R2')
+Rc = Resistor(resistance=3000, id='Rc')
+Re = Resistor(resistance=100, id = 'Re')
+C1 = Capacitor(capacitance=1e-6, id='C1')
+Vcc = DCVoltageSource(voltage=10, id='Vcc')
+Vin = SinusoidalVoltageSource(amplitude=.1, frequency=1000, id='Vin')
 
 circuit = Circuit()
 circuit.add(Q1, [5,3,4])

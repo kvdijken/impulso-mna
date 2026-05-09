@@ -5,9 +5,9 @@ from impulso import Circuit, Diode, Resistor, Capacitor, SinusoidalVoltageSource
 
 plt.rcParams['axes.xmargin'] = 0
 
-V1 = SinusoidalVoltageSource(1, 3, phase=np.pi/2, id='V1')
-R1 = Resistor(1000, id='R1')
-C1 = Capacitor(1e-2, id='C1')
+V1 = SinusoidalVoltageSource(amplitude=1, frequency=3, phase=np.pi/2, id='V1')
+R1 = Resistor(resistance=1000, id='R1')
+C1 = Capacitor(capacitance=1e-2, id='C1')
 D1 = Diode(id='D1', n=1.752, Is=2.52e-9)
 
 circuit = Circuit()

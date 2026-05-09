@@ -12,8 +12,8 @@ plt.rcParams['axes.xmargin'] = 0
 l1 = 1e-3
 c1 = 1e-6
 
-L1 = Inductor(l1, id='L1', initial_current=1e-3)
-C1 = Capacitor(c1, id='C1')
+L1 = Inductor(inductance=l1, id='L1', initial_current=1e-3)
+C1 = Capacitor(capacitance=c1, id='C1')
 
 circuit = Circuit()
 circuit.add(C1, [1, 0])

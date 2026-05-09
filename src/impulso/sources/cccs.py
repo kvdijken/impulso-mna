@@ -12,6 +12,7 @@ class CCCS(PowerSource):
     # Current Controlled Current Source
 
     def __init__(self,
+                 *,
                  A: float,
                  id: Optional[str] = None):
         self.A = A

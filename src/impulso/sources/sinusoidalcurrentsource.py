@@ -15,7 +15,7 @@ class SinusoidalCurrentSource(PowerSource):
     """
 
     def __init__(
-        self,
+        self, *,
         amplitude: float,
         phase: float = 0, # in radians
         dc: float = 0.0,          # DC offset
@@ -35,19 +35,19 @@ class SinusoidalCurrentSource(PowerSource):
 
     def set_amplitude(self, current: float):
         self.amplitude = current
-        
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
-    
+
     def current_at_time(self, t) -> float:
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
     def augments(self):
         return False
-    
+
     def stamp(self, ctx: Context):
         ac_analysis = ctx.analysis_type == Analysis.AC
-        
+
         if ac_analysis:
             if self.ac_source:
                 # In AC analysis, we treat the sinusoidal current source as a phasor with magnitude equal to the amplitude and phase equal to the specified phase.
@@ -61,15 +61,15 @@ class SinusoidalCurrentSource(PowerSource):
                 i = 0
             else:
                 i = self.current_at_time(ctx.t)
-                
+
         p, q = ctx.idx_query_fn(self)
         i = self.amplitude
         if p is not None:
             ctx.z[p] -= i # amps
         if q is not None:
             ctx.z[q] += i # amps
-    
+
     def current(self, ctx: Context) -> complex:
         return self.amplitude
-    
+
 

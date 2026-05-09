@@ -14,7 +14,7 @@ V1 = PulseVoltageSource(v1=0,
                         pulse_width=0.5,
                         period=1,
                         id='V1')
-R1 = Resistor(1000, id='R1')
+R1 = Resistor(resistance=1000, id='R1')
 
 circuit = Circuit()
 circuit.add(V1,[0,1])

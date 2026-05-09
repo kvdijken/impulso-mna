@@ -14,7 +14,7 @@ class DCCurrentSource(PowerSource):
     """
 
     def __init__(
-        self,
+        self, *,
         current: float,
         id: Optional[str] = None,
     ):

@@ -37,12 +37,12 @@ Vdc = PulseVoltageSource(id='Vdc',
                          fall_time=tr,
                          pulse_width=pulse_period/2,
                          period=pulse_period)
-Vac = SinusoidalVoltageSource(vac, frequency=f, id='Vac')
-R1 = Resistor(rdc, id='R1')
-R2 = Resistor(rdc, id='R2')
-R3 = Resistor(rl, id='R3')
-C1 = Capacitor(c1,  id='C1', initial_voltage=0)
-C2 = Capacitor(c2, id='C2', initial_voltage=0)
+Vac = SinusoidalVoltageSource(amplitude=vac, frequency=f, id='Vac')
+R1 = Resistor(resistance=rdc, id='R1')
+R2 = Resistor(resistance=rdc, id='R2')
+R3 = Resistor(resistance=rl, id='R3')
+C1 = Capacitor(capacitance=c1,  id='C1', initial_voltage=0)
+C2 = Capacitor(capacitance=c2, id='C2', initial_voltage=0)
 D1 = Diode(id='D1') # switching diode
 D2 = Diode(id='D2') # clamp diode
 D3 = Diode(id='D3') # clamp diode

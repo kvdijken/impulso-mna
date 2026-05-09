@@ -6,7 +6,7 @@ from impulso import Circuit, Diode, Resistor, SinusoidalVoltageSource, Opamp, so
 
 plt.rcParams['axes.xmargin'] = 0
 
-R1 = Resistor(1e3,id='R1')
+R1 = Resistor(resistance=1e3,id='R1')
 V1 = SinusoidalVoltageSource(amplitude=1, frequency=1000, id='V1')
 OA1 = Opamp(id='OA1')
 D1 = Diode(id='D1')
@@ -25,7 +25,7 @@ circuit.add(R1, [neg, gnd])
 stop = 0.005
 t = np.linspace(0, stop, 1000)
 t,v,c, = solve_transient(circuit,
-                         t_stop=stop, 
+                         t_stop=stop,
                          dt=stop/1000)
 
 plt.plot(t, v[pos], label="Input voltage")

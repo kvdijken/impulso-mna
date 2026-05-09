@@ -9,7 +9,7 @@ class DiracDeltaVoltageSource(PowerSource):
     '''
     '''
 
-    def __init__(self,
+    def __init__(self, *,
                  dt: float,
                  delay: float,
                  voltage: float = 1.0,
@@ -22,7 +22,7 @@ class DiracDeltaVoltageSource(PowerSource):
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf  # ideal voltage source has infinite admittance (zero impedance)
-    
+
     def voltage_at_time(self, t) -> float:
         if self.before and t >= self.delay:
             self.before = False
@@ -32,10 +32,10 @@ class DiracDeltaVoltageSource(PowerSource):
 
     def reset(self):
         self.before = True
-        
+
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
         assert ctx.analysis_type == Analysis.TRANSIENT, "DiracVoltageSource is only valid for transient analysis"
         v = self.voltage_at_time(ctx.t)
@@ -48,7 +48,7 @@ class DiracDeltaVoltageSource(PowerSource):
             ctx.Y[j, augm] -= 1
             ctx.Y[augm, j] += 1
         ctx.z[augm] = v # volts
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]

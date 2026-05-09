@@ -20,7 +20,7 @@ class VCVS(PowerSource):
     __in_neg = 2
     __in_pos = 3
 
-    def __init__(self,
+    def __init__(self, *,
                  A: float,
                  id: Optional[str] = None):
         self.A = A

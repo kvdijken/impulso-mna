@@ -6,9 +6,9 @@ from impulso import *
 
 plt.rcParams['axes.xmargin'] = 0
 
-V1 = PulseVoltageSource(0,1,4.5,0.2,0.2,0.5,1,id='V1')
-R1 = Resistor(50, id='R1')
-C1 = Capacitor(1e-3,id='C1',initial_voltage=-0.5)
+V1 = PulseVoltageSource(v1=0, v2=1, delay=4.5, rise_time=0.2, fall_time=0.2, pulse_width=0.5, period=1, id='V1')
+R1 = Resistor(resistance=50, id='R1')
+C1 = Capacitor(capacitance=1e-3, id='C1', initial_voltage=-0.5)
 
 circuit = Circuit()
 circuit.add(V1,[0,1])

@@ -7,9 +7,9 @@ from impulso import Circuit, Capacitor, Resistor, SinusoidalVoltageSource, ac_sw
 plt.rcParams['axes.xmargin'] = 0
 
 
-Vin = SinusoidalVoltageSource(1, id='Vin', ac_source=True)
-C1 = Capacitor(1e-6, id='C1')
-R1 = Resistor(1e3, id='R1')
+Vin = SinusoidalVoltageSource(amplitude=1, id='Vin', ac_source=True)
+C1 = Capacitor(capacitance=1e-6, id='C1')
+R1 = Resistor(resistance=1e3, id='R1')
 
 circuit = Circuit(ground_node=0)
 circuit.add(Vin, [0, 1])

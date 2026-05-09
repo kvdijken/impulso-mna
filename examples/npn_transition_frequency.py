@@ -7,13 +7,13 @@ from impulso import Circuit, Resistor, Capacitor, NPN, DCVoltageSource, Sinusoid
 plt.rcParams['axes.xmargin'] = 0
 
 
-Vcc = DCVoltageSource(9, id='Vcc')
-Vin = SinusoidalVoltageSource(.1, ac_source=True, id='Vin')
-C1 = Capacitor(1e-6, id='C1')
-R1 = Resistor(8000, id='R1')
-R2 = Resistor(1000, id='R2')
-Rc = Resistor(3000, id='Rc')
-Re = Resistor(1000, id='Re')
+Vcc = DCVoltageSource(voltage=9, id='Vcc')
+Vin = SinusoidalVoltageSource(amplitude=.1, ac_source=True, id='Vin')
+C1 = Capacitor(capacitance=1e-6, id='C1')
+R1 = Resistor(resistance=8000, id='R1')
+R2 = Resistor(resistance=1000, id='R2')
+Rc = Resistor(resistance=3000, id='Rc')
+Re = Resistor(resistance=1000, id='Re')
 Q1 = NPN(id='Q1')
 
 circuit = Circuit(ground_node='GND')

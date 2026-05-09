@@ -15,7 +15,7 @@ class VCCS(PowerSource):
     Control voltage is defined as V(vnodes[1]) - V(vnodes[0]).
     Current = gm * control_voltage
     """
-    def __init__(self,
+    def __init__(self, *,
                  gm: float,
                  id: Optional[str] = None):
         """

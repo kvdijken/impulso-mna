@@ -6,7 +6,7 @@ from ..components.capacitor import Capacitor
 class PowerSource(Component):
     """Base class for power sources (voltage and current)."""
 
-    def __init__(self,
+    def __init__(self, *,
                  ac_source: bool = False,
                  id: Optional[str] = None):
         self.id = id or uuid.uuid4().hex
@@ -21,6 +21,7 @@ class VoltageSource(PowerSource):
 
     def __init__(
         self,
+        *,
         voltage: float,
         id: Optional[str] = None,
     ):

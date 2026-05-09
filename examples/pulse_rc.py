@@ -15,8 +15,8 @@ V1 = PulseVoltageSource(v1=0,
                         period=1,
                         n_periods=1,
                         id='V1')
-R1 = Resistor(50, id='R1')
-C1 = Capacitor(1e-3,id='C1',initial_voltage=-0.5)
+R1 = Resistor(resistance=50, id='R1')
+C1 = Capacitor(capacitance=1e-3,id='C1',initial_voltage=-0.5)
 
 circuit = Circuit()
 circuit.add(V1,[0,1])

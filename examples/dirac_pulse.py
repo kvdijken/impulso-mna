@@ -13,8 +13,8 @@ c1 = 1
 
 circuit = Circuit()
 V1 = DiracDeltaVoltageSource(dt=dt, delay=1, voltage=v1, id='V1')
-R1 = Resistor(r1, id='R1')
-C1 = Capacitor(c1, id='C1')
+R1 = Resistor(resistance=r1, id='R1')
+C1 = Capacitor(capacitance=c1, id='C1')
 circuit.add(V1,[0,1])
 circuit.add(R1,[1, 2])
 circuit.add(C1,[2, 0])

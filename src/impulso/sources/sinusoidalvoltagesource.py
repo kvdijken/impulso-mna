@@ -10,7 +10,7 @@ from ..components.component import Context
 class SinusoidalVoltageSource(PowerSource):
     '''
     '''
-    def __init__(self,
+    def __init__(self, *,
                  amplitude: float,  # amplitude is half Vpp, not used in AC simulation
                  frequency: float = None,
                  phase: float = 0.0,        # in radians

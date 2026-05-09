@@ -132,15 +132,15 @@ class BJT(CompoundComponent):
         # All terminal zero volt voltage source point outwards to measure currents
 
         # internal zero volt voltage source to measure base current
-        self.v0b = DCVoltageSource(0, id=f"{self.id}_V0b")
+        self.v0b = DCVoltageSource(voltage=0, id=f"{self.id}_V0b")
         circuit.add(self.v0b, [self._b0,b])
 
         # internal zero volt voltage source to measure emitter current
-        self.v0e = DCVoltageSource(0, id=f"{self.id}_V0e")
+        self.v0e = DCVoltageSource(voltage=0, id=f"{self.id}_V0e")
         circuit.add(self.v0e, [self._e0,e])
 
         # internal zero volt voltage source to measure base-emitter diode current
-        self.v0e2 = DCVoltageSource(0, id=f"{self.id}_V0e2")
+        self.v0e2 = DCVoltageSource(voltage=0, id=f"{self.id}_V0e2")
         circuit.add(self.v0e2, [self._e02,self._e0])
 
         # base-emitter diode
@@ -158,11 +158,11 @@ class BJT(CompoundComponent):
             circuit.add(self.bc_diode, [self._c02,self._b0])
 
         # internal zero volt voltage source to measure base-collector diode current
-        self.v0c2 = DCVoltageSource(0, id=f"{self.id}_V0c2")
+        self.v0c2 = DCVoltageSource(voltage=0, id=f"{self.id}_V0c2")
         circuit.add(self.v0c2, [self._c02,self._c0])
 
         # internal zero volt voltage source to measure collector current
-        self.v0c = DCVoltageSource(0, id=f"{self.id}_V0c")
+        self.v0c = DCVoltageSource(voltage=0, id=f"{self.id}_V0c")
         circuit.add(self.v0c, [self._c0,c])
 
         # forward current amplification

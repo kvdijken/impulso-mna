@@ -7,8 +7,8 @@ plt.rcParams['axes.xmargin'] = 0
 
 @np.vectorize
 def current(v):
-    V1 = DCVoltageSource(v, id='V1')
-    R1 = Resistor(0.568, id='R1')
+    V1 = DCVoltageSource(voltage=v, id='V1')
+    R1 = Resistor(resistance=0.568, id='R1')
     D1 = Diode(id='D1', n=1.752, Is=2.52e-9)
     circuit = Circuit()
     circuit.add(V1, [0, 1])

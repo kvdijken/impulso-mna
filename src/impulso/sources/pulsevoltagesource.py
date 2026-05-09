@@ -8,7 +8,7 @@ from ..base import  Analysis
 class PulseVoltageSource(PowerSource):
     '''
     '''
-    def __init__(self,
+    def __init__(self, *,
                  v1: float,          # low voltage level
                  v2: float,          # high voltage level
                  delay: float,       # signal train starts after delay
@@ -30,7 +30,7 @@ class PulseVoltageSource(PowerSource):
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf  # ideal voltage source has infinite admittance (zero impedance)
-    
+
     def voltage_at_time(self, t) -> float:
         # This is a simplified implementation and does
         # not handle all edge cases (e.g., rise/fall
@@ -44,7 +44,7 @@ class PulseVoltageSource(PowerSource):
         if self.n_periods is not None:
             if t >= (self.delay + self.n_periods * self.period):
                 return self.v1
-        
+
         time_in_period = (t - self.delay) % self.period
         if time_in_period < self.rise_time:
             # Still in rise-time
@@ -57,10 +57,10 @@ class PulseVoltageSource(PowerSource):
             return self.v2 - (self.v2 - self.v1) * ((time_in_period - self.rise_time - self.pulse_width) / self.fall_time)
         else:
             return self.v1
-        
+
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
         assert ctx.analysis_type == Analysis.TRANSIENT, "PulseVoltageSource is only valid for transient analysis"
         v = self.voltage_at_time(ctx.t)
@@ -73,7 +73,7 @@ class PulseVoltageSource(PowerSource):
             ctx.Y[j, augm] -= 1
             ctx.Y[augm, j] += 1
         ctx.z[augm] = v # volts
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]

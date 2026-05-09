@@ -70,7 +70,7 @@ class Test_Circuit:
 
     def test_2(self):
         circuit = Circuit()
-        V1 = DCVoltageSource(1)
+        V1 = DCVoltageSource(voltage=1)
         R1 = Resistor(1e3)
         R2 = Resistor(1e3)
         circuit.add(V1,[0, 1])
@@ -82,9 +82,9 @@ class Test_Circuit:
     def test_3(self):
         # Loose end resistor, other end connected to ground
         circuit = Circuit()
-        V1 = DCVoltageSource(1)
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1)
+        R1 = Resistor(resistance=1e3)
+        R2 = Resistor(resistance=1e3)
         circuit.add(V1,[0, 1])
         circuit.add(R1,[1, 0])
         circuit.add(R2,[2, 0])
@@ -97,15 +97,15 @@ class Test_Circuit:
     def test_4(self):
         # test if adding component with illegal nodes list is caught
         circuit = Circuit()
-        V1 = DCVoltageSource(1)
+        V1 = DCVoltageSource(voltage=1)
         with pytest.raises(TypeError):
             circuit.add(V1, 1) # should be a list of nodes, not a single node
 
     def test_5(self):
         # test if adding a component with a duplicate ID is caught
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(1, id='V1') # duplicate ID
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=1, id='V1') # duplicate ID
         circuit.add(V1, [0, 1])
         with pytest.raises(TopologyError):
             circuit.add(V2, [1, 2])
@@ -119,8 +119,8 @@ class Test_Circuit:
     def test_7(self):
         # test if a circuit without a component connected to ground is caught
         circuit = Circuit(ground_node=0)
-        V1 = DCVoltageSource(1)
-        R1 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1)
+        R1 = Resistor(resistance=1e3)
         circuit.add(V1, [3, 1])
         circuit.add(R1, [1, 2])
         with pytest.raises(TopologyError):
@@ -129,8 +129,8 @@ class Test_Circuit:
     def test_8(self):
         # test if a circuit with a component connected to ground is valid
         circuit = Circuit(ground_node=0)
-        V1 = DCVoltageSource(1)
-        R1 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1)
+        R1 = Resistor(resistance=1e3)
         circuit.add(V1, [0, 1])
         circuit.add(R1, [1, 2])
         circuit.validate()
@@ -138,10 +138,10 @@ class Test_Circuit:
     def test_10(self):
         # test if we can add a component with only one node
         circuit = Circuit()
-        V1 = DCVoltageSource(1)
+        V1 = DCVoltageSource(voltage=1)
         circuit.add(V1, [0, 1]) # should be fine
 
-        V2 = DCVoltageSource(1)
+        V2 = DCVoltageSource(voltage=   1)
         with pytest.raises(ValueError):
             circuit.add(V2, [0]) # should raise an error
 
@@ -161,15 +161,15 @@ class Test_Circuit:
         circuit.add(R1, [1, 0])
         CCVS1.connect(R1) # Should connect to a resistor
 
-        C1 = Capacitor(1e-6, id='C1')
+        C1 = Capacitor(capacitance=1e-6, id='C1')
         circuit.add(C1, [1, 0])
         CCVS1.connect(C1) # Should connect to a resistor
 
-        V1 = DCVoltageSource(1, id='V1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
         circuit.add(V1, [1, 0])
         CCVS1.connect(V1) # Should connect to a resistor
 
-        L1 = Inductor(1e-3, id='L1')
+        L1 = Inductor(inductance=1e-3, id='L1')
         with pytest.raises(TypeError):
             CCVS1.connect(L1) # should not be able to connect to an inductor
 
@@ -180,8 +180,8 @@ class Test_DC:
         # 1 volt over a 1kOhm resistor, current should be 1mA
         # test positive direction of current
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
         result = solve_dc(circuit)
@@ -192,8 +192,8 @@ class Test_DC:
         # 1 volt over a 1kOhm resistor, current should be 1mA
         # test positive direction of current
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
         voltages, currents = solve_dc(circuit)
@@ -207,8 +207,8 @@ class Test_DC:
         # 1 volt over a 1kOhm resistor, current should be 1mA
         # test negative direction of current
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[0,1])
         result = solve_dc(circuit)
@@ -219,8 +219,8 @@ class Test_DC:
         # 1 volt over a 1kOhm resistor
         # Test node 1 voltage 1 volt
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
         result = solve_dc(circuit)
@@ -231,9 +231,9 @@ class Test_DC:
         # Two 1 volt voltage sources in series, over a 1kOhm resistor.
         # Should add up to two volts.
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(1, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=1, id='V2')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
@@ -245,9 +245,9 @@ class Test_DC:
         # Two 1 volt voltage sources in series, same sign but opposite direction over a 1kOhm resistor.
         # Should add up to zero volts.
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(1, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=1, id='V2')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(V2,[2,1])
         circuit.add(R1,[2,0])
@@ -259,9 +259,9 @@ class Test_DC:
         # Two 1 volt voltage sources in series, same direction but opposite sign over a 1kOhm resistor.
         # Should add up to zero volts.
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(-1, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=-1, id='V2')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
@@ -276,8 +276,8 @@ class Test_DC:
         # the current by using the component reference
         # instead of the component id.
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
         result = solve_dc(circuit)
@@ -287,12 +287,12 @@ class Test_DC:
 
     def test_8(self):
         # Test a VCVS
-        I1 = DCCurrentSource(1.7)
-        I2 = DCCurrentSource(0.5)
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
-        R4 = Resistor(1e3)
+        I1 = DCCurrentSource(current=1.7)
+        I2 = DCCurrentSource(current=0.5)
+        R1 = Resistor(resistance=1e3)
+        R2 = Resistor(resistance=1e3)
+        R3 = Resistor(resistance=1e3)
+        R4 = Resistor(resistance=1e3)
         VCVS1 = VCVS(A=2.5, id='VCVS1')
         circuit=Circuit()
         circuit.add(I1,[0,1])
@@ -311,12 +311,12 @@ class Test_DC:
 
     def test_9(self):
         # Test a CCVS with the controlling current through a resistor
-        I1 = DCCurrentSource(1,id='I1')
-        I2 = DCCurrentSource(3,id='I2')
-        R1 = Resistor(1e3,id='R1')
-        R2 = Resistor(1e3,id='R2')
-        R3 = Resistor(1e3,id='R3')
-        R4 = Resistor(1e3,id='R4')
+        I1 = DCCurrentSource(current=1, id='I1')
+        I2 = DCCurrentSource(current=3, id='I2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
+        R3 = Resistor(resistance=1e3, id='R3')
+        R4 = Resistor(resistance=1e3, id='R4')
         CCVS1 = CCVS(rm=2, id='CCVS1')
         circuit=Circuit()
         circuit.add(I1,[0,1])
@@ -334,14 +334,14 @@ class Test_DC:
 
     def test_10(self):
         # Test a CCVS with the controlling current through a zero volt voltage source
-        I1 = DCCurrentSource(1,id='I1')
-        I2 = DCCurrentSource(3,id='I2')
-        R1 = Resistor(1e3,id='R1')
-        R2 = Resistor(1e3,id='R2')
-        R3 = Resistor(1e3,id='R3')
-        R4 = Resistor(1e3,id='R4')
-        V1 = DCVoltageSource(0,id='V1')
-        CCVS1 = CCVS(rm=2,id='CCVS1')
+        I1 = DCCurrentSource(current=1, id='I1')
+        I2 = DCCurrentSource(current=3, id='I2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
+        R3 = Resistor(resistance=1e3, id='R3')
+        R4 = Resistor(resistance=1e3, id='R4')
+        V1 = DCVoltageSource(voltage=0, id='V1')
+        CCVS1 = CCVS(rm=2, id='CCVS1')
         circuit = Circuit()
         circuit.add(I1,[0,1])
         circuit.add(R1,[1,0])
@@ -360,13 +360,13 @@ class Test_DC:
 
     def test_11(self):
         # Test a CCCS with the controlling current through a resistor
-        I1 = DCCurrentSource(1,id='I1')
-        I2 = DCCurrentSource(3,id='I2')
-        R1 = Resistor(1e3,id='R1')
-        R2 = Resistor(1e3,id='R2')
-        R3 = Resistor(1e3,id='R3')
-        R4 = Resistor(1e3,id='R4')
-        V1 = DCVoltageSource(0, id='V1')
+        I1 = DCCurrentSource(current=1, id='I1')
+        I2 = DCCurrentSource(current=3, id='I2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
+        R3 = Resistor(resistance=1e3, id='R3')
+        R4 = Resistor(resistance=1e3, id='R4')
+        V1 = DCVoltageSource(voltage=0, id='V1')
         CCCS1 = CCCS(A=3, id='CCCS1')
         circuit = Circuit()
         circuit.add(I1,[0,1])
@@ -385,13 +385,13 @@ class Test_DC:
 
     def test_12(self):
         # Test a CCCS with the controlling current through a zero volt voltage source
-        I1 = DCCurrentSource(1,id='I1')
-        I2 = DCCurrentSource(3,id='I2')
-        R1 = Resistor(1e3,id='R1')
-        R2 = Resistor(1e3,id='R2')
-        R3 = Resistor(1e3,id='R3')
-        R4 = Resistor(1e3,id='R4')
-        V1 = DCVoltageSource(0, id='V1')
+        I1 = DCCurrentSource(current=1, id='I1')
+        I2 = DCCurrentSource(current=3, id='I2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
+        R3 = Resistor(resistance=1e3, id='R3')
+        R4 = Resistor(resistance=1e3, id='R4')
+        V1 = DCVoltageSource(voltage=0, id='V1')
         CCCS1 = CCCS(A=3, id='CCCS1')
         circuit = Circuit()
         circuit.add(I1,[0,1])
@@ -409,9 +409,9 @@ class Test_DC:
         assert(within(c12, -1.5, 0.1))
 
     def test_13(self):
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
-        V2 = DCVoltageSource(0, id='V2')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
+        V2 = DCVoltageSource(voltage=0, id='V2')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
@@ -426,9 +426,9 @@ class Test_DC:
         assert(within(iV2, 0.001, 0.1))
 
     def test_14(self):
-        I1 = DCCurrentSource(0.001, id='I1')
-        R1 = Resistor(1e3, id='R1')
-        V2 = DCVoltageSource(0, id='V2')
+        I1 = DCCurrentSource(current=0.001, id='I1')
+        R1 = Resistor(resistance=1e3, id='R1')
+        V2 = DCVoltageSource(voltage=0, id='V2')
         circuit = Circuit()
         circuit.add(I1,[0,1])
         circuit.add(R1,[1,2])
@@ -443,9 +443,9 @@ class Test_DC:
         assert(within(iV2, 0.001, 0.1))
 
     def test_15_1(self):
-        R1 = Resistor(1e3, id='R1')
-        V1 = DCVoltageSource(1, id='V1')
-        R2 = Resistor(1e3, id='R2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R2 = Resistor(resistance=1e3, id='R2')
         circuit = Circuit()
         circuit.add(R1,[0,1])
         circuit.add(V1,[1,2])
@@ -459,9 +459,9 @@ class Test_DC:
         assert(within(currents[V1], 0.0005, 0.1))
 
     def test_15_2(self):
-        R1 = Resistor(1e3, id='R1')
-        V1 = DCVoltageSource(1, id='V1')
-        R2 = Resistor(1e3, id='R2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R2 = Resistor(resistance=1e3, id='R2')
         circuit = Circuit()
         circuit.add(R1,[0,1])
         circuit.add(V1,[2,1])
@@ -475,9 +475,9 @@ class Test_DC:
         assert(within(currents[V1], 0.0005, 0.1))
 
     def test_16(self):
-        V1 = DCVoltageSource(1, id='V1')
-        I1 = DCCurrentSource(2, id='I1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        I1 = DCCurrentSource(current=2, id='I1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(I1,[2,1])
@@ -492,9 +492,9 @@ class Test_DC:
 
     def test_18(self):
         # Test current direction through a zero volts voltage source
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(0, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=0, id='V2')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
@@ -508,9 +508,9 @@ class Test_DC:
 
     def test_19(self):
         # Test current direction through a zero volts voltage source
-        V1 = DCVoltageSource(1, id='V1')
-        V2 = DCVoltageSource(0, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        V2 = DCVoltageSource(voltage=0, id='V2')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
@@ -524,10 +524,10 @@ class Test_DC:
 
     def test_20(self):
         # Opamp
-        V1 = DCVoltageSource(1, id='V1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
         OA1 = Opamp(id='OA1')
-        R1 = Resistor(1e3, id='R1')
-        R2 = Resistor(1e3, id='R2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
 
         pos = 1
         neg = 3
@@ -553,8 +553,8 @@ class Test_DC:
 
     def test_21(self):
         cccs1 = CCCS(A=2, id='CCCS1')
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
@@ -565,8 +565,8 @@ class Test_DC:
         assert(within(currents[cccs1], 0.002, 0.1))
 
     def test_22(self):
-        cs1 = DCCurrentSource(1, id='CS1')
-        v1 = DCVoltageSource(1, id='V1')
+        cs1 = DCCurrentSource(current=1, id='CS1')
+        v1 = DCVoltageSource(voltage=1, id='V1')
         circuit = Circuit()
         circuit.add(v1,[0,1])
         circuit.add(cs1,[1,0])
@@ -576,10 +576,10 @@ class Test_DC:
         assert(within(currents[v1], 1, 0.1))
 
     def tt_23(self):
-        vs_be = DCVoltageSource(0.6,id='Vbe')
-        vs_ce = DCVoltageSource(9,id='Vce')
+        vs_be = DCVoltageSource(voltage=0.6, id='Vbe')
+        vs_ce = DCVoltageSource(voltage=9, id='Vce')
         d1 = Diode(id='D1')
-        v0 = DCVoltageSource(0, id='V0')
+        v0 = DCVoltageSource(voltage=0, id='V0')
         cccs1 = CCCS(A=1, id='CCCS1')
 
         ground = 0
@@ -604,11 +604,11 @@ class Test_DC:
     def test_24(self):
         ''' test NPN in saturation '''
         Q1 = NPN(id='Q1')
-        R1 = Resistor(9000, id='R1')
-        R2 = Resistor(1000, id='R2')
-        Rc = Resistor(5000, id='Rc')
-        Re = Resistor(100, id = 'Re')
-        Vcc = DCVoltageSource(10, id='Vcc')
+        R1 = Resistor(resistance=9000, id='R1')
+        R2 = Resistor(resistance=1000, id='R2')
+        Rc = Resistor(resistance=5000, id='Rc')
+        Re = Resistor(resistance=100, id = 'Re')
+        Vcc = DCVoltageSource(voltage=10, id='Vcc')
 
         circuit = Circuit()
         circuit.add(Q1, [5,3,4])
@@ -625,9 +625,9 @@ class Test_DC:
     def test_25(self):
         # RL network with 1 volt DC source
         # Run with AC simulation
-        V1 = DCVoltageSource(1.0, id='V1')
-        R1 = Resistor(1000)
-        L1 = Inductor(1e-3)
+        V1 = DCVoltageSource(voltage=1.0, id='V1')
+        R1 = Resistor(resistance=1000)
+        L1 = Inductor(inductance=1e-3)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
@@ -645,9 +645,9 @@ class Test_DC:
     def test_26(self):
         # R and C in series with 1 volt DC source
 #        V1 = SinusoidalVoltageSource(amplitude=1.0, ac_source=True, id='V1')
-        V1 = DCVoltageSource(1.0, id='V1')
-        R1 = Resistor(1000)
-        C1 = Capacitor(1e-6)
+        V1 = DCVoltageSource(voltage=1.0, id='V1')
+        R1 = Resistor(resistance=1000)
+        C1 = Capacitor(capacitance=1e-6)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
@@ -667,9 +667,9 @@ class Test_DC:
 
     def test_27(self):
         # Is a zero volt voltage source equivalent to a short?
-        V1 = DCVoltageSource(1.0)
-        V2 = DCVoltageSource(0.0)
-        R1 = Resistor(1000)
+        V1 = DCVoltageSource(voltage=1.0)
+        V2 = DCVoltageSource(voltage=0.0)
+        R1 = Resistor(resistance=1000)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
@@ -681,8 +681,8 @@ class Test_DC:
 
     def test_28(self):
         # Test a wire with zero resistance, should be a short circuit
-        V1 = DCVoltageSource(1.0)
-        R1 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1.0)
+        R1 = Resistor(resistance=1e3)
         W1 = Wire(id='W1')
         circuit=Circuit()
         circuit.add(V1,[0,1])
@@ -697,8 +697,8 @@ class Test_DC:
 
     def test_29(self):
         # Test a wire with zero resistance, should be a short circuit
-        V1 = DCVoltageSource(1.0)
-        R1 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1.0)
+        R1 = Resistor(resistance=1e3)
         W1 = Wire(id='W1')
         circuit=Circuit()
         circuit.add(V1,[0,1])
@@ -714,11 +714,11 @@ class Test_DC:
 
     def test_30(self):
         # Test a VCCS
-        V1 = DCVoltageSource(1.0)
+        V1 = DCVoltageSource(voltage=1.0)
         VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
+        R1 = Resistor(resistance=1e3)
+        R2 = Resistor(resistance=1e3)
+        R3 = Resistor(resistance=1e3)
         circuit=Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
@@ -730,11 +730,11 @@ class Test_DC:
 
     def test_31(self):
         # Test a VCCS
-        V1 = DCVoltageSource(1.0)
+        V1 = DCVoltageSource(voltage=1.0)
         VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
+        R1 = Resistor(resistance=1e3)
+        R2 = Resistor(resistance=1e3)
+        R3 = Resistor(resistance=1e3)
         circuit=Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R2,[1,2])
@@ -746,11 +746,11 @@ class Test_DC:
 
     def test_32(self):
         # Test a VCCS
-        I1 = DCCurrentSource(1)
+        I1 = DCCurrentSource(current=1, id='I1')
         VCCS1 = VCCS(gm=2.5, id='VCCS1')
-        R1 = Resistor(1e3)
-        R2 = Resistor(1e3)
-        R3 = Resistor(1e3)
+        R1 = Resistor(resistance=1e3)
+        R2 = Resistor(resistance=1e3)
+        R3 = Resistor(resistance=1e3)
         circuit=Circuit()
         circuit.add(I1,[0,1])
         circuit.add(R1,[1,0])
@@ -767,8 +767,8 @@ class Test_DC:
     def test_33(self):
         # test if we can get the current through a component by using the component reference instead of the component id
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
         result = solve_dc(circuit)
@@ -784,7 +784,7 @@ class Test_AC:
         # Current through R1 should be 0
         V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, phase=0, id='V1')
         V2 = SinusoidalVoltageSource(amplitude=1, ac_source=True, phase=np.pi, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
@@ -798,7 +798,7 @@ class Test_AC:
         # Current through R1 should be 2mA
         V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, phase=0, id='V1')
         V2 = SinusoidalVoltageSource(amplitude=1, ac_source=True, phase=0, id='V2')
-        R1 = Resistor(1e3, id='R1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
@@ -809,8 +809,8 @@ class Test_AC:
 
     def test_3(self):
         # Test if a circuit without AC source in an AC simulation will be trapped.
-        V1 = DCVoltageSource(1.0)
-        R1 = Resistor(1e3)
+        V1 = DCVoltageSource(voltage=1.0)
+        R1 = Resistor(resistance=1e3)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
@@ -840,8 +840,8 @@ class Test_transient:
         # 1 volt over 1k resistor.
         # Test node 1 voltage 1 volt with transient analysis
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 0])
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)
@@ -854,9 +854,9 @@ class Test_transient:
         c = 1e-6
         t_rc = r * c
         v1 = 10.0
-        V1 = DCVoltageSource(v1)
-        R1 = Resistor(r)
-        C1 = Capacitor(c, initial_voltage=0.0)
+        V1 = DCVoltageSource(voltage=v1)
+        R1 = Resistor(resistance=r)
+        C1 = Capacitor(capacitance=c, initial_voltage=0.0)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
@@ -874,8 +874,8 @@ class Test_transient:
         # 1 volt over 1k resistor.
         # Test R1 1mA current with transient analysis
         circuit = Circuit()
-        V1 = DCVoltageSource(1, id='V1')
-        R1 = Resistor(1e3, id='R1')
+        V1 = DCVoltageSource(voltage=1, id='V1')
+        R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 0])
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)

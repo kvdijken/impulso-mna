@@ -12,6 +12,7 @@ class CCVS(PowerSource):
     # Current Controlled Voltage Source
 
     def __init__(self,
+                 *,
                  rm: float, # transresistance gain in Ohms (V/A)
                  id: Optional[str] = None):
         self.rm = rm

@@ -6,8 +6,8 @@ from impulso import *
 plt.rcParams['axes.xmargin'] = 0
 
 
-V1 = SinusoidalVoltageSource(1,1,0,id='V1')
-R1 = Resistor(1000, id='R1')
+V1 = SinusoidalVoltageSource(amplitude=1, frequency=1, phase=0, id='V1')
+R1 = Resistor(resistance=1000, id='R1')
 
 circuit = Circuit()
 circuit.add(V1,[0,1])

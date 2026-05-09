@@ -3,8 +3,8 @@ import numpy as np
 
 
 D1 = Diode(id='D1', n=1.752, Is=2.52e-9)
-R1 = Resistor(1000, id='R1')
-V1 = DCVoltageSource(1, id='V1')
+R1 = Resistor(resistance=1000, id='R1')
+V1 = DCVoltageSource(voltage=1, id='V1')
 
 circuit = Circuit()
 circuit.add(V1, [0, 1])
