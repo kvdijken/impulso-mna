@@ -4,7 +4,8 @@
 - solve_ac now performs operating point analysis prior to AC analysis
 - solve_ac now accepts list of frequencies to perform AC analysis on. This effectively replaces ac_sweep
 - diode current bug solved
-- 
+- optional parameters for sources are named now, unnamed not allowed anymore for clearer API design
+
 
 ## [1.0] - 2026-05-05
 
