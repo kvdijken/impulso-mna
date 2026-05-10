@@ -20,22 +20,18 @@ class Resistor(Component):
 
     def stamp(self, ctx: Context):
         g = 1.0 / self.resistance
-        idx = ctx.idx_query_fn(self)
-        i, j = idx
-        if i is not None and j is not None:
+        i, j = ctx.idx_query_fn(self)
+        if i is not None:
             ctx.Y[i, i] += g
+        if j is not None:
             ctx.Y[j, j] += g
+        if i is not None and j is not None:
             ctx.Y[i, j] -= g
             ctx.Y[j, i] -= g
-        elif i is not None:
-            ctx.Y[i, i] += g
-        elif j is not None:
-            ctx.Y[j, j] += g
 
 
     def current(self, ctx: Context) -> complex:
-        idx = ctx.idx_query_fn(self)
-        i, j = idx
+        i, j = ctx.idx_query_fn(self)
         if i is None:
             vi = 0
         else:

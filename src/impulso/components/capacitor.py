@@ -27,28 +27,24 @@ class Capacitor(Component):
         def stamp_not_transient():
             y = ctx.s * self.capacitance
             i, j = ctx.idx_query_fn(self)
-            if i is not None and j is not None:
+            if i is not None:
                 ctx.Y[i, i] += y
+            if j is not None:
                 ctx.Y[j, j] += y
+            if i is not None and j is not None:
                 ctx.Y[i, j] -= y
                 ctx.Y[j, i] -= y
-            elif i is not None:
-                ctx.Y[i, i] += y
-            elif j is not None:
-                ctx.Y[j, j] += y
 
         def stamp_transient():
 
             def stamp_as_resistor(i,j,g):
-                if i is not None and j is not None:
+                if i is not None:
                     ctx.Y[i, i] += g
+                if j is not None:
                     ctx.Y[j, j] += g
+                if i is not None and j is not None:
                     ctx.Y[i, j] -= g
                     ctx.Y[j, i] -= g
-                elif i is not None:
-                    ctx.Y[i, i] += g
-                elif j is not None:
-                    ctx.Y[j, j] += g
 
             n1, n2 = ctx.nodes_query_fn(self)
             if n1 == ctx.ground_node:

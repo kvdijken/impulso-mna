@@ -360,7 +360,7 @@ class Test_DC:
         print('DC_test_11 V12 = ',V12)
         assert(within(V12, -2, 0.1))
 
-    def test_11(self):
+    def tt_11(self):
         # Test a CCCS with the controlling current through a resistor
         I1 = DCCurrentSource(current=1, id='I1')
         I2 = DCCurrentSource(current=3, id='I2')
@@ -887,7 +887,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_DC().test_8()
+Test_DC().test_12()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

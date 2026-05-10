@@ -49,15 +49,13 @@ class Diode(Component):
     def stamp_for_ac(self, ctx: Context):
         g = self.admittance_ac
         i, j = ctx.idx_query_fn(self)
-        if i is not None and j is not None:
+        if i is not None:
             ctx.Y[i, i] += g
+        if j is not None:
             ctx.Y[j, j] += g
+        if i is not None and j is not None:
             ctx.Y[i, j] -= g
             ctx.Y[j, i] -= g
-        elif i is not None:
-            ctx.Y[i, i] += g
-        elif j is not None:
-            ctx.Y[j, j] += g
 
 
     def stamp_for_dc(self, ctx: Context):

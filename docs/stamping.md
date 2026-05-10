@@ -540,6 +540,98 @@ $$
 
 ## CCCS
 
+The current through the CCCS is controlled by the current over a resistor, capacitor or zero volt voltage source.
+
+### CCCS with current measured by resistor or capacitor
+
+Note that a CCCS controlled by a resistor or capacitor may cause ill-defined (singular) matrices because the CCCS may cancel conductances if the CCCS is connected to a node to which a controlling component is also connected.
+
+Controlled by a resistor or capacitor, the current $I_{ij}=A \cdot I_x$, where $I_x$ is the controlling current, and $I_{ij}$ the current from node $i$ to node $j$  being controlled. The controlling current $I_x=Y_{pq} \cdot (V_p-V_q)$, where $p$ and $q$ are the nodes to which the resistor or capacitor is connected to.
+
+$$
+\begin{align}
+I_{ij} &= A \cdot I_x \\
+& =A \cdot Y_{pq} \cdot (V_p-V_q) \\
+&= AY_{pq}V_p - AY_{pq}V_q
+\end{align}
+$$
+- extra current for node $i$ (outgoing, dependent current source): $-I_{ij} = AY_{pq}(V_p-V_q)$
+- extra current for node $j$ (incoming, dependent current source): $+I_{ij} = AY_{pq}(V_q-V_p)$
+
+This stamps th matrix as follows:
+$$\left[
+\begin{array}{c : c c c c c}
+\; & j & \; & i & p & q \\ \\
+\hdashline \\
+   j & \cdots & \cdots & \cdots &  -AY_{pq} & +AY_{pq}  \\
+   \; & \cdots &\cdots & \cdots & \cdots & \cdots  \\
+   i & \cdots & \cdots & \cdots & +AY_{pq} & -AY_{pq}  \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots  \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots  \\
+   \end{array}
+\right] \cdot
+\left[
+\begin{array}{c}
+   v_1 \\
+   v_2 \\
+   \vdots \\
+   v_n \\
+   \end{array}
+\right] =
+\left[
+\begin{array}{c}
+   i_1 \\
+   i_2 \\
+   \vdots  \\
+   i_n
+   \end{array}
+\right]
+$$
+
+### CCCS with current measured by zero volt voltage source
+
+
+$I_{ij}=A \cdot I_{V_0}$
+
+- extra current for node $i$: $A \cdot I_{V_0}$
+- extra current for node $j$: $-A \cdot I_{V_0}$
+
+$$
+\left[
+\begin{array}{c : c c c c c c}
+\; & j & \; & i & p & q & i_{v_0} \\ \\
+\hdashline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & -A \\
+   \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & A \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   v_0 & \cdots & \cdots & \cdots & -1 & +1 & \cdots \\
+   \end{array}
+\right] \cdot
+\left[
+\begin{array}{c}
+   v_1 \\
+   v_2 \\
+   \vdots \\
+\vdots \\
+   v_n \\
+   I_{V_{0}} \\
+   \end{array}
+\right] =
+\left[
+\begin{array}{c}
+   0 \\
+   0 \\
+   0 \\
+   0 \\
+   0 \\
+   0
+   \end{array}
+\right]$$
+
+
+
 ## VCCS
 
 A Voltage Controlled Current Source (VCCS) between nodes $i$ and $j$, producing a current flowing from $i$ to $j$ with magnitude $I_{ij}=G_m(V_p-V_q)$ where $V_p$ and $V_q$ are the controlling voltages, produces current

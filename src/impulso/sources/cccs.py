@@ -11,8 +11,7 @@ from ..components.capacitor import Capacitor
 class CCCS(PowerSource):
     # Current Controlled Current Source
 
-    def __init__(self,
-                 *,
+    def __init__(self, *,
                  A: float,
                  id: Optional[str] = None):
         self.A = A
@@ -42,17 +41,16 @@ class CCCS(PowerSource):
             Ypq = control.admittance()
             # CCCS is connected from i to j
             # current flows THROUGH the CCCS from i to j
-            # so into i and out of j
             if p is not None:
                 if i is not None:
-                    ctx.Y[i,p] -= self.A * Ypq
+                    ctx.Y[i,p] += self.A * Ypq
                 if j is not None:
-                    ctx.Y[j,p] += self.A * Ypq
+                    ctx.Y[j,p] -= self.A * Ypq
             if q is not None:
                 if i is not None:
-                    ctx.Y[i,q] += self.A * Ypq
+                    ctx.Y[i,q] -= self.A * Ypq
                 if j is not None:
-                    ctx.Y[j,q] -= self.A * Ypq
+                    ctx.Y[j,q] += self.A * Ypq
 
     def current(self, ctx: Context) -> complex:
         return self.A * self.component.current(ctx)
