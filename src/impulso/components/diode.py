@@ -121,41 +121,20 @@ class Diode(Component):
 
 
     def current(self, ctx: Context) -> complex:
+        i, j = ctx.idx_query_fn(self)
+        if i is None:
+            vi = 0
+        else:
+            vi = ctx.x[i]
+        if j is None:
+            vj = 0
+        else:
+            vj = ctx.x[j]
+
         if ctx.analysis_type == Analysis.AC:
-            return self.current_ac(ctx)
+            vd = vi - vj
+            return self.admittance_ac * vd
         else:
-            return self.current_dc(ctx)
+            vd = np.abs(vi - vj)
+            return self.Is * (math.exp(vd / (self.nvt)) - 1)
 
-    def current_ac(self, ctx: Context) -> complex:
-        # For AC analysis, we assume the small-signal
-        # current is given by the admittance times the
-        # voltage difference
-        i, j = ctx.idx_query_fn(self)
-        if i is None:
-            vi = 0
-        else:
-            vi = ctx.x[i]
-        if j is None:
-            vj = 0
-        else:
-            vj = ctx.x[j]
-        vd = np.real(vi - vj)
-        return self.admittance_ac * vd  # small-signal current approximation
-
-    def current_dc(self, ctx: Context) -> complex:
-        i, j = ctx.idx_query_fn(self)
-        if i is None:
-            vi = 0
-        else:
-            vi = ctx.x[i]
-        if j is None:
-            vj = 0
-        else:
-            vj = ctx.x[j]
-        # TODO: handle phase correctly when we have AC analysis
-        # current in phase with voltage difference across the diode,
-        # so we can take the real part of the voltage difference for
-        # the exponential calculation
-        vd = np.real(vi - vj)
-#        print(f'--> {vd}')
-        return self.Is * (math.exp(vd / (self.nvt)) - 1)
