@@ -41,11 +41,11 @@ class VCVS(PowerSource):
         q = nodes[VCVS.__in_pos]
 
         if i is not None:
-            ctx.Y[i, augm] -= -1
-            ctx.Y[augm, i] -= 1
+            ctx.Y[i, augm] += +1
+            ctx.Y[augm, i] += -1
         if j is not None:
             ctx.Y[j, augm] += -1
-            ctx.Y[augm, j] += 1
+            ctx.Y[augm, j] += +1
 
         # Control voltage contribution
         if p is not None:
@@ -55,8 +55,8 @@ class VCVS(PowerSource):
 
 
     def current(self, ctx: Context) -> complex:
-        idx = ctx.augm_query_fn(self)
-        return ctx.x[idx]
+        augm = ctx.augm_query_fn(self)
+        return ctx.x[augm]
 
 
 
