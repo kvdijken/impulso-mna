@@ -42,8 +42,10 @@ class SinusoidalVoltageSource(PowerSource):
                 v = 0
         else:
             if self.ac_source:
-                # In DC analysis, we treat the AC source as a short circuit, so the voltage is 0.
-                v = 0
+                # In DC analysis, we treat the AC source
+                # as a short circuit, so the voltage is
+                # the DC offset.
+                v = self.dc
             else:
                 v = self.voltage_at_time(ctx.t)
 

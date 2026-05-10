@@ -308,9 +308,6 @@ def solve_ac(circuit: Circuit,
     if not ac_sources:
         raise TopologyError("No AC sources found in the circuit. The results may be meaningless.")
 
-    ctx = Context()
-    ctx.analysis_type = Analysis.AC
-
     non_linears = set() # all nonlinear components in the circuit
     for comp in circuit.component.values():
         if not comp.linear():
@@ -318,9 +315,12 @@ def solve_ac(circuit: Circuit,
 
     if len(non_linears) > 0:
         # First do a operating point analysis
-        vdc, idc = _solve_acdc(circuit, 0)
+        _, idc = solve_dc(circuit)
         for comp in non_linears:
             comp.set_admittance_for_ac(idc[comp])
+
+    ctx = Context()
+    ctx.analysis_type = Analysis.AC
 
     if isinstance(freq, float):
         # single frequency AC analysis

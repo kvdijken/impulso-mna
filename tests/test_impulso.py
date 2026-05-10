@@ -17,9 +17,9 @@ def within(value, tobe, perc):
 def print_currents_voltages(circuit, voltages, currents):
     for c in currents.keys():
         if not isinstance(c,Component):
-            print('DC_test_11 current ',c,':',currents[c])
+            print('current',c,':',currents[c])
     for n in circuit.all_nodes():
-        print('DC_test_11 voltage node ',n,':',voltages[n])
+        print('voltage node',n,':',voltages[n])
 
 
 class Test_general:
@@ -836,6 +836,25 @@ class Test_AC:
         assert IV1 == ID1
 #        assert (within(IV1, ID1, 0.1))
 
+    def test_5(self):
+        # Test a diode in AC simulation with a DC offset
+        ampl = .5
+        V1 = SinusoidalVoltageSource(amplitude=ampl, dc=0.5, phase=0.5, ac_source=True, id='V1')
+        D1 = Diode(id='D1')
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(D1,[1,0])
+        voltages, currents = solve_ac(circuit,freq=1e3)
+        V_D1 = voltages[1]
+        I_V1 = currents[V1]
+        I_D1 = currents[D1]
+        print_currents_voltages(circuit, voltages, currents)
+        # current through the diode should be equal
+        # to the current through the voltage source,
+        # as they are in series.
+        assert I_V1 == I_D1
+        assert np.angle(V_D1) == np.angle(I_D1)
+
 class Test_transient:
 
     def test_1(self):
@@ -887,7 +906,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_DC().test_12()
+Test_AC().test_5()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

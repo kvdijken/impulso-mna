@@ -57,8 +57,10 @@ class SinusoidalCurrentSource(PowerSource):
                 i = 0
         else:
             if self.ac_source:
-                # In DC analysis, we treat the AC source as a short circuit, so the current is 0.
-                i = 0
+                # In DC analysis, we treat the AC source
+                # as a short circuit, so the current is
+                # the DC offset.
+                i = self.dc
             else:
                 i = self.current_at_time(ctx.t)
 

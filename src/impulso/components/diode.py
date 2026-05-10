@@ -129,10 +129,10 @@ class Diode(Component):
         else:
             vj = ctx.x[j]
 
+        vd = vi - vj
         if ctx.analysis_type == Analysis.AC:
-            vd = vi - vj
             return self.admittance_ac * vd
         else:
-            vd = np.abs(vi - vj)
-            return self.Is * (math.exp(vd / (self.nvt)) - 1)
+            vd = np.real(vd) # to prevent warning about complex values in the exponential, even though the imaginary part should be negligible
+            return self.Is * (math.exp(vd/ (self.nvt)) - 1)
 

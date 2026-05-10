@@ -1,7 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from impulso import Circuit, Resistor, Capacitor, NPN, DCVoltageSource, SinusoidalVoltageSource, ac_sweep, freq_pivot_and_select
+from impulso import (
+    Circuit,
+    Resistor,
+    Capacitor,
+    NPN,
+    DCVoltageSource,
+    SinusoidalVoltageSource,
+    solve_ac,
+    freq_pivot_and_select
+)
 
 
 plt.rcParams['axes.xmargin'] = 0
@@ -27,7 +36,7 @@ circuit.add(Re, ['Q1_E', 'GND'])
 circuit.add(Q1, ['Q1_E', 'Q1_B', 'Q1_C'])
 
 freqs = np.logspace(1, 10, 500)
-results = ac_sweep(circuit,freqs)
+results = solve_ac(circuit,freqs)
 
 freqs, node_voltages, _c = freq_pivot_and_select(results,
                                             voltage_nodes=['Q1_C'],
