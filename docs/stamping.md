@@ -381,50 +381,51 @@ $$
 
 The voltage between nodes $i$ and $j$ is controlled by the current $i_c$ through the component $c$ between nodes $p$ and $q$. The gain factor is $R_m$.
 
-$\begin{align}
-v_j-v_i &= R_m \cdot i_c \\
+$$\begin{align}
+v_{ccvs}=v_j-v_i &= R_m \cdot i_c \\
 &= R_m \cdot (v_q-v_p) \cdot G_{pq}
-\end{align}$
+\end{align}$$
 
-So the equation to be stamped is:
-$
+$G_{pq}$ is the admittance of the resistor or capacitor.
+
+So the equation for the voltage constraint is:
+$$
 \begin{align}
 v_j-v_i-G_{pq}R_mv_q+G_{pq}R_mv_p=0
 \end{align}
-$
+$$
+
+This stamps the admittance matrix as:
 
 $$
 \left[
-\begin{array}{c | c c c c c : c}
-\; & j & \; & i & p & q & I_{V_{cc}} \\
-\hline \\
-   j & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+\begin{array}{c : c c c c c c}
+\; & j & \; & i & p & q & i_{ccvs} \\ \\
+   \hdashline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
    \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots \\
-   i & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
    p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots  \\
    q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   \hdashline
-   V_{cc} & +1 & \cdots & -1 & +G_{pq}R_m & -G_{pq}R_m & 0 \\
+   v_{ccvs} & +1 & \cdots & -1 & +G_{pq}R_m & -G_{pq}R_m & 0 \\
    \end{array}
 \right]
 \cdot
 \left[
 \begin{array}{c}
-   vv_1 \\
+   v_1 \\
    v_2 \\
    \vdots \\
    v_n \\
-   \hdashline
-   I_{v_{source}}
+   i_{ccvs}
 \end{array}
 \right] =
 \left[
 \begin{array}{c}
-   II_1 \\
-   I_2 \\
+   i_1 \\
+   i_2 \\
    \vdots  \\
-   I_n \\
-   \hdashline
+   i_n \\
    0
    \end{array}
 \right]
@@ -432,53 +433,58 @@ $$
 
 $G_{pq}R_m$ is dimensionless.
 
->[!mistake]
->CCVS current I<sub>Vcc</sub> flows from i to j, so **enters** j, so coefficient should be -1, not +1. Similar for i.
->
->So: flip signs for [i,I<sub>Vcc</sub>] and [j,I<sub>Vcc</sub>].
 
 
 ### Measuring current through a zero volts voltage source
 
-With a zero volt voltage source the process is as follows. The zero volt voltage source $V_0$ is connected between nodes $p$ and $q$. The node equation is $V_q-V_p=V_0=0$.
+With a zero volt voltage source the process is as follows. The zero volt voltage source $v_0$ is connected between nodes $p$ and $q$. The node equation is
 
-The current controlled voltage $V_{cc}=R_m \cdot I_{V_0}$, where $I_{V_0}$ is the controlling current. The voltage $V_{cc}$ is between nodes $i$ and $j$, so $V_{cc} = V_j-V_i$, which makes the matrix equation $V_j-V_i-R_m \cdot I_{V_0}=0$.
+$$
+v_0 = v_q-v_p = 0
+$$
+
+This equation for the zero volt voltage source is stamped in the matrix.
+
+The current controlled voltage $v_{ccvs}=R_m \cdot i_{v_0}$, where $i_{v_0}$ is the controlling current through the zero volt voltage source. The voltage $v_{ccvs}$ is between nodes $i$ and $j$, so $v_{ccvs} = v_j-v_i$, which makes the equation
+
+$$
+v_j-v_i-R_m \cdot i_{v_0}=0
+$$
+
+This stamps the matrix as follows:
 
 $$
 \left[
-\begin{array}{c | c c c c c :c c}
-\; & j & \; & i & p & q & I_{V_0} & I_{V_{cc}}\\
-\hline \\
-   j & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+\begin{array}{c : c c c c c c c}
+\; & j & \; & i & p & q & i_{v_0} & i_{ccvs} \\ \\
+\hdashline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
    \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   i & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
-   p & \cdots & \cdots & \cdots & \cdots & \cdots & -1 & \cdots \\
-   q & \cdots & \cdots & \cdots & \cdots & \cdots & +1 & \cdots \\
-   \hdashline
-   V_0 & \cdots & \cdots & \cdots & -1 & +1 & \cdots & \cdots \\
-   V_{cc} & +1 & \cdots & -1 & \cdots & \cdots & -R_m & \cdots \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   v_0 & \cdots & \cdots & \cdots & -1 & +1 & \cdots & \cdots \\
+   v_{ccvs} & +1 & \cdots & -1 & \cdots & \cdots & -R_m & \cdots \\
    \end{array}
 \right] \cdot
 \left[
 \begin{array}{c}
-   vv_j \\
+   v_j \\
    \vdots \\
    v_i \\
    v_p \\
    v_q \\
-   \hdashline
-   I_{V_{0}} \\
-   I_{V_{cc}}
+   i_{v_{0}} \\
+   i_{ccvs}
    \end{array}
 \right] =
 \left[
 \begin{array}{c}
-   00 \\
    0 \\
    0 \\
    0 \\
    0 \\
-   \hdashline
+   0 \\
    0 \\
    0
    \end{array}
@@ -486,6 +492,51 @@ $$
 
 
 ## VCVS
+
+The controlling voltages are at nodes $p$ and $q$. The gain factor is $A$.
+
+$$
+v_j-v_i=A \cdot (v_q-v_p)
+$$
+
+$$
+v_j-v_i-Av_q+Av_p=0
+$$
+
+VCVS stamping:
+$$
+\left[
+\begin{array}{c : c c c c c c}
+\; & j & \; & i & p & q & i_{vcvs} \\ \\
+\hdashline \\
+   j & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   \; & \cdots &\cdots & \cdots & \cdots & \cdots & \cdots \\
+   i & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots  \\
+   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
+   v_{vcvs} & +1 & \cdots & -1 & +A & -A & 0 \\
+   \end{array}
+\right] \cdot
+\left[
+\begin{array}{c}
+   v_1 \\
+   v_2 \\
+   \vdots \\
+   v_n \\
+   i_{vcvs}
+   \end{array}
+\right] =
+\left[
+\begin{array}{c}
+   i_1 \\
+   i_2 \\
+   \vdots  \\
+   i_n \\
+   0
+   \end{array}
+\right]$$
+
+
 
 ## CCCS
 

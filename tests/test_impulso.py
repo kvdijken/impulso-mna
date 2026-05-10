@@ -287,14 +287,14 @@ class Test_DC:
 
     def test_8(self):
         # Test a VCVS
-        I1 = DCCurrentSource(current=1.7)
-        I2 = DCCurrentSource(current=0.5)
-        R1 = Resistor(resistance=1e3)
-        R2 = Resistor(resistance=1e3)
-        R3 = Resistor(resistance=1e3)
-        R4 = Resistor(resistance=1e3)
+        I1 = DCCurrentSource(current=1.7, id='I1')
+        I2 = DCCurrentSource(current=0.5, id='I2')
+        R1 = Resistor(resistance=1e3, id='R1')
+        R2 = Resistor(resistance=1e3, id='R2')
+        R3 = Resistor(resistance=1e3, id='R3')
+        R4 = Resistor(resistance=1e3, id='R4')
         VCVS1 = VCVS(A=2.5, id='VCVS1')
-        circuit=Circuit()
+        circuit = Circuit()
         circuit.add(I1,[0,1])
         circuit.add(R1,[1,0])
         circuit.add(R2,[2,0])
@@ -305,9 +305,11 @@ class Test_DC:
         voltages, currents = solve_dc(circuit)
         V12 = voltages[1] - voltages[2]
         V3 = voltages[3]
+        Ivcvs = currents[VCVS1]
         print_currents_voltages(circuit, voltages, currents)
         assert(within(V12,233.333,0.1))
         assert(within(V3, 593.333, 0.1))
+        assert(within(Ivcvs, -0.7799, 0.1))
 
     def test_9(self):
         # Test a CCVS with the controlling current through a resistor
@@ -885,7 +887,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_Circuit().test_5()
+Test_DC().test_8()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()
