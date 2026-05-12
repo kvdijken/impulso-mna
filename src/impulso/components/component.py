@@ -80,7 +80,8 @@ class CompoundComponent(Component):
     """
 
     def before_add(self,
-                   circuit: 'Circuit'
+                   circuit: 'Circuit',
+                   nodes: List[int]
                    ) -> Tuple[bool, bool]:
         #                     ^add  ^current
         """
