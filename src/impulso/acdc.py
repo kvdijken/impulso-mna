@@ -183,9 +183,13 @@ class Solver_ACDC():
     def extract_currents(self) -> dict:
         currents = {}
         for comp in self.all_components():
-            currents[comp.id] = comp.current(self.ctx)
+            try:
+                i = comp.current(self.ctx)
+            except AttributeError:
+                continue
+            currents[comp.id] = i
             # Make currents available by id and by component reference
-            currents[comp] = currents[comp.id]
+            currents[comp] = i
         return currents
 
 

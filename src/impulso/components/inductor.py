@@ -7,6 +7,34 @@ from ..base import Analysis
 LARGE_CONDUCTANCE = 1e12
 
 
+class CoupledInductorGroup(CircuitItem):
+    """
+    A group of inductors that are mutually coupled.
+
+    This is a helper class to manage the mutual
+    coupling between multiple inductors.
+    """
+
+    def __init__(self):
+        pass
+
+    def stamp_L(self, ctx: Context, L: Inductor):
+        # Stamping will be done by the mutual inductance, as it needs
+        # to know about all inductors involved.
+        pass
+
+    def current_L(self, ctx: Context, L: Inductor) -> complex:
+        # TODO: Implement the current calculation for a coupled inductor
+        pass
+
+    def augments_L(self, L: Inductor) -> bool:
+        # Augments for the entire coupled inductor group
+        return False
+
+    def augments(self) -> bool:
+        return True
+    
+
 class Inductor(Component):
 
     def __init__(
@@ -22,6 +50,7 @@ class Inductor(Component):
         self.dot_at_node1 = dot_at_node1
         self.inductance = inductance
         self.initial_current = initial_current
+        self.coupling = None  # type: Optional[CoupledInductorGroup]
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
@@ -30,7 +59,15 @@ class Inductor(Component):
         return LARGE_CONDUCTANCE  # treat inductor as short circuit in DC analysis
 
     def augments(self):
-        return True
+        if self.coupling is None:
+            return True
+        else:
+            # Let the mutual inductance handle the augmentation,
+            # as it needs to know about both inductors.
+            return self.coupling.augments_L(L=self)
+
+    def couple(self, M: MutualInductance):
+        self.coupling = M
 
     def stamp(self, ctx: Context):
 
@@ -59,15 +96,26 @@ class Inductor(Component):
             i_hist = ctx.current_history[-1][self]
             ctx.z[augm] += -alpha * i_hist
 
-        if ctx.analysis_type == Analysis.TRANSIENT:
-            stamp_transient()
+        if self.coupling is None:
+            if ctx.analysis_type == Analysis.TRANSIENT:
+                stamp_transient()
+            else:
+                stamp_not_transient()
         else:
-            stamp_not_transient()
+            # Let the mutual inductance handle the stamping,
+            # as it needs to know about both inductors.
+            self.coupling.stamp_L(ctx=ctx, L=self)
 
 
     def current(self, ctx: Context) -> complex:
-        idx = ctx.augm_query_fn(self)
-        return ctx.x[idx]
+        if self.coupling is None:
+            idx = ctx.augm_query_fn(self)
+            return ctx.x[idx]
+        else:
+            # Let the mutual inductance handle the current
+            # calculation, as it needs to know about both
+            # inductors.
+            return self.coupling.current_L(ctx=ctx, L=self)
 
 
 class MutualInductance(CircuitItem):
@@ -77,7 +125,7 @@ class MutualInductance(CircuitItem):
     M = k * sqrt(L1 * L2)
     """
 
-    def __init__(self,
+    def __init__(self, *,
                  L1: Inductor,
                  L2: Inductor,
                  coupling: float,

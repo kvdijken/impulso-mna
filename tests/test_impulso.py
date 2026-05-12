@@ -12,6 +12,9 @@ def within(value, tobe, perc):
     return (ratio > 1-perc) and (ratio < 1+perc)
 
 
+def in_counter_phase(a, b, tol=1e-9):
+    phase_diff = np.angle(a / b)
+    return np.isclose(np.abs(phase_diff), np.pi, atol=tol)
 
 
 def print_currents_voltages(circuit, voltages, currents):
@@ -855,6 +858,71 @@ class Test_AC:
         assert I_V1 == I_D1
         assert np.angle(V_D1) == np.angle(I_D1)
 
+    def test_6(self):
+        # Test a transformer in AC simulation, coupling of 1
+        V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, id='V1')
+        L1 = Inductor(inductance=1e-3, id='L1')
+        L2 = Inductor(inductance=1e-3, id='L2')
+        K1 = MutualInductance(coupling=1, id='K1', L1=L1, L2=L2)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(L1,[1,0])
+        circuit.add(L2,[2,0])
+        circuit.add_instruction(K1)
+        voltages, currents = solve_ac(circuit,freq=1e3)
+        V_L1 = voltages[1]
+        V_L2 = voltages[2]
+        I_L1 = currents[L1]
+        I_L2 = currents[L2]
+        print_currents_voltages(circuit, voltages, currents)
+        # The voltage across L2 should be the same as the
+        # voltage across L1, as the mutual inductance is 1.
+        assert np.abs(V_L1) == np.abs(V_L2)
+
+    def test_7(self):
+        # Test a transformer in AC simulation, coupling of 1, dots opposite
+        V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, id='V1')
+        L1 = Inductor(inductance=1e-3, id='L1')
+        L2 = Inductor(inductance=1e-3,dot_at_node1=False, id='L2')
+        K1 = MutualInductance(coupling=1, id='K1', L1=L1, L2=L2)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(L1,[1,0])
+        circuit.add(L2,[2,0])
+        circuit.add_instruction(K1)
+        voltages, currents = solve_ac(circuit,freq=1e3)
+        V_L1 = voltages[1]
+        V_L2 = voltages[2]
+        I_L1 = currents[L1]
+        I_L2 = currents[L2]
+        print_currents_voltages(circuit, voltages, currents)
+        # The voltage across L2 should be the same as the
+        # voltage across L1, as the mutual inductance is 1.
+        assert np.abs(V_L1) == np.abs(V_L2)
+        assert in_counter_phase(V_L1, V_L2)
+
+    def test_8(self):
+        # Test a transformer in AC simulation, coupling of .5, dots opposite
+        V1 = SinusoidalVoltageSource(amplitude=1, ac_source=True, id='V1')
+        L1 = Inductor(inductance=1e-3, id='L1')
+        L2 = Inductor(inductance=1e-3,dot_at_node1=False, id='L2')
+        K1 = MutualInductance(coupling=.5, id='K1', L1=L1, L2=L2)
+        circuit = Circuit()
+        circuit.add(V1,[0,1])
+        circuit.add(L1,[1,0])
+        circuit.add(L2,[2,0])
+        circuit.add_instruction(K1)
+        voltages, currents = solve_ac(circuit,freq=1e3)
+        V_L1 = voltages[1]
+        V_L2 = voltages[2]
+        I_L1 = currents[L1]
+        I_L2 = currents[L2]
+        print_currents_voltages(circuit, voltages, currents)
+        # The voltage across L2 should be the same as the
+        # voltage across L1, as the mutual inductance is 1.
+        assert np.isclose(np.abs(V_L1), 2 * np.abs(V_L2), atol=1e-9)
+        assert in_counter_phase(V_L1, V_L2)
+
 class Test_transient:
 
     def test_1(self):
@@ -906,7 +974,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_AC().test_5()
+Test_AC().test_7()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

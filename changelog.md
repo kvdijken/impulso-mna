@@ -1,3 +1,7 @@
+## [1.2.0] -
+
+
+
 ## [1.1.0] - 2026-05-10
 
 - SinusoidalVoltageSOurce now can use ampitudes other than 1 for AC analysis
