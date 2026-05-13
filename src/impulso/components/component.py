@@ -61,6 +61,13 @@ class Component(CircuitItem):
     def augments(self) -> None:
         pass
 
+    def stamps(self) -> bool:
+        return True
+
+    def returns_current(self) -> bool:
+        """Whether this component can return a current when queried."""
+        return True
+    
     def linear(self) -> bool:
         return True
 

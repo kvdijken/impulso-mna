@@ -17,12 +17,13 @@ class Solver_Transient(Solver_ACDC):
     all: Dict[Type[Component], List[Component]] = {} # sorted catalog of components by type
 
     def __init__(self,
+                 circuit: Circuit,
                  nodes: Dict[Component, Tuple[int,int]],
                  component: Dict[str, Component],
                  ground_node: int | str,
                  dt: float,
                  integration_method: str = "backward_euler"):
-        super().__init__(nodes, component, ground_node)
+        super().__init__(circuit, nodes, component, ground_node)
         self.integration_method = integration_method
         self.dt = dt
 
@@ -127,7 +128,8 @@ def solve_transient(circuit: Circuit,
                 result[k].append(v)
         return dict(result)
 
-    solver = Solver_Transient(circuit.nodes,
+    solver = Solver_Transient(circuit,
+                              circuit.nodes,
                               circuit.component,
                               circuit.ground_node,
                               dt=dt)

@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Optional, Type, Any
 
 from .base import TopologyError
 from .sources.source import *
-from .components.inductor import MutualInductance, InductorGroup
+from .components.inductor import MutualInductance
 
 
 class Circuit:
@@ -53,8 +53,8 @@ class Circuit:
                 raise TopologyError(f"Component ID {component.id} already exists in the circuit.")
 
             # Node connection check, at least 2 nodes
-            if len(nodes) < 2:
-                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
+#            if len(nodes) < 2:
+#                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
 
 
         try:
@@ -73,7 +73,7 @@ class Circuit:
 
 
     def add_instruction(self, instruction: Component):
-        assert(isinstance(instruction, MutualInductance))
+#        assert(isinstance(instruction, MutualInductance))
         try:
             do_add, _ = instruction.before_add(self, [])
         except AttributeError:
@@ -81,18 +81,6 @@ class Circuit:
         if do_add:
             self.component[instruction.id] = instruction
         return self
-
-
-    def build_inductor_group(self):
-        self._inductorgroup = InductorGroup(self)
-        pass
-
-
-    def prepare_for_solving(self):
-        if not self._prepared:
-            # Prepare the circuit for solving
-            self.build_inductor_group()
-            self._prepared = True
 
 
     def all_nodes(self) -> List[int]:

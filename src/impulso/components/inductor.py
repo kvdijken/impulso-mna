@@ -3,7 +3,6 @@ import numpy as np
 
 from .component import Component, CircuitItem, Context
 from ..base import Analysis
-from ..circuit import Circuit
 
 LARGE_CONDUCTANCE = 1e12
 
@@ -17,15 +16,22 @@ class InductorGroup(Component):
     """
     _tol = 1e-6
 
-    def __init__(self, circuit: Circuit, get_augm_index):
+    def __init__(self, circuit: Circuit, ctx: Context):
+        super().__init__(id=f"INDUCTOR_GROUP")
         self._circuit = circuit
-        self.circuit.add_component(self) # to let itself be called for stamping
+        self._circuit.add(self, []) # to let itself be called for stamping
 
         # Get the inductors and mutual inductances from the circuit
-        self._inductors: dict[Inductor, int] = {c: i for i, c in enumerate(self._inductors)} # map from Inductor to local _L index
+        self._inductors: dict[Inductor, int] = {} # map from Inductor to local _L index
+        self._n = 0
+        for comp in circuit.component.values():
+            if isinstance(comp, Inductor):
+                self._inductors[comp] = self._n
+                self._n += 1
         self._mutuals: List[MutualInductance] = [c for c in circuit.component.values() if isinstance(c, MutualInductance)]
 
         # node numbers
+        self._nodes = {}
         for local_idx, ind in enumerate(self._inductors):
             self._nodes[local_idx] = circuit.nodes[ind]
 
@@ -34,7 +40,7 @@ class InductorGroup(Component):
         # Create the mapping from local index in inductance matrix _L -> global index in admittance matrix
         self._local_to_global_idx: Dict[int, int] = {}
         for i, ind in enumerate(self._inductors):
-            self._local_to_global_idx[i] = get_augm_index(ind)
+            self._local_to_global_idx[i] = ctx.augm_query_fn(ind)
 
         # Calculate inductance matrix _L
         self._L = np.diag([ind.inductance for ind in self._inductors])
@@ -72,13 +78,15 @@ class InductorGroup(Component):
     def augments(self) -> None:
         return False
 
+    def returns_current(self) -> bool:
+        return False
+
     def linear(self) -> bool:
         return True
 
     def _stamp_ac(self, ctx: Context):
         Z = ctx.s * self._L
-        self._stamp_topology(ctx)
-        k = self._local_to_global_idx.values()
+        k = np.array(list(self._local_to_global_idx.values()))
         ctx.Y[np.ix_(k, k)] -= Z
 
     def _stamp_transient(self, ctx: Context):
@@ -136,6 +144,9 @@ class Inductor(Component):
         self.dot_at_node1 = dot_at_node1
         self.inductance = inductance
         self.initial_current = initial_current
+
+    def stamps(self) -> bool:
+        return False
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
@@ -205,6 +216,12 @@ class MutualInductance(CircuitItem):
         self.L1 = L1
         self.L2 = L2
         self.k = coupling
+
+    def stamps(self) -> bool:
+        return False
+
+    def returns_current(self) -> bool:
+        return False
 
     def mutual_M(self):
         M = self.k * np.sqrt(self.L1.inductance * self.L2.inductance)

@@ -120,6 +120,9 @@ class BJT(CompoundComponent):
         self.cbc = cbc
         self.cbe = cbe
 
+    def stamps(self) -> bool:
+        return False
+
     def before_add(self,
                    circuit: 'Circuit',
                    nodes: List[int]

@@ -7,6 +7,7 @@ from functools import cache
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
+from .components.inductor import MutualInductance, InductorGroup
 from .circuit import Circuit
 from .sources.source import PowerSource
 
@@ -22,15 +23,22 @@ class Solver_ACDC():
                                         # voltage sources, etc.)
 
     def __init__(self,
+                 circuit: Circuit,
                  nodes: Dict[Component, List[int]],
                  component: Dict[str, Component],
                  ground_node: int | str
                  ):
+        self.circuit = circuit
+        self._prepared = False
         self.nodes = nodes
         self.component = component
         self.ground_node = ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.ctx = self.create_context()
+
+        self._stamping_components = None # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
+        self._current_components = None # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
+
 
 
     def create_context(self) -> Context:
@@ -95,6 +103,22 @@ class Solver_ACDC():
         return self.node_index.keys()
 
 
+    def build_inductor_group(self,
+                             circuit: Circuit,
+                             ctx: Context):
+        self._inductorgroup = InductorGroup(circuit, ctx)
+        pass
+
+
+    def prepare_circuit_for_solving(self,
+                                    circuit: Circuit,
+                                    ctx: Context = None):
+        if not self._prepared:
+            # Prepare the circuit for solving
+            self.build_inductor_group(circuit, ctx)
+            self._prepared = True
+
+
     def solve_mna(self,
                   freq: float = 0,
                   return_real: bool = False
@@ -116,7 +140,17 @@ class Solver_ACDC():
         # Prepare the circuit for solving.
         # Do this at the very last moment just before solving, when everything  is ready,
         # since some components may need to know the node indices for preparation.
-        circuit.prepare_for_solving()
+        self.prepare_circuit_for_solving(self.circuit, self.ctx)
+        if self._stamping_components is None:
+            self._stamping_components = []
+            for c in self.component.values():
+                if c.stamps():
+                    self._stamping_components.append(c)
+        if self._current_components is None:
+            self._current_components = []
+            for c in self.component.values():
+                if c.returns_current():
+                    self._current_components.append(c)
 
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 
@@ -187,7 +221,7 @@ class Solver_ACDC():
 
     def extract_currents(self) -> dict:
         currents = {}
-        for comp in self.all_components():
+        for comp in self._current_components:
             try:
                 i = comp.current(self.ctx)
             except AttributeError:
@@ -261,7 +295,7 @@ class Solver_ACDC():
 
 
     def stamp(self, ctx: Context = None):
-        for comp in self.all_components():
+        for comp in self._stamping_components:
             comp.stamp(ctx)
 
 
@@ -287,8 +321,7 @@ def _solve_acdc(circuit: Circuit,
             assert ctx.analysis_type in (None, Analysis.AC), "Context analysis type must be AC or None for AC analysis"
 
     circuit.validate()
-    circuit.prepare_for_solving()
-    solver = Solver_ACDC(circuit.nodes, circuit.component, circuit.ground_node)
+    solver = Solver_ACDC(circuit, circuit.nodes, circuit.component, circuit.ground_node)
     return solver.solve(freq)
 
 
