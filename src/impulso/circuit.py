@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Optional, Type, Any
 
 from .base import TopologyError
 from .sources.source import *
-from .components.inductor import MutualInductance
+from .components.inductor import MutualInductance, InductorGroup
 
 
 class Circuit:
@@ -25,6 +25,7 @@ class Circuit:
         self._topology_hash: Optional[str] = None
         self.nodes = {}
         self.ground_node = ground_node
+        self._prepared = False
 
 
     def __getitem__(self, component_id: str) -> Component:
@@ -73,8 +74,25 @@ class Circuit:
 
     def add_instruction(self, instruction: Component):
         assert(isinstance(instruction, MutualInductance))
-        self.component[instruction.id] = instruction
+        try:
+            do_add, _ = instruction.before_add(self, [])
+        except AttributeError:
+            do_add = True
+        if do_add:
+            self.component[instruction.id] = instruction
         return self
+
+
+    def build_inductor_group(self):
+        self._inductorgroup = InductorGroup(self)
+        pass
+
+
+    def prepare_for_solving(self):
+        if not self._prepared:
+            # Prepare the circuit for solving
+            self.build_inductor_group()
+            self._prepared = True
 
 
     def all_nodes(self) -> List[int]:

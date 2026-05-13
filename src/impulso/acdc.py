@@ -113,6 +113,11 @@ class Solver_ACDC():
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
 
+        # Prepare the circuit for solving.
+        # Do this at the very last moment just before solving, when everything  is ready,
+        # since some components may need to know the node indices for preparation.
+        circuit.prepare_for_solving()
+
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 
         times = 0
@@ -282,7 +287,7 @@ def _solve_acdc(circuit: Circuit,
             assert ctx.analysis_type in (None, Analysis.AC), "Context analysis type must be AC or None for AC analysis"
 
     circuit.validate()
-
+    circuit.prepare_for_solving()
     solver = Solver_ACDC(circuit.nodes, circuit.component, circuit.ground_node)
     return solver.solve(freq)
 

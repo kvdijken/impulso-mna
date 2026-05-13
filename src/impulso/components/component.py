@@ -72,13 +72,6 @@ class Component(CircuitItem):
     def current(self, ctx: Context) -> complex:
         pass
 
-
-
-class CompoundComponent(Component):
-    """
-    A component that contains other components (e.g. subcircuit).
-    """
-
     def before_add(self,
                    circuit: 'Circuit',
                    nodes: List[int]
@@ -98,4 +91,12 @@ class CompoundComponent(Component):
             we want to be able to query the collector current from the BJT component itself,
             not from its internal components).
         """
-        return False, True
+        return True, True
+
+
+class CompoundComponent(Component):
+    """
+    A component that contains other components (e.g. subcircuit).
+    """
+    pass
+
