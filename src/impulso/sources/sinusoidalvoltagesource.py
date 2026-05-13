@@ -33,9 +33,7 @@ class SinusoidalVoltageSource(PowerSource):
         return True
 
     def stamp(self, ctx: Context):
-        ac_analysis = ctx.analysis_type == Analysis.AC
-
-        if ac_analysis:
+        if ctx.analysis_type == Analysis.AC:
             if self.ac_source:
                 v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
             else:

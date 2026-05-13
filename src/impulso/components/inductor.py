@@ -30,17 +30,17 @@ class InductorGroup(Component):
                 self._n += 1
         self._mutuals: List[MutualInductance] = [c for c in circuit.component.values() if isinstance(c, MutualInductance)]
 
-        # node numbers
-        self._nodes = {}
+        # node indices into MNA matrix for each inductor
+        self._node_indices = {}
         for local_idx, ind in enumerate(self._inductors):
-            self._nodes[local_idx] = circuit.nodes[ind]
+            self._node_indices[local_idx] = ctx.idx_query_fn(ind)
 
         self._n = len(self._inductors)
 
         # Create the mapping from local index in inductance matrix _L -> global index in admittance matrix
-        self._local_to_global_idx: Dict[int, int] = {}
+        self._local_to_global_idx: List[int] = []
         for i, ind in enumerate(self._inductors):
-            self._local_to_global_idx[i] = ctx.augm_query_fn(ind)
+            self._local_to_global_idx.append(ctx.augm_query_fn(ind))
 
         # Calculate inductance matrix _L
         self._L = np.diag([ind.inductance for ind in self._inductors])
@@ -48,8 +48,6 @@ class InductorGroup(Component):
             M = mutual.mutual_M()
             L1 = mutual.L1
             L2 = mutual.L2
-            if L1.dot_at_node1 != L2.dot_at_node1:
-                M = -M
             i = self._inductors[L1] # map into local _L index
             j = self._inductors[L2] # map into local _L index
 
@@ -86,8 +84,9 @@ class InductorGroup(Component):
 
     def _stamp_ac(self, ctx: Context):
         Z = ctx.s * self._L
-        k = np.array(list(self._local_to_global_idx.values()))
-        ctx.Y[np.ix_(k, k)] -= Z
+        k = np.array(self._local_to_global_idx)
+        ix_ = np.ix_(k, k)
+        ctx.Y[ix_] -= Z
 
     def _stamp_transient(self, ctx: Context):
         pass
@@ -96,8 +95,7 @@ class InductorGroup(Component):
         # Stamp topology
         for m in range(self._n):
             k = self._local_to_global_idx[m]
-            i = self._nodes[m][0]
-            j = self._nodes[m][1]
+            i, j = self._node_indices[m]
             if i != 0:
                 ctx.Y[i, k] += 1
                 ctx.Y[k, i] += 1
@@ -158,37 +156,7 @@ class Inductor(Component):
         return True
 
     def stamp(self, ctx: Context):
-
-        def stamp_not_transient():
-            i1, i2 = ctx.idx_query_fn(self)
-            augm = ctx.augm_query_fn(self)
-            if i1 is not None:
-                ctx.Y[i1, augm] += 1
-                ctx.Y[augm, i1] += 1
-            if i2 is not None:
-                ctx.Y[i2, augm] -= 1
-                ctx.Y[augm, i2] -= 1
-            ctx.Y[augm, augm] -= ctx.s * self.inductance # ohm
-
-        def stamp_transient():
-            i1, i2 = ctx.idx_query_fn(self)
-            augm = ctx.augm_query_fn(self)
-            if i1 is not None:
-                ctx.Y[i1, augm] += 1
-                ctx.Y[augm, i1] += 1
-            if i2 is not None:
-                ctx.Y[i2, augm] -= 1
-                ctx.Y[augm, i2] -= 1
-            alpha = self.inductance / ctx.dt # ohm
-            ctx.Y[augm,augm] -= alpha
-            i_hist = ctx.current_history[-1][self]
-            ctx.z[augm] += -alpha * i_hist
-
-        if ctx.analysis_type == Analysis.TRANSIENT:
-            stamp_transient()
-        else:
-            stamp_not_transient()
-
+        raise NotImplementedError("MutualInductance should not be stamped directly, it's just a helper for managing inductors")
 
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
@@ -240,10 +208,5 @@ class MutualInductance(CircuitItem):
         return True
 
     def stamp(self, ctx: Context):
-        idx1 = ctx.augm_query_fn(self.L1)
-        idx2 = ctx.augm_query_fn(self.L2)
-        M = self.mutual_M()
-        val = -ctx.s * M
-        ctx.Y[idx1, idx2] += val
-        ctx.Y[idx2, idx1] += val
+        raise NotImplementedError("MutualInductance should not be stamped directly, it's just a helper for managing inductors")
 
