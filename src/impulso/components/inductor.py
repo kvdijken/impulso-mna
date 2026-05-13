@@ -1,13 +1,13 @@
 from typing import Dict, List, Tuple, Optional, Type, Any
 import numpy as np
 
-from .component import Component, CircuitItem, Context
+from .component import Component, CircuitItem, Context, Stamping
 from ..base import Analysis
 
 LARGE_CONDUCTANCE = 1e12
 
 
-class InductorGroup(Component):
+class InductorGroup(Stamping):
     """
     A group of inductors that are mutually coupled.
 
@@ -17,9 +17,7 @@ class InductorGroup(Component):
     _tol = 1e-6
 
     def __init__(self, circuit: Circuit, ctx: Context):
-        super().__init__(id=f"INDUCTOR_GROUP")
         self._circuit = circuit
-        self._circuit.add(self, []) # to let itself be called for stamping
 
         # Get the inductors and mutual inductances from the circuit
         self._inductors: dict[Inductor, int] = {} # map from Inductor to local _L index
@@ -68,19 +66,8 @@ class InductorGroup(Component):
         if np.any(eigvals < -self._tol):
             raise ValueError("Non-physical inductance matrix")
 
-
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        """Calculate admittance (1/impedance) for AC analysis."""
-        raise NotImplementedError("InductorGroup does not have a fixed admittance, it's just a helper for managing inductors")
-
-    def augments(self) -> None:
-        return False
-
     def returns_current(self) -> bool:
         return False
-
-    def linear(self) -> bool:
-        return True
 
     def _stamp_ac(self, ctx: Context):
         Z = ctx.s * self._L
@@ -89,17 +76,23 @@ class InductorGroup(Component):
         ctx.Y[ix_] -= Z
 
     def _stamp_transient(self, ctx: Context):
-        pass
+        Z = self._L / ctx.dt
+        k = np.array(self._local_to_global_idx)
+        ix_ = np.ix_(k, k)
+        ctx.Y[ix_] -= Z
+
+        i_prev = np.array([ctx.current_history[-1][ind] for ind in self._inductors])
+        ctx.z[k] -= Z @ i_prev
 
     def stamp(self, ctx: Context):
         # Stamp topology
         for m in range(self._n):
             k = self._local_to_global_idx[m]
             i, j = self._node_indices[m]
-            if i != 0:
+            if i is not None:
                 ctx.Y[i, k] += 1
                 ctx.Y[k, i] += 1
-            if j != 0:
+            if j is not None:
                 ctx.Y[j, k] -= 1
                 ctx.Y[k, j] -= 1
 
@@ -113,17 +106,6 @@ class InductorGroup(Component):
 
     def current(self, ctx: Context) -> complex:
         raise NotImplementedError("InductorGroup does not have a current, it's just a helper for managing inductors")
-
-    def before_add(self,
-                   circuit: Circuit,
-                   nodes: List[int]
-                   ) -> Tuple[bool, bool]:
-        # This component is not actually added to the circuit, it's just a
-        # helper for managing inductors
-        # Do return True for do_add, because it will need to do the stamping.
-        # It does not return current, that will be left to the individual inductors.
-        return True, False
-
 
 
 
@@ -170,7 +152,7 @@ class MutualInductance(CircuitItem):
     M = k * sqrt(L1 * L2)
     """
 
-    def __init__(self, *,
+    def __init__(self,
                  L1: Inductor,
                  L2: Inductor,
                  coupling: float,

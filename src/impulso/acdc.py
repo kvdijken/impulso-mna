@@ -7,7 +7,7 @@ from functools import cache
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
-from .components.inductor import MutualInductance, InductorGroup
+from .components.inductor import Inductor, MutualInductance, InductorGroup
 from .circuit import Circuit
 from .sources.source import PowerSource
 
@@ -106,8 +106,9 @@ class Solver_ACDC():
     def build_inductor_group(self,
                              circuit: Circuit,
                              ctx: Context):
-        self._inductorgroup = InductorGroup(circuit, ctx)
-        pass
+        if any(isinstance(c, Inductor) for c in circuit.component.values()):
+            self._inductorgroup = InductorGroup(circuit, ctx)
+            self._stamping_components.append(self._inductorgroup)
 
 
     def prepare_circuit_for_solving(self,
@@ -137,10 +138,6 @@ class Solver_ACDC():
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
 
-        # Prepare the circuit for solving.
-        # Do this at the very last moment just before solving, when everything  is ready,
-        # since some components may need to know the node indices for preparation.
-        self.prepare_circuit_for_solving(self.circuit, self.ctx)
         if self._stamping_components is None:
             self._stamping_components = []
             for c in self.component.values():
@@ -151,6 +148,11 @@ class Solver_ACDC():
             for c in self.component.values():
                 if c.returns_current():
                     self._current_components.append(c)
+
+        # Prepare the circuit for solving.
+        # Do this at the very last moment just before solving, when everything  is ready,
+        # since some components may need to know the node indices for preparation.
+        self.prepare_circuit_for_solving(self.circuit, self.ctx)
 
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 

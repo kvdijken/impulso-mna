@@ -144,7 +144,7 @@ class Test_Circuit:
         V1 = DCVoltageSource(voltage=1)
         circuit.add(V1, [0, 1]) # should be fine
 
-        V2 = DCVoltageSource(voltage=   1)
+        V2 = DCVoltageSource(voltage=1)
         with pytest.raises(ValueError):
             circuit.add(V2, [0]) # should raise an error
 
@@ -885,7 +885,8 @@ class Test_AC:
         L1 = Inductor(inductance=1e-3, id='L1')
         L2 = Inductor(inductance=1e-3,dot_at_node1=False, id='L2')
         R1 = Resistor(resistance=1e3, id='R1')
-        K1 = MutualInductance(coupling=.999, id='K1', L1=L1, L2=L2)
+        k = .999
+        K1 = MutualInductance(coupling=k, id='K1', L1=L1, L2=L2)
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(L1,[1,0])
@@ -900,7 +901,7 @@ class Test_AC:
         print_currents_voltages(circuit, voltages, currents)
         # The voltage across L2 should be the same as the
         # voltage across L1, as the mutual inductance is 1.
-        assert np.abs(V_L1) == np.abs(V_L2)
+        assert np.isclose(np.abs(V_L1)*k, np.abs(V_L2), atol=1e-9)
         assert in_counter_phase(V_L1, V_L2)
 
     def test_8(self):
@@ -976,7 +977,7 @@ class Test_transient:
 
 # Test_Circuit().test_4()
 # Test_transient().test_1()
-Test_AC().test_7()
+Test_AC().test_5()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional, Type, Any, Callable
+from typing import Dict, List, Protocol, Tuple, Optional, Type, Any, Callable
 import uuid
 import abc
 from dataclasses import dataclass
@@ -11,7 +11,6 @@ from ..base import Analysis
 LARGE_CONDUCTANCE = 1e12
 
 
-
 class CircuitItem(abc.ABC):
     """Base class for items in the circuit (components and instructions)."""
 
@@ -22,9 +21,9 @@ class CircuitItem(abc.ABC):
 class Context():
     ground_node: int
     analysis_type: Analysis
-    x: NDArray[complex] # previous solution vector (node voltages)
-    Y: NDArray[complex] # augmented admittance matrix
-    z: NDArray[complex] # RHS vector
+    x: NDArray[np.complex128] # previous solution vector (node voltages)
+    Y: NDArray[np.complex128] # augmented admittance matrix
+    z: NDArray[np.complex128] # RHS vector
 
     # query index into admittance matrix for a given circuit item
     idx_query_fn: Callable[[CircuitItem |     # query circuit item
@@ -34,10 +33,10 @@ class Context():
                            Tuple[int, ...]]   # returns list of indices into admittance matrix
 
     # query augmentation index for a given circuit item (if it augments the system)
-    augm_query_fn: Callable[CircuitItem, int]
+    augm_query_fn: Callable[[CircuitItem], int]
 
     # query nodes of a circuit item (e.g. component)
-    nodes_query_fn: Callable[CircuitItem, Tuple[int, ...]]
+    nodes_query_fn: Callable[[CircuitItem], Tuple[int, ...]]
 
     # This dataclass can be extended with additional fields as needed.
     #
@@ -47,7 +46,12 @@ class Context():
     # For AC analysis we can add the complex frequency, etc.
 
 
-class Component(CircuitItem):
+class Stamping(Protocol):
+    def stamp(self, ctx: Context) -> None:
+        ...
+
+
+class Component(CircuitItem, Stamping):
     """
     Base class for all circuit components.
     """
@@ -67,7 +71,7 @@ class Component(CircuitItem):
     def returns_current(self) -> bool:
         """Whether this component can return a current when queried."""
         return True
-    
+
     def linear(self) -> bool:
         return True
 

@@ -53,8 +53,8 @@ class Circuit:
                 raise TopologyError(f"Component ID {component.id} already exists in the circuit.")
 
             # Node connection check, at least 2 nodes
-#            if len(nodes) < 2:
-#                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
+            if len(nodes) < 2:
+                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
 
 
         try:

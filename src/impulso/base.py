@@ -8,4 +8,3 @@ class Analysis(Enum):
 class TopologyError(Exception):
     pass
 
-
