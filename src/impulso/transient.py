@@ -18,12 +18,9 @@ class Solver_Transient(Solver_ACDC):
 
     def __init__(self,
                  circuit: Circuit,
-                 nodes: Dict[Component, Tuple[int,int]],
-                 component: Dict[str, Component],
-                 ground_node: int | str,
                  dt: float,
                  integration_method: str = "backward_euler"):
-        super().__init__(circuit, nodes, component, ground_node)
+        super().__init__(circuit)
         self.integration_method = integration_method
         self.dt = dt
 
@@ -129,9 +126,6 @@ def solve_transient(circuit: Circuit,
         return dict(result)
 
     solver = Solver_Transient(circuit,
-                              circuit.nodes,
-                              circuit.component,
-                              circuit.ground_node,
                               dt=dt)
     time, _v, _c = solver.solve(t_stop, dt)
     _v = transpose(_v)

@@ -58,7 +58,7 @@ class Circuit:
 
 
         try:
-            do_add, current = component.before_add(self, nodes)
+            do_add = component.before_add(self, nodes)
         except AttributeError:
             do_add = True
 
@@ -66,8 +66,6 @@ class Circuit:
             check()
             self.component[component.id] = component
             self.nodes[component] = nodes
-        elif current:
-            self.component[component.id] = component
 
         return self
 
@@ -75,7 +73,7 @@ class Circuit:
     def add_instruction(self, instruction: Component):
 #        assert(isinstance(instruction, MutualInductance))
         try:
-            do_add, _ = instruction.before_add(self, [])
+            do_add = instruction.before_add(self, [])
         except AttributeError:
             do_add = True
         if do_add:

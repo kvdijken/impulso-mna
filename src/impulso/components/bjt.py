@@ -204,7 +204,7 @@ class BJT(CompoundComponent):
         self.cbe_cap = Capacitor(self.cbe, id=f"{self.id}_Cbe")
         circuit.add(self.cbe_cap, [self._b0,self._e0])
 
-        return False, True
+        return False
         # False: do not add this BJT itself
         # True: does deliver current info
 
