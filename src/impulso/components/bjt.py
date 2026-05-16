@@ -1,7 +1,12 @@
 # Ebers-Moll approximation as in https://en.wikipedia.org/wiki/Bipolar_junction_transistor
 
+from __future__ import annotations
+
 import uuid
-from typing import Dict, List, Tuple, Optional, Type, Protocol
+from typing import Dict, List, Tuple, Optional, Type, Protocol, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..circuit import Circuit
 
 from ..base import Analysis
 from .diode import Diode
@@ -124,7 +129,7 @@ class BJT(CompoundComponent):
         return False
 
     def before_add(self,
-                   circuit: 'Circuit',
+                   circuit: Circuit,
                    nodes: List[int]
                    ) -> Tuple[bool, bool]:
         #                     ^add  ^current

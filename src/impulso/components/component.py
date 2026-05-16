@@ -1,4 +1,5 @@
-from typing import Dict, List, Protocol, Tuple, Optional, Type, Any, Callable
+from __future__ import annotations
+from typing import Dict, List, Protocol, Tuple, Optional, Type, Any, Callable, TYPE_CHECKING
 import uuid
 import abc
 from dataclasses import dataclass
@@ -7,6 +8,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..base import Analysis
+
+if TYPE_CHECKING:
+    from ..circuit import Circuit
+
 
 LARGE_CONDUCTANCE = 1e12
 
@@ -46,11 +51,6 @@ class Context():
     # For AC analysis we can add the complex frequency, etc.
 
 
-class Stamping(Protocol):
-    def stamp(self, ctx: Context) -> None:
-        ...
-
-
 class Component(CircuitItem):
     """
     Base class for all circuit components.
@@ -81,7 +81,7 @@ class Component(CircuitItem):
         pass
 
     def before_add(self,
-                   circuit: 'Circuit',
+                   circuit: Circuit,
                    nodes: List[int]
                    ) -> bool:
         """

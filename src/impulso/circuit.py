@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Type, Any
 
@@ -20,6 +21,7 @@ class Circuit:
     def __init__(self, ground_node =0):
         """Initialize an empty circuit."""
         self.component = {}
+        self.component_not_added = {}
         self._node_voltage_cache: Optional[Dict[int, float]] = None
         self._comp_currents_cache: Optional[Dict[str, float]] = None
         self._topology_hash: Optional[str] = None
@@ -35,7 +37,7 @@ class Circuit:
     def add(self,
             component: Component,
             nodes: List[int]
-            ) -> 'Circuit':
+            ) -> Circuit:
         """ Add a component to the circuit. """
 
         def check():
@@ -66,6 +68,8 @@ class Circuit:
             check()
             self.component[component.id] = component
             self.nodes[component] = nodes
+        else:
+             self.component_not_added[component.id] = component
 
         return self
 

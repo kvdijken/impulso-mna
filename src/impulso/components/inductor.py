@@ -1,13 +1,19 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
+from __future__ import annotations
+from typing import Dict, List, Tuple, Optional, Type, Any, Protocol, TYPE_CHECKING
 import numpy as np
 
-from .component import Component, CircuitItem, Context, Stamping
+from .component import Component, CircuitItem, Context
 from ..base import Analysis
+from ..helperregistry import registry, StampingHelper, Factory
+
+if TYPE_CHECKING:
+    from ..circuit import Circuit
+
 
 LARGE_CONDUCTANCE = 1e12
 
 
-class InductorGroup(Stamping):
+class InductorGroup(StampingHelper):
     """
     A group of inductors that are mutually coupled.
 
@@ -16,7 +22,9 @@ class InductorGroup(Stamping):
     """
     _tol = 1e-6
 
-    def __init__(self, circuit: Circuit, ctx: Context):
+    def __init__(self,
+                 circuit: Circuit,
+                 ctx: Context):
         self._circuit = circuit
 
         # Get the inductors and mutual inductances from the circuit
@@ -131,9 +139,6 @@ class Inductor(Component):
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
 
-    def dc_conductance(self):
-        return LARGE_CONDUCTANCE  # treat inductor as short circuit in DC analysis
-
     def augments(self):
         return True
 
@@ -191,4 +196,23 @@ class MutualInductance(CircuitItem):
 
     def stamp(self, ctx: Context):
         raise NotImplementedError("MutualInductance should not be stamped directly, it's just a helper for managing inductors")
+
+
+class InductorGroupFactory(Factory):
+    def creates(self) -> Type[StampingHelper]:
+        return StampingHelper
+
+    def create_helper(self,
+                      circuit: Circuit,
+                      ctx: Context) -> StampingHelper:
+        inductors = [c for c in circuit.component.values() if isinstance(c, Inductor)]
+        if len(inductors) == 0:
+            return None
+        # TODO: one InductorGroup per Circuit 
+        return InductorGroup(circuit, ctx)
+
+
+
+registry.register_factory("InductorGroup", InductorGroupFactory())
+
 

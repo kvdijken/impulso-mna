@@ -7,9 +7,10 @@ from functools import cache
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
-from .components.inductor import Inductor, MutualInductance, InductorGroup
+#from .components.inductor import Inductor, MutualInductance, InductorGroup
 from .circuit import Circuit
 from .sources.source import PowerSource
+from .helperregistry import registry, StampingHelper, Factory
 
 
 class Solver_ACDC():
@@ -100,17 +101,15 @@ class Solver_ACDC():
         return self.node_index.keys()
 
 
-    def build_inductor_group(self) -> None:
-        # Only have to create an InductorGroup if there are inductors in the circuit
-        # since it is only used for stamping inductors and mutual inductances.
-        if any(isinstance(c, Inductor) for c in self.circuit.component.values()):
-            self._inductorgroup = InductorGroup(self.circuit, self.ctx)
-            self._stamping_components.append(self._inductorgroup)
-
-
     def prepare_for_solving(self) -> None:
         # Prepare the circuit for solving
-        self.build_inductor_group()
+
+        # Get all the stamping helpers
+        for name, provider in registry.factories(cls=StampingHelper):
+            stamping_helper = provider.create_helper(self.circuit, self.ctx)
+            if stamping_helper is not None:
+                self._stamping_components.append(stamping_helper)
+                stamping_helper.prepare(self.circuit, self.ctx)
 
 
     def solve_mna(self,
@@ -138,7 +137,7 @@ class Solver_ACDC():
                     self._stamping_components.append(c)
         if self._current_components is None:
             self._current_components = []
-            for c in self.component.values():
+            for c in list(self.component.values()) + list(self.circuit.component_not_added.values()):
                 if c.returns_current():
                     self._current_components.append(c)
 

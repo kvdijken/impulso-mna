@@ -9,6 +9,8 @@
 - Before solving, the Components are asked whether they stamp themselves into the admittance matrix by calling Component.stamps(). This should return True if the component stamps itself.
 - Before solving, the Components are asked whether they return a current after the solve by calling Component.returns_current(). This should return True if the Component returns a current.
 - two pytest tests added: TestAC.test_6() and TestAC.test_7() which test a transformer with coupling of 1 and dots opoosite (test_7) or not opposite (test_6).
+- new testscript named test_examples.py tests all example scripts in the .examples folder.
+- Circuit has a new attribute 'components_not_added' which contains all not-added components (mainly used for compound components such as BJT's).
 
 
 

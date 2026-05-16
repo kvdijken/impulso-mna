@@ -12,10 +12,11 @@ from .sources.diracdeltavoltagesource import DiracDeltaVoltageSource
 from .components.diode import Diode
 from .components.inductor import Inductor, MutualInductance
 from .components.opamp import Opamp
+from .components.resistor import Resistor
+from .helperregistry import registry, StampingHelper, Factory
 from .pivot import *
 from .profiler import profile
 from .sources.pulsevoltagesource import PulseVoltageSource
-from .components.resistor import Resistor
 from .sources.sinusoidalcurrentsource import SinusoidalCurrentSource
 from .sources.sinusoidalvoltagesource import SinusoidalVoltageSource
 from .sources.source import VoltageSource, PowerSource
