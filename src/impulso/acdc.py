@@ -34,8 +34,8 @@ class Solver_ACDC():
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.ctx = self.create_context()
 
-        self._stamping_components = None # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
-        self._current_components = None # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
+        self._stamping_components = [] # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
+        self._current_components = [] # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
 
 
 
@@ -130,22 +130,21 @@ class Solver_ACDC():
         if self.ctx.analysis_type is None:
             self.ctx.analysis_type = Analysis.AC if freq != 0 else Analysis.DC
 
-        if self._stamping_components is None:
-            self._stamping_components = []
-            for c in self.component.values():
-                if c.stamps():
-                    self._stamping_components.append(c)
-        if self._current_components is None:
-            self._current_components = []
-            for c in list(self.component.values()) + list(self.circuit.component_not_added.values()):
-                if c.returns_current():
-                    self._current_components.append(c)
-
         # Prepare the circuit for solving.
         # Do this at the very last moment just before solving, when everything  is ready,
         # since some components may need to know the node indices for preparation.
         if not self._prepared:
             self.prepare_for_solving()
+
+            # Collect all stamping component instances and current-returning
+            # components in the circuit, including those provided by helpers.
+            for comp in self.component.values():
+                if comp.stamps():
+                    self._stamping_components.append(comp)
+            for comp in list(self.component.values()) + list(self.circuit.component_not_added.values()):
+                if comp.returns_current():
+                    self._current_components.append(comp)
+
             self._prepared = True
 
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration

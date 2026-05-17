@@ -1,3 +1,7 @@
+# Run all the example scripts to ensure they execute without errors.
+# This is a smoke test to catch any issues in the examples or
+# bugs in the package itself which are not caught by the unit tests.
+
 import subprocess
 import sys
 from pathlib import Path
