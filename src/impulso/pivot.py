@@ -1,5 +1,9 @@
 from typing import List, Tuple, Dict, Union, TypeVar
 from collections import defaultdict
+from bisect import bisect_left, bisect_right
+from typing import Dict, Hashable, Literal, Tuple, TypeVar
+
+
 
 import numpy as np
 
@@ -128,3 +132,82 @@ def transpose_dicts(data:List[Dict[K,float]]) -> Dict[K,List[float]]:
             result[k].append(v)
     return dict(result)
 
+
+def time_slice(
+    *,
+    time: list[float],                 # time, ascending order
+    data: Dict[K, list[float]],        # data series
+    start: float,                      # start of time slice
+    end: float,                        # end of time slice
+    inclusive: bool = True,            # include start/end if equal
+    returns: Literal['data', 'indices'] = 'data'
+) -> (
+    Tuple[list[float], Dict[K, list[float]]]
+    | Tuple[int, int]
+):
+    """
+    Slice time-series data between `start` and `end`.
+
+    Parameters
+    ----------
+    time:
+        Ascending list of time values.
+    data:
+        Dictionary mapping keys to data vectors of equal length as `time`.
+    start:
+        Start time of slice.
+    end:
+        End time of slice.
+    inclusive:
+        If True:
+            include samples where time == start or time == end.
+        If False:
+            exclude samples where time == start or time == end.
+    returns:
+        'data':
+            return sliced time and data.
+        'indices':
+            return slice indices (i0, i1), usable as [i0:i1].
+
+    Returns
+    -------
+    If returns == 'data':
+        (
+            sliced_time,
+            sliced_data
+        )
+
+    If returns == 'indices':
+        (
+            start_index,
+            end_index
+        )
+
+    Notes
+    -----
+    The returned end index is exclusive, matching Python slicing semantics.
+    """
+
+    if start > end:
+        raise ValueError("start must be <= end")
+
+    if inclusive:
+        i0 = bisect_left(time, start)
+        i1 = bisect_right(time, end)
+    else:
+        i0 = bisect_right(time, start)
+        i1 = bisect_left(time, end)
+
+    if returns == 'indices':
+        return i0, i1
+
+    if returns != 'data':
+        raise ValueError("returns must be 'data' or 'indices'")
+
+    sliced_time = time[i0:i1]
+    sliced_data = {
+        key: values[i0:i1]
+        for key, values in data.items()
+    }
+
+    return sliced_time, sliced_data
