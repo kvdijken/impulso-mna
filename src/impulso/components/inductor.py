@@ -192,7 +192,10 @@ class MutualInductance(CircuitItem):
         return True
 
 
+
 class InductorGroupFactory(Factory):
+    _groups: dict[Circuit, InductorGroup] = {}
+
     def creates(self) -> Type[StampingHelper]:
         return StampingHelper
 
@@ -202,9 +205,11 @@ class InductorGroupFactory(Factory):
         inductors = [c for c in circuit.components if isinstance(c, Inductor)]
         if len(inductors) == 0:
             return None
-        # TODO: one InductorGroup per Circuit
-        return InductorGroup(circuit, ctx)
-
+        group = self._groups.get(circuit,None)
+        if group is None:
+            group = InductorGroup(circuit, ctx)
+            self._groups[circuit] = group
+        return group
 
 
 registry.register_factory("InductorGroup", InductorGroupFactory())

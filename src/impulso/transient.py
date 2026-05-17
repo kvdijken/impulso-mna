@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from typing import Dict, List, Tuple, Any, Type
+from typing import Dict, List, Tuple, Type
 
 import numpy as np
 

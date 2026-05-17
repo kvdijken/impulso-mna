@@ -99,8 +99,8 @@ class Solver_ACDC():
         # Prepare the circuit for solving
 
         # Get all the stamping helpers
-        for name, provider in registry.factories(cls=StampingHelper):
-            stamping_helper = provider.create_helper(self.circuit, self.ctx)
+        for name, factory in registry.factories(cls=StampingHelper):
+            stamping_helper = factory.create_helper(self.circuit, self.ctx)
             if stamping_helper is not None:
                 self._stamping_components.append(stamping_helper)
                 stamping_helper.prepare(self.circuit, self.ctx)
