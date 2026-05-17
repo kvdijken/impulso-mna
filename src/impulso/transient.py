@@ -18,10 +18,8 @@ class Solver_Transient(Solver_ACDC):
 
     def __init__(self,
                  circuit: Circuit,
-                 dt: float,
-                 integration_method: str = "backward_euler"):
+                 dt: float):
         super().__init__(circuit)
-        self.integration_method = integration_method
         self.dt = dt
 
         # augment context for transient analysis
