@@ -16,7 +16,7 @@ from .helperregistry import registry, StampingHelper, Factory
 class Solver_ACDC():
 
     nodes: Dict[Component, List[int]]  # component -> connected nodes
-    component: Dict[str, Component]  # component_id -> Component instance
+    component: list[Component]  # component_id -> Component instance
     node_index: Dict[int, int] = {} # node number -> index in MNA matrix
     ground_node: int = 0
     augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for
@@ -29,7 +29,7 @@ class Solver_ACDC():
         self.circuit = circuit
         self._prepared = False
         self.nodes = circuit.nodes
-        self.component = circuit.component
+        self.component = circuit.components
         self.ground_node = circuit.ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.ctx = self.create_context()
@@ -88,7 +88,7 @@ class Solver_ACDC():
 
     def all_components(self) -> List[Component]:
         """Return a list of all components in the circuit."""
-        return self.component.values()
+        return self.component
 
 
     def node_administration(self):
@@ -138,10 +138,10 @@ class Solver_ACDC():
 
             # Collect all stamping component instances and current-returning
             # components in the circuit, including those provided by helpers.
-            for comp in self.component.values():
+            for comp in self.component:
                 if comp.stamps():
                     self._stamping_components.append(comp)
-            for comp in list(self.component.values()) + list(self.circuit.component_not_added.values()):
+            for comp in list(self.component) + list(self.circuit.component_not_added.values()):
                 if comp.returns_current():
                     self._current_components.append(comp)
 
@@ -337,7 +337,7 @@ def solve_ac(circuit: Circuit,
         raise TopologyError("No AC sources found in the circuit. The results may be meaningless.")
 
     non_linears = set() # all nonlinear components in the circuit
-    for comp in circuit.component.values():
+    for comp in circuit.components:
         if not comp.linear():
             non_linears.add(comp)
 

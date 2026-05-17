@@ -15,12 +15,12 @@ class Circuit:
     """
 
     nodes: Dict[Component, List[int]]  # component -> connected nodes
-    component: Dict[str, Component]  # component_id -> Component instance
+    components: list[Component]  # component_id -> Component instance
 
 
     def __init__(self, ground_node =0):
         """Initialize an empty circuit."""
-        self.component = {}
+        self.components = []
         self.component_not_added = {}
         self._node_voltage_cache: Optional[Dict[int, float]] = None
         self._comp_currents_cache: Optional[Dict[str, float]] = None
@@ -30,46 +30,50 @@ class Circuit:
         self._prepared = False
 
 
-    def __getitem__(self, component_id: str) -> Component:
-        return self.component[component_id]
+    def __getitem__(self, id: str) -> Component:
+        for c in self.components:
+            if c.id == id:
+                return c
+        return None
 
 
     def add(self,
-            component: Component,
+            comp: Component,
             nodes: List[int]
             ) -> Circuit:
         """ Add a component to the circuit. """
 
         def check():
             """ Perform checks on the component and nodes before adding to the circuit. """
-            if not isinstance(component, Component):
-                raise TypeError(f"Expected component to be an instance of Component, got {type(component)}")
+            if not isinstance(comp, Component):
+                raise TypeError(f"Expected component to be an instance of Component, got {type(comp)}")
 
             if not (isinstance(nodes, list)):
                 raise TypeError(f"Expected nodes to be a list, got {type(nodes)}")
 
-            assert(not isinstance(component, MutualInductance))
+            assert(not isinstance(comp, MutualInductance))
 
             # Duplicate ID check
-            if self.component.get(component.id) is not None:
-                raise TopologyError(f"Component ID {component.id} already exists in the circuit.")
+            for c in self.components:
+                if c.id == comp.id:
+                    raise TopologyError(f"Component ID {comp.id} already exists in the circuit.")
 
             # Node connection check, at least 2 nodes
             if len(nodes) < 2:
-                raise ValueError(f"Component {component.id} must be connected to at least 2 nodes, got {len(nodes)}")
+                raise ValueError(f"Component {comp.id} must be connected to at least 2 nodes, got {len(nodes)}")
 
 
         try:
-            do_add = component.before_add(self, nodes)
+            do_add = comp.before_add(self, nodes)
         except AttributeError:
             do_add = True
 
         if do_add:
             check()
-            self.component[component.id] = component
-            self.nodes[component] = nodes
+            self.components.append(comp)
+            self.nodes[comp] = nodes
         else:
-             self.component_not_added[component.id] = component
+             self.component_not_added[comp.id] = comp
 
         return self
 
@@ -81,14 +85,14 @@ class Circuit:
         except AttributeError:
             do_add = True
         if do_add:
-            self.component[instruction.id] = instruction
+            self.components.append(instruction)
         return self
 
 
     def all_nodes(self) -> List[int]:
         """Return a sorted list of all nodes in the circuit."""
         _nodes = set()
-        for c in self.component.values():
+        for c in self.components:
             _nodes.update(self.nodes.get(c, [])) # A component may not have been added to the circuit itself, only its sub-components (e.g. NPN's internal components)
         if None in _nodes:
             _nodes.remove(None)
@@ -100,13 +104,13 @@ class Circuit:
         return _nodes_int + _nodes_str
 
     def all_of_type(self, _type: CircuitItem) -> List[CircuitItem]:
-        all = [c for c in self.component.values() if isinstance(c, _type)]
+        all = [c for c in self.components if isinstance(c, _type)]
         return all
 
     def validate(self):
         if not self.ground_node in self.all_nodes():
             raise TopologyError(f"Ground node {self.ground_node} is not connected to any component in the circuit.")
-        if len(self.component) == 0:
+        if len(self.components) == 0:
             raise TopologyError("Circuit must contain at least one component.")
 
 

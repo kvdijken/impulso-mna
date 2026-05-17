@@ -30,11 +30,11 @@ class InductorGroup(StampingHelper):
         # Get the inductors and mutual inductances from the circuit
         self._inductors: dict[Inductor, int] = {} # map from Inductor to local _L index
         self._n = 0
-        for comp in circuit.component.values():
+        for comp in circuit.components:
             if isinstance(comp, Inductor):
                 self._inductors[comp] = self._n
                 self._n += 1
-        self._mutuals: List[MutualInductance] = [c for c in circuit.component.values() if isinstance(c, MutualInductance)]
+        self._mutuals: List[MutualInductance] = [c for c in circuit.components if isinstance(c, MutualInductance)]
 
         # node indices into MNA matrix for each inductor
         self._node_indices = {}
@@ -205,10 +205,10 @@ class InductorGroupFactory(Factory):
     def create_helper(self,
                       circuit: Circuit,
                       ctx: Context) -> StampingHelper:
-        inductors = [c for c in circuit.component.values() if isinstance(c, Inductor)]
+        inductors = [c for c in circuit.components if isinstance(c, Inductor)]
         if len(inductors) == 0:
             return None
-        # TODO: one InductorGroup per Circuit 
+        # TODO: one InductorGroup per Circuit
         return InductorGroup(circuit, ctx)
 
 

@@ -11,6 +11,8 @@
 - two pytest tests added: TestAC.test_6() and TestAC.test_7() which test a transformer with coupling of 1 and dots opoosite (test_7) or not opposite (test_6).
 - new testscript named test_examples.py tests all example scripts in the .examples folder.
 - Circuit has a new attribute 'components_not_added' which contains all not-added components (mainly used for compound components such as BJT's).
+- Circuit.component has changed from a dict[str:Component] to a list[Component]. The lookup from comp.id to Component was never used and a list is easier. Also renamed from component to components. Similar for Solver_ACDC.component.
+
 
 
 
