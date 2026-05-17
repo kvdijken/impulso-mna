@@ -33,7 +33,7 @@ class Solver_Transient(Solver_ACDC):
         # --- Separate components ---
         self.all = {} # dict component_type -> list of components of that type
         self.all = defaultdict(list)
-        for comp in self.all_components():
+        for comp in self.components:
             self.all[type(comp)].append(comp)
         super().node_administration()
 
@@ -50,7 +50,7 @@ class Solver_Transient(Solver_ACDC):
         times = np.arange(0, t_stop + dt / 2, dt)
 
         voltage = {n: 0.0 for n in self.all_nodes()}
-        current = {comp.id: 0.0 for comp in self.all_components()}
+        current = {comp.id: 0.0 for comp in self.components}
 
         initial_voltages = {}
         initial_currents = {}

@@ -15,7 +15,7 @@ from .helperregistry import registry, StampingHelper
 class Solver_ACDC():
 
     nodes: Dict[Component, List[int]]  # component -> connected nodes
-    component: list[Component]  # component_id -> Component instance
+    components: list[Component]  # component_id -> Component instance
     node_index: Dict[int, int] = {} # node number -> index in MNA matrix
     ground_node: int = 0
     augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for
@@ -28,7 +28,7 @@ class Solver_ACDC():
         self.circuit = circuit
         self._prepared = False
         self.nodes = circuit.nodes
-        self.component = circuit.components
+        self.components = circuit.components
         self.ground_node = circuit.ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.ctx = self.create_context()
@@ -85,11 +85,6 @@ class Solver_ACDC():
         return self.solve_mna(freq)
 
 
-    def all_components(self) -> List[Component]:
-        """Return a list of all components in the circuit."""
-        return self.component
-
-
     def node_administration(self):
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
@@ -137,10 +132,10 @@ class Solver_ACDC():
 
             # Collect all stamping component instances and current-returning
             # components in the circuit, including those provided by helpers.
-            for comp in self.component:
+            for comp in self.components:
                 if comp.stamps():
                     self._stamping_components.append(comp)
-            for comp in list(self.component) + list(self.circuit.component_not_added.values()):
+            for comp in list(self.components) + list(self.circuit.component_not_added.values()):
                 if comp.returns_current():
                     self._current_components.append(comp)
 
@@ -193,7 +188,7 @@ class Solver_ACDC():
     @cache
     def has_nonlinear_components(self) -> bool:
         """Check if the circuit contains any nonlinear components."""
-        for comp in self.all_components():
+        for comp in self.components:
             if not comp.linear():
                 return True
         return False
@@ -248,7 +243,7 @@ class Solver_ACDC():
         '''
         # --- Collect nodes ---
         all_nodes = set()
-        for comp in self.all_components():
+        for comp in self.components:
             # Check if this is only a simulation directve,
             # without nodes, that should not be included
             # in the node administration
@@ -272,7 +267,7 @@ class Solver_ACDC():
         Assign a slot to all components that require one in the
         MNA matrix (voltage sources, VCVS, CCVS, Wires, Inductors, Opamps)
         '''
-        for comp in self.all_components():
+        for comp in self.components:
             if comp.augments():
                 self.augm_idx[comp] = N
                 N = N + 1
