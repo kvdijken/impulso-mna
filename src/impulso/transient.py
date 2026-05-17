@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Type
 
 import numpy as np
 
@@ -10,6 +10,7 @@ from .acdc import Solver_ACDC
 from .components.capacitor import Capacitor
 from .components.inductor import Inductor
 from .circuit import Circuit
+from .pivot import transpose_dicts
 
 
 class Solver_Transient(Solver_ACDC):
@@ -20,16 +21,14 @@ class Solver_Transient(Solver_ACDC):
                  circuit: Circuit,
                  dt: float):
         super().__init__(circuit)
-        self.dt = dt
 
         # augment context for transient analysis
         self.ctx.analysis_type = Analysis.TRANSIENT
-        self.ctx.dt = self.dt
+        self.ctx.dt = dt
 
 
     def node_administration(self):
-        # --- Separate components ---
-        self.all = {} # dict component_type -> list of components of that type
+        # --- Separate components by their type ---
         self.all = defaultdict(list)
         for comp in self.components:
             self.all[type(comp)].append(comp)
@@ -115,19 +114,11 @@ def solve_transient(circuit: Circuit,
                                Dict[str|Component, # component
                                     List[float]     # current over time
                                ]]:
-
-    def transpose(data:List[Dict[Any,float]]) -> Dict[Any,List[float]]:
-        result = defaultdict(list)
-        for d in data:
-            for k, v in d.items():
-                result[k].append(v)
-        return dict(result)
-
     solver = Solver_Transient(circuit,
                               dt=dt)
     time, _v, _c = solver.solve(t_stop, dt)
-    _v = transpose(_v)
-    _c = transpose(_c)
+    _v = transpose_dicts(_v)
+    _c = transpose_dicts(_c)
     return time, _v, _c
 
 

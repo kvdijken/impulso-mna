@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, TypeVar
 from collections import defaultdict
 
 import numpy as np
@@ -112,4 +112,19 @@ def i_pivot(data: list[Dict[ComponentType, complex]] # list[component -> compone
         for k, v in d.items():
             out[k].append(v)
     return dict(out)
+
+
+
+K = TypeVar('Key')
+
+def transpose_dicts(data:List[Dict[K,float]]) -> Dict[K,List[float]]:
+    '''
+    Transpose a list of key–value mappings into
+    a mapping of keys to value sequences.
+    '''
+    result = defaultdict(list)
+    for d in data:
+        for k, v in d.items():
+            result[k].append(v)
+    return dict(result)
 
