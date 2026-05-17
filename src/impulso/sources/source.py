@@ -1,6 +1,4 @@
 from ..components.component import *
-from ..components.resistor import Resistor
-from ..components.capacitor import Capacitor
 
 
 class PowerSource(Component):

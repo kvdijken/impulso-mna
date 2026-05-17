@@ -1,7 +1,6 @@
 # Transient analysis of a transformer circuit with mutual inductance = 0.5
 # and dots on opposite sides of the inductors.
 
-import numpy as np
 import matplotlib.pyplot as plt
 from impulso import Circuit, Resistor, Inductor, MutualInductance, SinusoidalVoltageSource, solve_transient
 

@@ -1,12 +1,11 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
-import numpy as np
+from typing import Optional
 
 from ..base import Analysis
 from .source import PowerSource
-from ..components.component import Context
+from ..components.component import Context, Stamper
 
 
-class DCCurrentSource(PowerSource):
+class DCCurrentSource(PowerSource, Stamper):
     """
     Independent DC current source.
 

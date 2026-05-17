@@ -1,11 +1,11 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Optional
 
 from ..base import Analysis
 from .source import VoltageSource
-from ..components.component import Context
+from ..components.component import Context, Stamper
 
 
-class DCVoltageSource(VoltageSource):
+class DCVoltageSource(VoltageSource, Stamper):
     """
     Voltage source component.
     """
@@ -13,10 +13,10 @@ class DCVoltageSource(VoltageSource):
     def admittance(self, s: Optional[complex] = None) -> complex:
         """Calculate admittance (1/impedance) for AC analysis."""
         pass
-        
+
     def augments(self):
         return True
-    
+
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)
@@ -26,15 +26,15 @@ class DCVoltageSource(VoltageSource):
         if j is not None:
             ctx.Y[j, augm] -= 1
             ctx.Y[augm, j] += 1
-            
+
         if ctx.analysis_type == Analysis.AC:
             ctx.z[augm] = 0 # volts
         else:
             ctx.z[augm] = self.voltage # volts
-    
+
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]
-    
-    
+
+
 

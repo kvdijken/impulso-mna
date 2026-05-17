@@ -2,13 +2,13 @@ from typing import Dict, List, Tuple, Optional, Type, Any
 import numpy as np
 
 from .source import PowerSource
-from ..components.component import Component, Context
+from ..components.component import Component, Context, Stamper
 from .dcvoltagesource import DCVoltageSource
 from ..components.resistor import Resistor
 from ..components.capacitor import Capacitor
 
 
-class CCCS(PowerSource):
+class CCCS(PowerSource, Stamper):
     # Current Controlled Current Source
 
     def __init__(self, *,

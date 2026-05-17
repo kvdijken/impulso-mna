@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from quantiphy import Quantity
 
 from impulso import Circuit, Capacitor, Inductor, solve_transient
-from impulso import Resistor
 
 plt.rcParams['axes.xmargin'] = 0
 

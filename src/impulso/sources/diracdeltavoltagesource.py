@@ -1,11 +1,11 @@
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Optional
 
 from .source import PowerSource
-from ..components.component import Context
+from ..components.component import Context, Stamper
 from ..base import  Analysis
 
-class DiracDeltaVoltageSource(PowerSource):
+class DiracDeltaVoltageSource(PowerSource, Stamper):
     '''
     '''
 

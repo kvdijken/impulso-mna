@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Dict, List, Protocol, Type, Generator, Any, TYPE_CHECKING
+from typing import Dict, List, Protocol, Type, TYPE_CHECKING
 from collections import defaultdict
 
-from .components.component import Context
+from .components.component import Context, Stamper
 
 if TYPE_CHECKING:
     from .circuit import Circuit
@@ -15,10 +15,7 @@ class Helper(Protocol):
         ...
 
 
-class StampingHelper(Helper):
-    def stamp(self,
-              circuit: Circuit,
-              ctx: Context):
+class StampingHelper(Helper, Stamper):
         ...
 
 

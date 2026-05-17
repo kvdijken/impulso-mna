@@ -1,10 +1,10 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Optional
 
-from .component import Component, Context
+from .component import Component, Context, Stamper
 from ..base import Analysis
 
 
-class Capacitor(Component):
+class Capacitor(Component, Stamper):
 
     def __init__(self,
                  capacitance: float,

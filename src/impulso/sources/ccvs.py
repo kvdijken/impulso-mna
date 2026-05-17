@@ -1,14 +1,14 @@
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Dict, Optional
 
 from .source import PowerSource
-from ..components.component import Component, Context
+from ..components.component import Component, Context, Stamper
 from ..components.resistor import Resistor
 from ..components.capacitor import Capacitor
 from .dcvoltagesource import DCVoltageSource
 
 
-class CCVS(PowerSource):
+class CCVS(PowerSource, Stamper):
     # Current Controlled Voltage Source
 
     def __init__(self,

@@ -1,9 +1,9 @@
-from typing import Dict, List, Tuple, Optional, Type, Any
+from typing import Optional
 
-from .component import Component, Context
+from .component import Component, Context, Stamper
 
 
-class Resistor(Component):
+class Resistor(Component, Stamper):
     """Resistor component."""
 
     def __init__(self, resistance: float, id: Optional[str] = None):

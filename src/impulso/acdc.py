@@ -1,8 +1,7 @@
 import os
 
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Tuple
 import numpy as np
-from collections import defaultdict
 from functools import cache
 
 from .base import Analysis, TopologyError
@@ -10,7 +9,7 @@ from .components.component import Component, Context
 #from .components.inductor import Inductor, MutualInductance, InductorGroup
 from .circuit import Circuit
 from .sources.source import PowerSource
-from .helperregistry import registry, StampingHelper, Factory
+from .helperregistry import registry, StampingHelper
 
 
 class Solver_ACDC():

@@ -3,10 +3,10 @@ from typing import Optional
 import numpy as np
 
 from ..base import Analysis
-from .component import Component, Context
+from .component import Component, Context, Stamper
 
 
-class Diode(Component):
+class Diode(Component, Stamper):
     ''' connect as [anode,cathode] '''
 
     def __init__(self,

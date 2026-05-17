@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 
 from impulso import Circuit, Diode, Resistor, Capacitor, DCVoltageSource, SinusoidalVoltageSource, NPN, PNP, solve_transient

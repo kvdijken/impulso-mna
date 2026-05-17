@@ -1,8 +1,7 @@
 from __future__ import annotations
-from typing import Dict, List, Protocol, Tuple, Optional, Type, Any, Callable, TYPE_CHECKING
+from typing import List, Protocol, Tuple, Optional, Callable, TYPE_CHECKING
 import uuid
 import abc
-from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,6 +13,13 @@ if TYPE_CHECKING:
 
 
 LARGE_CONDUCTANCE = 1e12
+
+
+class Stamper(Protocol):
+    def stamp(self,
+              circuit: Circuit,
+              ctx: Context):
+        ...
 
 
 class CircuitItem(abc.ABC):

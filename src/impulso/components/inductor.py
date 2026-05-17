@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Tuple, Optional, Type, Any, Protocol, TYPE_CHECKING
+from typing import List, Optional, Type, TYPE_CHECKING
 import numpy as np
 
 from .component import Component, CircuitItem, Context
@@ -142,9 +142,6 @@ class Inductor(Component):
     def augments(self):
         return True
 
-    def stamp(self, ctx: Context):
-        raise NotImplementedError("MutualInductance should not be stamped directly, it's just a helper for managing inductors")
-
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
         return ctx.x[idx]
@@ -193,9 +190,6 @@ class MutualInductance(CircuitItem):
 
     def linear(self) -> bool:
         return True
-
-    def stamp(self, ctx: Context):
-        raise NotImplementedError("MutualInductance should not be stamped directly, it's just a helper for managing inductors")
 
 
 class InductorGroupFactory(Factory):

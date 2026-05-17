@@ -1,7 +1,6 @@
 # see: https://forum.digikey.com/t/operation-of-a-diode-based-rf-switch-a-pin-diode-demonstration/36786
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from impulso import (
     Circuit,

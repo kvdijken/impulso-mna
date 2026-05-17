@@ -1,11 +1,9 @@
 from typing import List, Tuple, Dict, Iterable, Any
-from collections import defaultdict
 
-import numpy as np
 
 from .circuit import Circuit
 from .acdc import _solve_acdc, solve_ac
-from .components.component import Component, Context
+from .components.component import Component
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Dict, List, Tuple, Optional, Type, Protocol, Any, TYPE_CHECKING
+from typing import List, Tuple, Optional, Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..circuit import Circuit

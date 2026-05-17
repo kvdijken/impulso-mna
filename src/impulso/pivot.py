@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Union, Iterable
+from typing import List, Tuple, Dict, Union
 from collections import defaultdict
 
 import numpy as np
@@ -36,7 +36,7 @@ def freq_pivot_and_select(data: dict[float, # frequency
         node_voltages: dict node -> list of voltages over frequencies
         component_currents: dict component -> list of currents over frequencies
     '''
-    
+
     def output(c: complex):
         match to_return:
             case 'M':
@@ -51,7 +51,7 @@ def freq_pivot_and_select(data: dict[float, # frequency
                 return np.imag(c)
             case 'C':
                 return c
-        
+
     def unwrap(arr):
         if to_return == 'P':
             return np.unwrap(arr, period=360 if deg else 2*np.pi)
@@ -61,11 +61,11 @@ def freq_pivot_and_select(data: dict[float, # frequency
             return np.array(mag), np.unwrap(phase, period=360 if deg else 2*np.pi)
         else:
             return arr
-        
+
     assert to_return in ['M', 'P', 'MP', 'R', 'I', 'C'], "to_return must be one of 'M', 'P', 'MP', 'R', 'I', or 'C'"
     freqs = list(data.keys())
     first_voltages, first_currents = next(iter(data.values()))
-    
+
     # Determine which node voltages to return
     if voltage_nodes is None:
         voltage_nodes = first_voltages.keys()
@@ -75,7 +75,7 @@ def freq_pivot_and_select(data: dict[float, # frequency
     voltages = {
         node: unwrap(np.array(output([data[f][0][node] for f in freqs]))) for node in voltage_nodes
     }
-    
+
     # Determine which component currents to return
     if current_components is None:
         current_components = first_currents.keys()
@@ -86,7 +86,7 @@ def freq_pivot_and_select(data: dict[float, # frequency
         comp: output(np.array([data[f][1][comp] for f in freqs]))
                for comp in current_components
     }
-    
+
     return freqs, voltages, currents
 
 
@@ -96,7 +96,7 @@ ComponentType = Union[str, "Component"]
 
 def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that node]
             )-> Dict[NodeType, List[complex]]: # node -> list of voltages
-    
+
     out: Dict[NodeType, List[complex]] = defaultdict(list)
     for d in data:
         for k, v in d.items():
@@ -106,7 +106,7 @@ def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that n
 
 def i_pivot(data: list[Dict[ComponentType, complex]] # list[component -> component current]
             )-> Dict[ComponentType, List[complex]]: # component -> list of currents
-    
+
     out: Dict[ComponentType, List[complex]] = defaultdict(list)
     for d in data:
         for k, v in d.items():
