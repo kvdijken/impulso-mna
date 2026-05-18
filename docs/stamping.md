@@ -1,46 +1,3 @@
-$$
-\left[
-\begin{array}{c c c c c c}
-   & & i & & j \\
-    & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   i &\cdots & \cdots & \cdots & \cdots & \cdots \\
-    & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   j & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   \end{array}
-\right]
-$$
-
-$$
-\left[
-\begin{array}{c c c c c c}
-   & & i & j & p & q \\
-    & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   i &\cdots & \cdots & \cdots & \cdots & \cdots \\
-   j & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   p & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   q & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   \end{array}
-\right]
-$$
-
-$$
-\left[
-\begin{array}{c c c c c c | c}
-   & & i & j & p & q \\
-    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   i &\cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   j & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   \hline
-    & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
-   \end{array}
-\right]
-$$
-
-
-
 # References
 
 1. Ali Hajimiri (Caltech), https://youtu.be/E6SWCh33L7U?list=PLc7Gz02Znph_HU1I9STgC4Nv0aG_jdb8Z (for resistor)
@@ -119,21 +76,40 @@ Values in $\mathbf{Y}$ can have (frequency dependent) complex values for reactiv
 
 In MNA auxiliary equations (for voltage sources, inductors) diagonal entries are **not admittances**. They are whatever coefficient arises from the constitutive equation.
 
-For some components with time varying behaviour stamping differs for AC and DC analysis
+The MNA matrix equation is
+
+$$
+Ax=z
+$$
+
+where
+
+$\mathbf{A}$ contains coefficients relating unknown variables,
+$\vec{x}$ contains the unknown node voltages and auxiliary currents,
+$\vec{z}$ contains independent excitations.
+For dynamic components such as capacitors and inductors, the stamping differs between DC, AC, and transient analysis.
+
+One nuance worth mentioning: an independent voltage source also modifies the matrix because it introduces an additional equation and unknown current,
+but its value still appears in the RHS vector $\vec{z}$.
 
 # Conventions
 
-- dependent currents flowing out of a node are positive
-- independent currents $I$ are positive into a node
+Currents leaving a node are taken as positive.
 
+Independent sources contribute to the RHS vector.
 
+Dependent sources contribute coefficients to the system matrix because their values depend on circuit unknowns.
+
+# Frequency
+
+In AC analysis the (complex) frequency is defined as $s=j\omega=2j\pi f$ with $f$ the frequency in radians per second.
 
 
 # Linear Components
 
 ## Resistor
 
-A resistor $R_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+A resistor $R_{ij}$ between nodes $i$ and $j$ stamps the admittance matrix $\mathbf{Y}$ as
 
 $$
 \left[
@@ -155,7 +131,7 @@ See [1].
 
 ## Capacitor
 
-A capacitor $C_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+A capacitor $C_{ij}$ between nodes $i$ and $j$ stamps the admittance matrix $\mathbf{Y}$ as
 
 $$
 \left[
@@ -175,11 +151,11 @@ where $G_{ij}=sC_{ij}$.
 
 ## Inductor
 
-### Simple solution
+### Admittance formulation (AC only)
 
 A very simple way which works for AC analysis (neither DC, nor transient) is the following.
 
-An inductor $L_{ij}$ between nodes {i} and {j} stamps the admittance matrix $\mathbf{Y}$ as
+An inductor $L_{ij}$ between nodes $i$ and $j$ stamps the admittance matrix $\mathbf{Y}$ as
 
 $$
 \left[
@@ -200,7 +176,7 @@ It does not work for DC because at DC $s=0$ causing numerical problems. A specia
 
 For transient analysis we need an entirely different way, similar to capacitors in transient analysis.
 
-### Advanced solution
+### Standard MNA formulation
 
 For an inductor L between nodes $i$ and $j$, positive current flowing from node $i$ to node $j$
 
@@ -227,7 +203,7 @@ $$
 \right]
 $$
 
-Then the KCL controbutions are:
+Then the KCL contributions are:
 
 * $+i_L$ for node $i$
 * $-i_L$ for node $j$
@@ -235,6 +211,8 @@ Then the KCL controbutions are:
 This produces
 * $Y[i,i_L]+=1$
 * $Y[j,i_L]-=1$
+
+where $\mathbf{A}$ now is the system matrix. The system matrix $\mathbf{A}$ is the admittance matrix $\mathbf{Y}$ augmented with non-current rows.
 
 Now we enforce $v_i - v_j - sLi_L = 0$.
 
@@ -253,6 +231,7 @@ $$
 The full stamping becomes:
 
 $$
+\Delta\mathbf{Y} =
 \left[
 \begin{array}{c c c c c c | c}
    & & i & j &  &  & i_L\\
@@ -273,7 +252,7 @@ $$
 
 The non-linear diode is linearized using the Newton-Raphson method.
 
-The diode equation
+The diode equation is
 
 $$
 i_D = I_s(\mathrm{e}^{v_D/V_T}-1)
@@ -282,10 +261,27 @@ $$
 We will approach the value for $i_D$ by iterating over step $k$ around the current estimate $v_D^{(k)}$. We approximate the diode current with a first-order Taylor expansion:
 
 $$
-\begin{align}
-i_D^{(k+1)} &\approx i_D^{(k)} +\frac{\delta i_D^{(k)}}{\delta v_D}v_D^{(k)} \\
-&= i_D^k+g_D^{(k)}v_D^{(k)}
-\end{align}
+i_D^{(k+1)}
+\approx
+i_D^{(k)}
++
+\left.\frac{di_D}{dv_D}\right|_{v_D^{(k)}}
+\left(v_D^{(k+1)} - v_D^{(k)}\right)
+$$
+
+or equivalently:
+
+$$
+i_D
+\approx
+g_D^{(k)} v_D + I_{\mathrm{eq}}^{(k)}
+$$
+
+with
+
+$$
+I_{\mathrm{eq}}^{(k)}
+= i_D^{(k)} - g_D^{(k)}v_D^{(k)}
 $$
 
 where
@@ -332,13 +328,14 @@ $$
 
 ## Voltage Source
 
-A voltage source $V_{ij} = V_j-V_i$ produces an extraexpression  in the matrix $\mathbf{Y}$, what makes the nodal analysis an augmented nodal analysis. The extra equation give an extra row and extra column at index $a$ with the following entries:
+A voltage source $V_{ij} = V_j-V_i$ produces an extra expression  in the matrix $\mathbf{Y}$, which augments the nodal system. The extra equation gives an extra row and extra column at index $a$ with the following entries:
 
 The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$. Current through the voltage source flows from the negative pole to the positive pole.
 
 Stamping the voltage source will be as follows:
 
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c c c c c c | c}
    & & i & j & p & q & a\\
@@ -348,7 +345,23 @@ $$
    p & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
    q & \cdots & \cdots & \cdots & \cdots & \cdots & \cdots \\
    \hline
-   a & \cdots & -1 & +1 & \cdots & \cdots & V_{ij} \\
+   a & \cdots & -1 & +1 & \cdots & \cdots & 0 \\
+   \end{array}
+\right]
+$$
+
+and the stamping in the RHS vector
+
+$$
+\Delta \vec{z} = \left[
+\begin{array}{c}
+   \cdots \\
+   \cdots \\
+   \cdots  \\
+   \cdots  \\
+   \cdots \\
+   \hline
+   V_{ij}
    \end{array}
 \right]
 $$
@@ -361,7 +374,7 @@ Row $a$ represents the equation $V_{ij}=V_j-V_i$. Column $a$ calculates the curr
 A current source $I_{ij}$ between nodes $i$ and $j$ with current flowing from $i$ to $j$ stamps the RHS vector $\vec{z}$ as
 
 $$
-\left[
+\Delta \vec{z} = \left[
 \begin{array}{ccc}
    & \vdots \\
    i: & -I_{ij} \\
@@ -398,6 +411,7 @@ $$
 This stamps the admittance matrix as:
 
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c : c c c c c c}
 \; & j & \; & i & p & q & i_{ccvs} \\ \\
@@ -454,6 +468,7 @@ $$
 This stamps the matrix as follows:
 
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c : c c c c c c c}
 \; & j & \; & i & p & q & i_{v_0} & i_{ccvs} \\ \\
@@ -505,6 +520,7 @@ $$
 
 VCVS stamping:
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c : c c c c c c}
 \; & j & \; & i & p & q & i_{vcvs} \\ \\
@@ -549,6 +565,7 @@ Note that a CCCS controlled by a resistor or capacitor may cause ill-defined (si
 Controlled by a resistor or capacitor, the current $I_{ij}=A \cdot I_x$, where $I_x$ is the controlling current, and $I_{ij}$ the current from node $i$ to node $j$  being controlled. The controlling current $I_x=Y_{pq} \cdot (V_p-V_q)$, where $p$ and $q$ are the nodes to which the resistor or capacitor is connected to.
 
 $$
+\Delta \mathbf{Y} =
 \begin{align}
 I_{ij} &= A \cdot I_x \\
 & =A \cdot Y_{pq} \cdot (V_p-V_q) \\
@@ -641,6 +658,7 @@ $G_m(V_p-V_q)$
 out of node $i$ (negative) into node $j$ (positive). This causes the following additions to the matrix $\mathbf{Y}$:
 
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c c c c c c}
    & & i & j & p & q \\
