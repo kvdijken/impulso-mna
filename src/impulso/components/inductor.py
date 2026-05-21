@@ -84,13 +84,13 @@ class InductorGroup(StampingHelper):
         ctx.Y[ix_] -= Z
 
     def _stamp_transient(self, ctx: Context):
-        Z = self._L / ctx.dt
+        z_eq = self._L / ctx.dt
         k = np.array(self._local_to_global_idx)
         ix_ = np.ix_(k, k)
-        ctx.Y[ix_] -= Z
+        ctx.Y[ix_] -= z_eq
 
         i_prev = np.array([ctx.current_history[-1][ind] for ind in self._inductors])
-        ctx.z[k] -= Z @ i_prev
+        ctx.z[k] -= z_eq @ i_prev
 
     def stamp(self, ctx: Context):
         # Stamp topology

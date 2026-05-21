@@ -102,7 +102,7 @@ Dependent sources contribute coefficients to the system matrix because their val
 
 # Frequency
 
-In AC analysis the (complex) frequency is defined as $s=j\omega=2j\pi f$ with $f$ the frequency in radians per second.
+In AC analysis the (complex) frequency is defined as $s=j\omega=2j\pi f$ with $f$ the frequency in Hz.
 
 
 # Linear Components
@@ -158,6 +158,7 @@ A very simple way which works for AC analysis (neither DC, nor transient) is the
 An inductor $L_{ij}$ between nodes $i$ and $j$ stamps the admittance matrix $\mathbf{Y}$ as
 
 $$
+\Delta \mathbf{Y} =
 \left[
 \begin{array}{c c c c c c}
    & & i & & j \\
@@ -190,7 +191,7 @@ $$
 v_L(s) = v_i - v_j=sLi_L
 $$
 
-We define an extra unknown, the inductor current $i_L$ so the unknown vector $\vec{z}$ becomes
+We define an extra unknown, the inductor current $i_L$ so the unknown vector $\vec{x}$ becomes
 
 $$
 \vec{z}=\left[
@@ -212,7 +213,7 @@ This produces
 * $Y[i,i_L]+=1$
 * $Y[j,i_L]-=1$
 
-where $\mathbf{A}$ now is the system matrix. The system matrix $\mathbf{A}$ is the admittance matrix $\mathbf{Y}$ augmented with non-current rows.
+where $\mathbf{Y}$ now is the system matrix. The system matrix $\mathbf{Y}$ extends the nodal admittance matrix with auxiliary rows and columns for additional current and constraint equations.
 
 Now we enforce $v_i - v_j - sLi_L = 0$.
 
@@ -245,6 +246,231 @@ $$
    \end{array}
 \right]
 $$
+
+### Mutual Inductance
+#### General
+
+For two coupled inductors:
+
+$$v_1 = L_1 \frac{di_1}{dt} + M \frac{di_2}{dt}$$
+$$v_2 = L_2 \frac{di_2}{dt} + M \frac{di_1}{dt}$$
+
+When we write
+
+$$i = \begin{bmatrix} i_1 \\ i_2 \end{bmatrix}, \quad
+v = \begin{bmatrix} v_1 \\ v_2 \end{bmatrix}$$
+Then:
+
+$$v =
+\begin{bmatrix}
+L_1 & M \\
+M & L_2
+\end{bmatrix}
+\frac{di}{dt}$$
+
+Call this matrix:
+
+$$\mathbf{L} =
+\begin{bmatrix}
+L_1 & M \\
+M & L_2
+\end{bmatrix}$$
+
+The matrix $\mathbf{L}$ is the inductance matrix. A mutual inductance is represented by a matrix-values inductance. The mutual inductance between two inductors $L_1$ and $L_2$ = $M_{12}=k_{12}\sqrt{L_1L_2}$, where $k$ is the coupling factor between the two inductors, $\left| k_{12}\right|\le 1$. If the winding orientation of the two coils is opposite, $M$ is negative.
+
+When all coupled inductors are regarded as a single multiport element, the equations remain structurally identical to the single-inductor case.
+
+A coupled inductor system is simply:
+
+$$v = \mathbf{L} \frac{di}{dt}$$
+
+where $\mathbf{L}$ is no longer scalar.
+
+$\mathbf{L}$ can be expanded to any size for any number of coupled inductors. For non-coupled inductors $i$ and $j$ the mutual inductance $M_{ij}=0$. For a system with three inductors
+
+$$\mathbf{L} =
+\begin{bmatrix}
+L_1 & M_{12} & M_{13} \\
+M_{21} & L_2 & M_{23} \\
+M_{31} & M_{32} & L_3
+\end{bmatrix}$$
+
+For only a single inductor in the circuit $\mathbf{L}$ reduces to
+$$
+\mathbf{L} = L
+$$
+
+Every inductor augments the admittance matrix with its own row. This row defines the current-voltage relation over this single inductor. The rows associated with the auxiliary inductor currents are coupled through the inductance matrix L.
+
+#### Transient simulation
+
+Using backward Euler, you get:
+
+$$\frac{di}{dt} \approx \frac{i^{n} - i^{n-1}}{\Delta t}$$
+
+So:
+
+$$v^{n} = \mathbf{L} \cdot \frac{i^{n} - i^{n-1}}{\Delta t}$$
+
+Rearrange:
+
+$$v^{n} = \underbrace{\frac{\mathbf{L}}{\Delta t}}_{\mathbf{Z}_{eq}} i^{(n)}
+
+- \underbrace{\frac{\mathbf{L}}{\Delta t}}_{\mathbf{Z}_{eq}} i^{(n-1)}$$
+
+So the equivalent is:
+
+* A **matrix impedance**
+  $$\mathbf{Z}_{eq} = \frac{\mathbf{L}}{\Delta t}$$
+
+* parallel with a **history voltage source**
+  $$v_{hist} = \frac{\mathbf{L}}{\Delta t} i^{(n-1)}$$
+
+The matrix impedance $\mathbf{Z}_{eq}$ stamps the matrix $\mathbf{Y}$ as:
+$$
+\Delta \mathbf{Y} =
+\left[
+\begin{array}{c c c c c : c c}
+   & i & j & p & q & i_{L_1} & i_{L_2} \\
+    i & \cdots & \cdots & \cdots & \cdots & +1 & \cdots \\
+    j & \cdots & \cdots & \cdots & \cdots & -1 & \cdots \\
+    p & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+    q & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   \hdashline
+    i_{L_1} & +1 & -1 & \cdots & \cdots & -L_1/{\Delta t} & -M_{12}/{\Delta t} \\
+    i_{L_2} & \cdots & \cdots & +1 & -1 & -M_{21}/{\Delta t} & -L_2/{\Delta t} \\
+   \end{array}
+\right]
+$$
+where $L_1$ is the inductor between nodes $i$ and $j$, and $L_2$ the inductor between $p$ and $q$. Note that $M_{12}=M_{21}$.
+
+The history voltage source stamps in the RHS vector $\vec{z}$ as:
+$$
+\Delta \vec{z} =
+\left[
+\begin{array}{c}
+\cdots \\
+\cdots \\
+\cdots \\
+\cdots \\
+\hdashline
+\frac{i_{L_1}^{(n-1)}L_1 + i_{L_2}^{(n-1)}M_{21}}{\Delta t} \\
+\frac{i_{L_1}^{(n-1)}M_{12} + i_{L_2}^{(n-1)}L_2}{\Delta t}\\
+\end{array}
+\right]
+$$
+
+The rows $i_{L_1}$ and $i_{L_2}$ in $\Delta \mathbf{Y}$ and $\Delta \vec{z}$ encode the equation
+$$
+\begin{bmatrix}
+v_1 \\
+v_2
+\end{bmatrix}
+-\mathbf{Z}_{eq}
+\begin{bmatrix}
+i_1 \\
+i_2
+\end{bmatrix}^{(n)}
+= -\mathbf{Z}_{eq}
+\begin{bmatrix}
+i_1 \\
+i_2
+\end{bmatrix}^{(n-1)}
+$$
+The history term contributes negatively to the RHS vector because it is moved to the right-hand side of the constitutive equation.
+
+This stamping is similar to single inductor stamping as described in 'Standard MNA formulation', generalized to matrix form.
+
+
+#### AC simulation
+
+For AC simulation we have
+$$
+\mathbf{Z} = s\mathbf{L}
+$$
+
+The matrix $\mathbf{Y}$ is stamped as follows:
+$$
+\Delta \mathbf{Y} =
+\left[
+\begin{array}{c c c c c : c c}
+   & i & j & p & q & i_{L_1} & i_{L_2} \\
+    i & \cdots & \cdots & \cdots & \cdots & +1 & \cdots \\
+    j & \cdots & \cdots & \cdots & \cdots & -1 & \cdots \\
+    p & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+    q & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   \hdashline
+    i_{L_1} & +1 & -1 & \cdots & \cdots & -sL_1 & -sM_{12} \\
+    i_{L_2} & \cdots & \cdots & +1 & -1 & -sM_{21} & -sL_2 \\
+   \end{array}
+\right]
+$$
+
+The source vector $\vec{z}$ is stamped as
+
+$$
+\Delta \vec{z} =
+\left[
+\begin{array}{c}
+\cdots \\
+\cdots \\
+\cdots \\
+\cdots \\
+\hdashline
+\cdots \\
+\cdots \\
+\end{array}
+\right]
+$$
+
+ie, it is not stamped.
+
+This stamping encodes the equation
+$$
+\vec{v}-s\mathbf{L}\vec{i}=0
+$$
+
+
+#### DC simulation
+For DC simulation the matrix $\mathbf{Y}$ is stamped as follows:
+$$
+\Delta \mathbf{Y} =
+\left[
+\begin{array}{c c c c c : c c}
+   & i & j & p & q & i_{L_1} & i_{L_2} \\
+    i & \cdots & \cdots & \cdots & \cdots & +1 & \cdots \\
+    j & \cdots & \cdots & \cdots & \cdots & -1 & \cdots \\
+    p & \cdots & \cdots & \cdots & \cdots & \cdots & +1 \\
+    q & \cdots & \cdots & \cdots & \cdots & \cdots & -1 \\
+   \hdashline
+    i_{L_1} & +1 & -1 & \cdots & \cdots & \cdots & \cdots \\
+    i_{L_2} & \cdots & \cdots & +1 & -1 & \cdots & \cdots  \\
+   \end{array}
+\right]
+$$
+
+The source vector $\vec{z}$ is stamped as
+
+$$
+\Delta \vec{z} =
+\left[
+\begin{array}{c}
+\cdots \\
+\cdots \\
+\cdots \\
+\cdots \\
+\hdashline
+\cdots \\
+\cdots \\
+\end{array}
+\right]
+$$
+This encodes the equation
+$$
+\vec{v}=0
+$$
+since at DC there is no voltage drop over an inductor, while the inductor currents remain unconstrained.
+
 
 # Non-linear Components
 
@@ -330,7 +556,7 @@ $$
 
 A voltage source $V_{ij} = V_j-V_i$ produces an extra expression  in the matrix $\mathbf{Y}$, which augments the nodal system. The extra equation gives an extra row and extra column at index $a$ with the following entries:
 
-The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$. Current through the voltage source flows from the negative pole to the positive pole.
+The current $I_{ij}$ flowing from node $i$ through the voltage source to node $j$ is an extra $+1$ addition in the extra column for node $i$ and a $-1$ addition for node $j$ which will calculate the current $I_{ij}$ as an extra value $z_a$ in the solution vector $\vec{z}$. The auxiliary current variable is defined positive from node i to node j.
 
 Stamping the voltage source will be as follows:
 
@@ -449,17 +675,17 @@ $G_{pq}R_m$ is dimensionless.
 
 
 
-### Measuring current through a zero volts voltage source
+### Measuring current through a zero-volt voltage source
 
-With a zero volt voltage source the process is as follows. The zero volt voltage source $v_0$ is connected between nodes $p$ and $q$. The node equation is
+With a zero-volt voltage source the process is as follows. The zero-volt voltage source $v_0$ is connected between nodes $p$ and $q$. The node equation is
 
 $$
 v_0 = v_q-v_p = 0
 $$
 
-This equation for the zero volt voltage source is stamped in the matrix.
+This equation for the zero-volt voltage source is stamped in the matrix.
 
-The current controlled voltage $v_{ccvs}=R_m \cdot i_{v_0}$, where $i_{v_0}$ is the controlling current through the zero volt voltage source. The voltage $v_{ccvs}$ is between nodes $i$ and $j$, so $v_{ccvs} = v_j-v_i$, which makes the equation
+The current controlled voltage $v_{ccvs}=R_m \cdot i_{v_0}$, where $i_{v_0}$ is the controlling current through the zero-volt voltage source. The voltage $v_{ccvs}$ is between nodes $i$ and $j$, so $v_{ccvs} = v_j-v_i$, which makes the equation
 
 $$
 v_j-v_i-R_m \cdot i_{v_0}=0
@@ -556,7 +782,7 @@ $$
 
 ## CCCS
 
-The current through the CCCS is controlled by the current over a resistor, capacitor or zero volt voltage source.
+The current through the CCCS is controlled by the current over a resistor, capacitor or zero-volt voltage source.
 
 ### CCCS with current measured by resistor or capacitor
 
@@ -605,7 +831,7 @@ $$\left[
 \right]
 $$
 
-### CCCS with current measured by zero volt voltage source
+### CCCS with current measured by zero-volt voltage source
 
 
 $I_{ij}=A \cdot I_{V_0}$
