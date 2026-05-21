@@ -1,4 +1,4 @@
-## [2.0.0] -
+## [2.0.0] - 2026-05-21
 
 - interface for Solver_ACDC.__init__() simplified
 - stamping for Inductor and MutualInductance rewritten. Now these are all stamped by a single InductorGroup, which stamps them all at once.
