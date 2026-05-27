@@ -11,8 +11,8 @@ from .components.component import Component
 
 
 def freq_pivot_and_select(data: dict[float, # frequency
-                                Tuple[Dict[int | str, complex], # node voltages
-                                      Dict[str | Component, complex]]], # component currents
+                                     Tuple[Dict[int | str, complex], # node voltages
+                                           Dict[str | Component, complex]]], # component currents
                      voltage_nodes: List[int | str] = None, # which node voltages to return
                      current_components: List[str | Component] = None, # which component currents to return
                      to_return: str = 'M', # whether to return magnitude, phase, magnitude+phase, real, imaginary, or complex
