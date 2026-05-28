@@ -6,7 +6,6 @@ from functools import cache
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
-#from .components.inductor import Inductor, MutualInductance, InductorGroup
 from .circuit import Circuit
 from .sources.source import PowerSource
 from .helperregistry import registry, StampingHelper
