@@ -2,8 +2,14 @@ from typing import Optional
 
 from .component import Component, Context
 
-
-LARGE_CONDUCTANCE = 1e12
+# Note: we use a large but finite conductance to
+# approximate the ideal behavior of an op-amp in
+# the MNA solver. This is necessary to avoid numerical
+# issues that can arise from having infinite values
+# in the system of equations. In practice, this should
+# be sufficiently large to approximate ideal behavior
+# for most circuits, but can be adjusted if needed.
+LARGE_CONDUCTANCE = 1e3
 
 
 class Opamp(Component):
@@ -15,7 +21,11 @@ class Opamp(Component):
 
     """Ideal op-amp with infinite gain, zero input current, and zero output impedance."""
 
-    A = 1e6  # large gain to approximate ideal behavior
+    # Note: the gain is set to a large but finite value to
+    # avoid numerical issues in the MNA solver. In practice,
+    # this should be sufficiently large to approximate ideal
+    # behavior for most circuits, but can be adjusted if needed.
+    A = 1e3  # large gain to approximate ideal behavior
 
     def __init__(self, id: Optional[str] = None):
         super().__init__(id)
