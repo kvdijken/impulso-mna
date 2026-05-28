@@ -1,3 +1,24 @@
+## [2.0.1] - 2026-05-28
+
+- implementation of a new diode soft limiter in diode.py. This work has been
+  done for issue #1. The new diode soft limiter is enabled by default. To
+  disable it, set _simple_limiter to True. Its behaviour (the moment at
+  which the limiter kicks in) can be influenced by setting DIODE_LIMITER_NVT
+  which defaults to 1. If the diode voltage as advised by solution of the
+  previous MNA solver iteration is higher than DIODE_LIMITER_NVT * n * Vt,
+  the soft limiter kicks in. Lower values of DIODE_LIMITER_NVT make the
+  limiter more agressive, higher values make it more relaxed. This value
+  may need to be adjusted per different Circuit. To make it fully
+  automatic makes this project move into advanced territory and thus
+  should be done in impulsox-mna instead of this project.
+- make Opamp less hard for the solver. It is less stiff now.
+- introduce realify, imagify and magify in pivot.py. These functions return
+  the real parts, imaginary parts and magnitude respectively of simulation results
+- refactor i_pivot and v_pivot functions in pivot.py. They relegate
+  work to _pivot_generic() now.
+- new example 'diode_soft_limit_test.py' which tests the diode soft limiter
+- some tests have been improved
+
 ## [2.0.0] - 2026-05-21
 
 - interface for Solver_ACDC.__init__() simplified
