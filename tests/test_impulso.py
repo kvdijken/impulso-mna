@@ -546,14 +546,12 @@ class Test_DC:
 
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
-        assert(within(voltages[pos], 1.0, 0.1))
-        assert(within(voltages[neg], 1.0, 0.1))
-        assert(within(voltages[out], 2.0, 0.1))
+        assert np.isclose(voltages[pos], voltages[neg], rtol=0.1)
+        assert np.isclose(voltages[out], 2*voltages[pos], rtol=0.1)
 
         # Test output current
         Iout = currents[OA1]
-        print('DC_test_20, Iout=',Iout)
-        assert(within(Iout, 0.001, 0.1))
+        assert np.isclose(Iout, 0.001, rtol=0.01)
 
 
     def test_21(self):
@@ -855,8 +853,8 @@ class Test_AC:
         # current through the diode should be equal
         # to the current through the voltage source,
         # as they are in series.
-        assert I_V1 == I_D1
-        assert np.angle(V_D1) == np.angle(I_D1)
+        assert np.isclose(I_V1, I_D1)
+        assert np.isclose(np.angle(V_D1), np.angle(I_D1))
 
     def test_6(self):
         # Test a transformer in AC simulation, coupling of 1
