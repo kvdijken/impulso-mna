@@ -95,31 +95,66 @@ def freq_pivot_and_select(data: dict[float, # frequency
 
 
 
+K = TypeVar('K', bound=Hashable)
+
 NodeType = Union[int, str]
 ComponentType = Union[str, "Component"]
 
-def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that node]
-            )-> Dict[NodeType, List[complex]]: # node -> list of voltages
+def _pivot_generic(data: List[Dict[K, complex]]) -> Dict[K, List[complex]]:
+    """Generic helper to pivot a sequence of mappings into a mapping of keys to lists.
 
-    out: Dict[NodeType, List[complex]] = defaultdict(list)
+    Parameters
+    ----------
+    data:
+        List of dictionaries mapping keys (hashable) to complex values.
+
+    Returns
+    -------
+    Dict[Hashable, List[complex]]
+        Mapping from each key found to the list of values encountered in order.
+    """
+    out: Dict[K, List[complex]] = defaultdict(list)
     for d in data:
         for k, v in d.items():
             out[k].append(v)
     return dict(out)
+
+
+def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that node]
+            )-> Dict[NodeType, List[complex]]: # node -> list of voltages
+    """Pivot node-voltage history data into per-node voltage traces.
+
+    Parameters
+    ----------
+    data:
+        Sequence of mappings from node identifiers to complex node voltages.
+        Node identifiers may be either integers or strings.
+
+    Returns
+    -------
+    Dict[NodeType, List[complex]]
+        Mapping from each node identifier to the list of voltages seen in order.
+    """
+    return _pivot_generic(data)  # type: ignore[return-value]
 
 
 def i_pivot(data: list[Dict[ComponentType, complex]] # list[component -> component current]
             )-> Dict[ComponentType, List[complex]]: # component -> list of currents
+    """Pivot component-current history data into per-component current traces.
 
-    out: Dict[ComponentType, List[complex]] = defaultdict(list)
-    for d in data:
-        for k, v in d.items():
-            out[k].append(v)
-    return dict(out)
+    Parameters
+    ----------
+    data:
+        Sequence of mappings from component identifiers to complex component currents.
+        Component identifiers may be component `id` strings or `Component` objects.
 
+    Returns
+    -------
+    Dict[ComponentType, List[complex]]
+        Mapping from each component identifier to the list of currents seen in order.
+    """
+    return _pivot_generic(data)  # type: ignore[return-value]
 
-
-K = TypeVar('Key')
 
 def transpose_dicts(data:List[Dict[K,float]]) -> Dict[K,List[float]]:
     '''
@@ -211,3 +246,61 @@ def time_slice(
     }
 
     return sliced_time, sliced_data
+
+
+def realify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]] | List[float]:
+    """Convert complex values to their real parts.
+
+    Parameters
+    ----------
+    data:
+        Either a mapping from keys to lists of complex values, or a simple list of complex values.
+
+    Returns
+    -------
+    Dict[K, List[float]] | List[float]
+        If given a dict, returns a dict with the same keys and lists of real parts.
+        If given a list, returns a list of real parts.
+    """
+    if isinstance(data, dict):
+        return {k: [v.real for v in lst] for k, lst in data.items()}
+    return [v.real for v in data]
+
+
+def imagify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]] | List[float]:
+    """Convert complex values to their imaginary parts.
+
+    Parameters
+    ----------
+    data:
+        Either a mapping from keys to lists of complex values, or a simple list of complex values.
+
+    Returns
+    -------
+    Dict[K, List[float]] | List[float]
+        If given a dict, returns a dict with the same keys and lists of imaginary parts.
+        If given a list, returns a list of imaginary parts.
+    """
+    if isinstance(data, dict):
+        return {k: [v.imag for v in lst] for k, lst in data.items()}
+    return [v.imag for v in data]
+
+
+def magify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]] | List[float]:
+    """Convert complex values to their magnitudes.
+
+    Parameters
+    ----------
+    data:
+        Either a mapping from keys to lists of complex values, or a simple list of complex values.
+
+    Returns
+    -------
+    Dict[K, List[float]] | List[float]
+        If given a dict, returns a dict with the same keys and lists of magnitudes.
+        If given a list, returns a list of magnitudes.
+    """
+    if isinstance(data, dict):
+        return {k: [abs(v) for v in lst] for k, lst in data.items()}
+    return list(map(np.abs, data))
+
