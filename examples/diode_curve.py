@@ -9,7 +9,7 @@ plt.rcParams['axes.xmargin'] = 0
 def current(v):
     V1 = DCVoltageSource(voltage=v, id='V1')
     R1 = Resistor(resistance=0.568, id='R1')
-    D1 = Diode(id='D1', n=1.752, Is=2.52e-9)
+    D1 = Diode(id='D1')
     circuit = Circuit()
     circuit.add(V1, [0, 1])
     circuit.add(R1, [1, 2])
