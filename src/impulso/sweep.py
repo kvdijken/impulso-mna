@@ -1,9 +1,9 @@
 from typing import List, Tuple, Dict, Iterable, Any
 
-
+from .base import Analysis
 from .circuit import Circuit
-from .acdc import _solve_acdc, solve_ac
-from .components.component import Component
+from .acdc import solve_ac, solve_dc
+from .components.component import Component, Context
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
 
@@ -50,7 +50,7 @@ def dc_sweep(circuit: Circuit,
             dc_source.voltage = dc
         elif isinstance(dc_source, DCCurrentSource):
             dc_source.set_current(dc)
-        vdc, idc = _solve_acdc(circuit, 0)
+        vdc, idc = solve_dc(circuit)
         vdc_.append(vdc)
         idc_.append(idc)
 
