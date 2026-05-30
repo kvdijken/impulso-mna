@@ -10,7 +10,7 @@ R1 = Resistor(resistance=1e3,id='R1')
 V1 = SinusoidalVoltageSource(amplitude=1, frequency=1000, id='V1')
 OA1 = Opamp(id='OA1')
 D1 = Diode(id='D1')
-D1.DIODE_LIMITER_NVT = 100  # Use a more aggressive limiter for better convergence in this test
+D1.DIODE_LIMITER_NVT = 100  # Use a less aggressive limiter for better convergence in this test
 
 gnd = 0
 pos = 1
