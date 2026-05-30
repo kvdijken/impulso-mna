@@ -275,7 +275,8 @@ class PNP(BJT):
                          Va=Va)
 
 
-# Utility functions to retrive emitter, base and collector currents from .a list of currents returned by BJT.current()
+# Utility functions to retrive emitter, base and collector currents
+# from a list of currents returned by BJT.current()
 def emitter_current(i: list[Tuple[complex,complex,complex]]) -> list[complex]:
     return [i[0] for i in i]
 
