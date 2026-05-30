@@ -49,22 +49,8 @@ class Solver_Transient(Solver_ACDC):
         voltage = {n: 0.0 for n in self.all_nodes()}
         current = {comp.id: 0.0 for comp in self.components}
 
-        initial_voltages = {}
-        initial_currents = {}
-
-        # For capacitors set initial voltage across terminals at t=0
-        for cap in self.all.get(Capacitor, []):
-            n1, n2 = self.nodes[cap]
-            v_initial = cap.initial_voltage # v_initial = v2 - v1
-            if n2 != self.ground_node:
-                voltage[n2] = voltage.get(n1, 0.0) + v_initial
-                initial_voltages[n2] = voltage[n2]
-            else:
-                # n2 is ground
-                voltage[n1] = -v_initial
-                initial_voltages[n1] = -v_initial
-
         # For inductors set initial current at t=0
+        initial_currents = {}
         for ind in self.all.get(Inductor, []):
             i_initial = ind.initial_current
             current[ind] = i_initial
@@ -77,6 +63,20 @@ class Solver_Transient(Solver_ACDC):
         # Get the initial voltages for the other nodes
         self.ctx.t = times[0]
         voltage, current = self.solve_mna(return_real=True)
+
+        # For capacitors set initial voltage across terminals at t=0
+        initial_voltages = {}
+        for cap in self.all.get(Capacitor, []):
+            n1, n2 = self.nodes[cap]
+            v_initial = cap.initial_voltage # v_initial = v2 - v1
+            if n2 != self.ground_node:
+                voltage[n2] = voltage.get(n1, 0.0) + v_initial
+                initial_voltages[n2] = voltage[n2]
+            else:
+                # n2 is ground
+                voltage[n1] = -v_initial
+                initial_voltages[n1] = -v_initial
+
         # Overwrite the voltage history at t=0 with the initial
         # voltages for the capacitor nodes
         for n in initial_voltages.keys():
