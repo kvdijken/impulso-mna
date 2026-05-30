@@ -44,7 +44,7 @@ class Diode(Component, Stamper):
     # the simple clipping limiter. The simple clipping limiter
     # simply clips the voltage across the diode to a fixed value
     # (e.g. 0.8 volts), regardless of the value of DIODE_LIMITER_NVT.
-    DIODE_LIMITER_NVT = 1
+    DIODE_LIMITER_NVT = 5
 
     # The DIODE_VOLTAGE_CLIP constant is used for the simple
     # clipping limiter. It represents the maximum voltage that
@@ -226,6 +226,6 @@ class Diode(Component, Stamper):
             # Prevent forward overflow
             arg = min(vr / self.nvt, 40)
 
-            i = self.Is * (math.exp(arg) - 1)
+            i = self.Is * (math.exp(arg) - 1) # Shockley diode equation
 
             return complex(i, 0)
