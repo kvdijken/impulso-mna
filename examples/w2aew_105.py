@@ -31,7 +31,7 @@ ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
 # Solve transient response
-t, v, i = solve_transient(ckt, t_stop=5e-3, dt=5e-5)
+t, v, i = solve_transient(ckt, t_stop=3e-3, dt=5e-6)
 
 # Plot results
 plt.plot(t, v[4], 'k', label='V(5)')
