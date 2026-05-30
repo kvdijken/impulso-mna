@@ -10,6 +10,7 @@ def current(v):
     V1 = DCVoltageSource(voltage=v, id='V1')
     R1 = Resistor(resistance=0.568, id='R1')
     D1 = Diode(id='D1')
+    D1.DIODE_LIMITER_NVT = 10
     circuit = Circuit()
     circuit.add(V1, [0, 1])
     circuit.add(R1, [1, 2])
