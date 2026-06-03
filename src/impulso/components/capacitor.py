@@ -20,8 +20,8 @@ class Capacitor(Component, Stamper):
         return s * self.capacitance()
 
     def augments(self, ctx: Context) -> bool:
-        return (ctx.analysis_type == Analysis.IC) and (self.initial_voltage != 0)
-
+        return (ctx.analysis_type == Analysis.IC)
+    
     def init_state(self):
         # For transient analysis, we can initialize the voltage across the capacitor at t=0
         self.previous_voltage = self.initial_voltage

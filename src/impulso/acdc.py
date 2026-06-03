@@ -48,14 +48,17 @@ class Solver_ACDC():
         return ctx
 
 
+    @cache
     def get_nodes(self, comp):
         return self.nodes.get(comp, None)
 
 
+    @cache
     def get_augm_index(self, comp):
         return self.augm_idx.get(comp, None)
 
 
+    @cache
     def get_node_indices(self,
                      comp: Component
     ) -> List[int]:
@@ -64,6 +67,13 @@ class Solver_ACDC():
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
         '''
         return [self.node_index.get(n, None) for n in self.get_nodes(comp)]
+
+
+    def _reset_cache(self):
+        self.get_nodes.cache_clear()
+        self.get_augm_index.cache_clear()
+        self.get_node_indices.cache_clear()
+        self.has_nonlinear_components.cache_clear()
 
 
     def solve(self,

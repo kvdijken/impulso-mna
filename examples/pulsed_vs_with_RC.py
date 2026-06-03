@@ -18,6 +18,8 @@ circuit.add(C1,[2,0])
 time, voltages, currents = solve_transient(circuit,10, .01)
 plt.plot(time, np.real(voltages[2]),'k')
 plt.grid()
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
 plt.show()
 
 
