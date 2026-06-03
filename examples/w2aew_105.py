@@ -1,3 +1,6 @@
+# This is the circuit demonstrated in https://youtu.be/2a1I1X3RV0g?si=624yVUx0UT1IlGki
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
