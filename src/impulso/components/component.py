@@ -28,6 +28,18 @@ class CircuitItem(abc.ABC):
     def __init__(self, id: Optional[str] = None):
         self.id = id or uuid.uuid4().hex
 
+    def init_state(self) -> None:
+        """Initialize any internal state for transient analysis."""
+        pass
+
+    def initial_conditions(self) -> None:
+        """Return initial conditions for transient analysis."""
+        pass
+
+    def update_state(self, ctx: Context) -> None:
+        """Update internal state based on current solution for transient analysis."""
+        pass
+
 
 class Context():
     ground_node: int

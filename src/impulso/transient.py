@@ -23,7 +23,6 @@ class Solver_Transient(Solver_ACDC):
         super().__init__(circuit)
 
         # augment context for transient analysis
-        self.ctx.analysis_type = Analysis.TRANSIENT
         self.ctx.dt = dt
 
 
@@ -35,7 +34,7 @@ class Solver_Transient(Solver_ACDC):
         super().node_administration()
 
 
-    def solve(self,
+    def _solve(self,
               t_stop: float,
               dt: float
               ) -> Tuple[np.ndarray, List[Dict[int, float]], List[Dict[str | Component, float]]]:
@@ -70,11 +69,23 @@ class Solver_Transient(Solver_ACDC):
             n1, n2 = self.nodes[cap]
             v_initial = cap.initial_voltage # v_initial = v2 - v1
             if n2 != self.ground_node:
-                voltage[n2] = voltage.get(n1, 0.0) + v_initial
+                voltage[n2] = voltage.get(n1) + v_initial # there has already been a solve_mna call,
+                                                          # so voltage[n1] should be set to the correct
+                                                          # value for n1 at t=0
+                # Check for conflicts with the voltage at n2 that may have already been set by
+                # another capacitor. This should not happen because we expect the user to
+                # only set the initial voltage for each node once, but we check for this
+                # just in case to avoid silent errors.
+                assert initial_voltages.get(n2, voltage[n2]) == voltage[n2], f"Conflicting initial voltages for node {n2}."
                 initial_voltages[n2] = voltage[n2]
             else:
                 # n2 is ground
                 voltage[n1] = -v_initial
+                # Check for conflicts with the voltage at n1 that may have already been set by
+                # another capacitor. This should not happen because we expect the user to
+                # only set the initial voltage for each node once, but we check for this
+                # just in case to avoid silent errors.
+                assert initial_voltages.get(n1, -v_initial) == -v_initial, f"Conflicting initial voltages for node {n1}."
                 initial_voltages[n1] = -v_initial
 
         # Overwrite the voltage history at t=0 with the initial
@@ -99,6 +110,64 @@ class Solver_Transient(Solver_ACDC):
             voltage, current = self.solve_mna(return_real=True)
             self.ctx.voltage_history.append(voltage.copy())
             self.ctx.current_history.append(current.copy())
+
+        # TODO: check capacitor current
+        # TODO: describe why we do not return entire history (we return history[:-1] because the last entry is after the last time step)
+        return times, self.ctx.voltage_history[:-1], self.ctx.current_history[:-1]
+
+
+    def solve(self,
+              t_stop: float,
+              dt: float
+              ) -> Tuple[np.ndarray, List[Dict[int, float]], List[Dict[str | Component, float]]]:
+        '''              ^time       ^node voltages          ^component currents
+        '''
+        self.ctx.analysis_type = Analysis.IC
+        self.node_administration()
+
+        # Create time series
+        times = np.arange(0, t_stop + dt / 2, dt)
+
+        for comp in self.components:
+            comp.init_state()
+
+        C1 = self.circuit['C1']
+        print("Cap state:", C1.previous_voltage)
+
+        # Get the initial voltages for the other nodes
+        self.ctx.t = times[0]
+        voltage, current = self.solve_mna(return_real=True)
+        for comp in self.components:
+            comp.update_state(self.ctx)
+
+        print("Node4:", voltage[4])
+        n1, n2 = self.circuit.nodes[C1]
+        v1 = 0 if n1 == 0 else voltage[n1]
+        v2 = 0 if n2 == 0 else voltage[n2]
+
+        print("Cap voltage after first solve:", v2 - v1)
+
+        # Prepare history with the initial voltages for all nodes
+        # now at t=0
+        self.ctx.voltage_history = [voltage.copy()]
+        self.ctx.current_history = [current.copy()]
+
+        try:
+            self.ctx.analysis_type = Analysis.TRANSIENT
+            self.node_administration()
+
+            for t in times:
+                self.ctx.t = t
+                if os.environ.get("IMPULSO_DEBUG", '0') == '1':
+                    print(f"Time: {t} s\n")
+                voltage, current = self.solve_mna(return_real=True)
+                self.ctx.voltage_history.append(voltage.copy())
+                self.ctx.current_history.append(current.copy())
+                for comp in self.components:
+                    comp.update_state(self.ctx)
+        except np.linalg.LinAlgError as e:
+            print(f"Linear algebra error at time {self.ctx.t}: {e}")
+            times = times[:len(self.ctx.voltage_history)-1]
 
         # TODO: check capacitor current
         # TODO: describe why we do not return entire history (we return history[:-1] because the last entry is after the last time step)

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from impulso import Circuit, Resistor, NPN, PNP, Capacitor, DCVoltageSource, solve_transient
+from impulso import Circuit, Resistor, NPN, PNP, Capacitor, DCVoltageSource, solve_transient, emitter_current
 
 plt.rcParams['axes.xmargin'] = 0
 
@@ -11,10 +11,13 @@ R2 = Resistor(resistance=10e3, id='R2')
 R3 = Resistor(resistance=10e3, id='R3')
 R4 = Resistor(resistance=10e3, id='R4')
 R5 = Resistor(resistance=10e3, id='R5')
+#Q1 = PNP(id='Q1',cbc=0,cbe=0)
+#Q2 = PNP(id='Q2',cbc=0,cbe=0)
+#Q3 = NPN(id='Q3',cbc=0,cbe=0)
 Q1 = PNP(id='Q1')
 Q2 = PNP(id='Q2')
 Q3 = NPN(id='Q3')
-C1 = Capacitor(capacitance=10e-9, id='C1', initial_voltage=0)
+C1 = Capacitor(capacitance=10e-9, id='C1', initial_voltage=-3)
 V1 = DCVoltageSource(voltage=9, id='V1')
 
 # Define circuit and add components
@@ -31,12 +34,18 @@ ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
 # Solve transient response
-t, v, i = solve_transient(ckt, t_stop=3e-3, dt=5e-6)
+t, v, i = solve_transient(ckt, t_stop=1e-3, dt=1e-6)
+
+OUT = 4
 
 # Plot results
-plt.plot(t, v[4], 'k', label='V(5)')
-plt.grid()
-plt.xlabel('Time (s)')
-plt.ylabel('Voltage (V)')
-plt.legend()
+fig, axL = plt.subplots()
+axR = axL.twinx()
+axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
+axR.plot(t, v[6], 'r', label='V(6)')
+#axR.plot(t, emitter_current(i[Q3]), 'r', label='I(Q1)')
+axL.grid()
+axL.set_xlabel('Time (s)')
+axL.set_ylabel('Voltage (V)')
+#plt.legend()
 plt.show()

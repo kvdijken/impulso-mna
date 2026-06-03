@@ -48,17 +48,14 @@ class Solver_ACDC():
         return ctx
 
 
-    @cache
     def get_nodes(self, comp):
         return self.nodes.get(comp, None)
 
 
-    @cache
     def get_augm_index(self, comp):
         return self.augm_idx.get(comp, None)
 
 
-    @cache
     def get_node_indices(self,
                      comp: Component
     ) -> List[int]:
@@ -147,7 +144,7 @@ class Solver_ACDC():
         while not converged:
             self.ctx.Y = self.zero_MNA_matrix(self.N)
             self.ctx.z = self.zero_RHS(self.N)
-            self.stamp(self.ctx)
+            self.stamp()
             self.x_prev = self.ctx.x
             self.ctx.x = self.solve_matrix_equation()
             if return_real:
@@ -266,17 +263,23 @@ class Solver_ACDC():
         Assign a slot to all components that require one in the
         MNA matrix (voltage sources, VCVS, CCVS, Wires, Inductors, Opamps)
         '''
+        self.augm_idx = {}
         for comp in self.components:
-            if comp.augments():
-                self.augm_idx[comp] = N
-                N = N + 1
+            try:
+                # TODO Temporary fix for initial conditions, need to find a better way to handle this
+                if comp.augments(self.ctx):
+                    self.augm_idx[comp] = N
+                    N = N + 1
+            except TypeError:
+                if comp.augments():
+                    self.augm_idx[comp] = N
+                    N = N + 1
         return N
 
 
-    def stamp(self, ctx: Context = None):
+    def stamp(self):
         for comp in self._stamping_components:
-            comp.stamp(ctx)
-
+            comp.stamp(self.ctx)
 
 
 def _solve_acdc(circuit: Circuit,

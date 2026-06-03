@@ -1,7 +1,7 @@
 from .acdc import Solver_ACDC, solve_ac, solve_dc
 from .base import TopologyError, Analysis
 from .circuit import Circuit
-from .components.bjt import BJT, NPN, PNP
+from .components.bjt import BJT, NPN, PNP, emitter_current, collector_current, base_current
 from .components.capacitor import Capacitor
 from .sources.cccs import CCCS
 from .sources.ccvs import CCVS
