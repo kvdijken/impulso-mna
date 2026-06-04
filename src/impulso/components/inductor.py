@@ -123,7 +123,20 @@ class Inductor(Component):
         self,
         inductance: float,
         dot_at_node1: bool = True,
-        initial_current: float = 0.0,
+        initial_current: float | None = None, # initial current through the inductor
+                                              # if None, don't care; let the IC solve
+                                              # determine the inductor current. This
+                                              # inductor will be treated as a regular
+                                              # inductor with no initial condition for
+                                              # the IC analysis, and will be initialized
+                                              # to the current obtained from IC analysis
+                                              # at t=0 for transient analysis.
+                                              #
+                                              # if not None, this will be the initial
+                                              # current through the inductor for the
+                                              # initial condition analysis (IC). For
+                                              # transient analysis, the inductor will
+                                              # be initialized to this current at t=0.
         id: Optional[str] = None,
     ):
         if inductance < 0:
@@ -133,6 +146,9 @@ class Inductor(Component):
         self.inductance = inductance
         self.initial_current = initial_current
 
+    def _has_initial_condition(self) -> bool:
+        return self.initial_current is not None
+    
     def stamps(self) -> bool:
         return False
 

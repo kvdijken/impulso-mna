@@ -37,7 +37,7 @@ class DiracDeltaVoltageSource(PowerSource, Stamper):
         return True
 
     def stamp(self, ctx: Context):
-        assert ctx.analysis_type == Analysis.TRANSIENT, "DiracVoltageSource is only valid for transient analysis"
+        assert ctx.analysis_type in (Analysis.TRANSIENT, Analysis.IC), "DiracVoltageSource is only valid for transient and IC analysis"
         v = self.voltage_at_time(ctx.t)
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)

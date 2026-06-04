@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from impulso import Circuit, Diode, Resistor, Capacitor, DCVoltageSource, SinusoidalVoltageSource, NPN, PNP, solve_transient
+from impulso import Circuit, Diode, Resistor, Capacitor, DCVoltageSource, SinusoidalVoltageSource, NPN, PNP, solve_transient, solve_dc
 
 
 plt.rcParams['axes.xmargin'] = 0
@@ -32,6 +32,7 @@ circuit.add(D1, ['Q5_E', 'GND'])
 circuit.add(Q5, ['Q5_E', 'GND', 'Q5_C'])
 circuit.add(R10, ['VCC','Q5_C'])
 
+dc = solve_dc(circuit)
 t, v, i = solve_transient(circuit,t_stop=0.001, dt=0.000005)
 
 fig, ax = plt.subplots()

@@ -1,6 +1,5 @@
 # This is the circuit demonstrated in https://youtu.be/2a1I1X3RV0g?si=624yVUx0UT1IlGki
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,6 +35,7 @@ ckt.add(R5, [5, 0])
 # Solve transient response
 t, v, i = solve_transient(ckt, t_stop=1e-3, dt=1e-6)
 
+# Define output node
 OUT = 4
 
 # Plot results
@@ -43,9 +43,8 @@ fig, axL = plt.subplots()
 axR = axL.twinx()
 axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
 axR.plot(t, v[6], 'r', label='V(6)')
-#axR.plot(t, emitter_current(i[Q3]), 'r', label='I(Q1)')
 axL.grid()
 axL.set_xlabel('Time (s)')
 axL.set_ylabel('Voltage (V)')
-#plt.legend()
+axR.set_ylabel('Discharge current (A)')
 plt.show()

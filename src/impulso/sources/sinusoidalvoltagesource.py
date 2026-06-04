@@ -1,4 +1,5 @@
 from typing import Optional
+from unittest import case
 
 import numpy as np
 
@@ -33,19 +34,40 @@ class SinusoidalVoltageSource(PowerSource):
         return True
 
     def stamp(self, ctx: Context):
-        if ctx.analysis_type == Analysis.AC:
-            if self.ac_source:
-                v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
-            else:
-                v = 0
-        else:
-            if self.ac_source:
-                # In DC analysis, we treat the AC source
-                # as a short circuit, so the voltage is
-                # the DC offset.
-                v = self.dc
-            else:
+        match ctx.analysis_type:
+            case Analysis.AC:
+                if self.ac_source:
+                    v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
+                else:
+                    v = 0
+            case Analysis.DC:
+                if self.ac_source:
+                    # In DC analysis, we treat the AC source
+                    # as a short circuit, so the voltage is
+                    # the DC offset.
+                    v = self.dc
+                else:
+                    v = self.dc
+            case Analysis.TRANSIENT:
                 v = self.voltage_at_time(ctx.t)
+            case Analysis.IC:
+                v = self.voltage_at_time(0)
+
+
+        if False:
+            if ctx.analysis_type == Analysis.AC:
+                if self.ac_source:
+                    v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
+                else:
+                    v = 0
+            else:
+                if self.ac_source:
+                    # In DC analysis, we treat the AC source
+                    # as a short circuit, so the voltage is
+                    # the DC offset.
+                    v = self.dc
+                else:
+                    v = self.voltage_at_time(ctx.t)
 
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)

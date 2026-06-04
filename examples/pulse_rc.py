@@ -1,3 +1,11 @@
+# This script simulates a simple RC circuit driven by a single pulse voltage source and plots the capacitor voltage over time.
+#
+# - It creates a pulse source `V1` that switches from 0 V to 1 V for 0.1 s, starting at 0.25 s, with a total period of 1 s.
+# - It connects that source to a 50 Ω resistor `R1` and a 1 mF capacitor `C1`.
+# - The capacitor is initialized with an initial voltage of -0.5 V.
+# - The circuit is solved with a transient analysis from 0 to 1 s using 0.01 s time steps.
+# - Finally, it plots the voltage at the capacitor node over time.
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,7 +16,7 @@ plt.rcParams['axes.xmargin'] = 0
 
 V1 = PulseVoltageSource(v1=0,
                         v2=1,
-                        delay=0,
+                        delay=0.25,
                         rise_time=0,
                         fall_time=0,
                         pulse_width=0.1,

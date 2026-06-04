@@ -44,8 +44,7 @@ class Rout(Component):
         return False
 
     def stamp(self, ctx: Context):
-        ac_analysis = ctx.analysis_type == Analysis.AC
-        if ac_analysis:
+        if ctx.analysis_type == Analysis.AC:
             g = self.admittance_ac
         else:
             # collector current

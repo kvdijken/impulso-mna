@@ -327,7 +327,7 @@ def solve_dc(circuit: Circuit,
     if ctx is None:
         ctx = Context()
     ctx.analysis_type = Analysis.DC
-    return _solve_acdc(circuit, 0, ctx)
+    return _solve_acdc(circuit, freq=0, ctx=ctx)
 
 
 def solve_ac(circuit: Circuit,

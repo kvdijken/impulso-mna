@@ -80,8 +80,8 @@ class Component(CircuitItem):
         pass
 
     @abc.abstractmethod
-    def augments(self) -> None:
-        pass
+    def augments(self) -> bool:
+        return False
 
     def stamps(self) -> bool:
         """Whether this component stamps itself into the admittance matrix."""

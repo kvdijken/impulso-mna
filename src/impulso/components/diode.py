@@ -97,10 +97,21 @@ class Diode(Component, Stamper):
         return False
 
     def stamp(self, ctx: Context):
-        if ctx.analysis_type == Analysis.AC:
-            self._stamp_for_ac(ctx)
-        else:
-            self._stamp_for_dc(ctx)
+        match ctx.analysis_type:
+            case Analysis.AC:
+                self._stamp_for_ac(ctx)
+            case Analysis.DC:
+                self._stamp_for_dc(ctx)
+            case Analysis.TRANSIENT:
+                self._stamp_for_dc(ctx)
+            case Analysis.IC:
+                self._stamp_for_dc(ctx)
+
+        if False:
+            if ctx.analysis_type == Analysis.AC:
+                self._stamp_for_ac(ctx)
+            else:
+                self._stamp_for_dc(ctx)
 
 
     def _stamp_for_ac(self, ctx: Context):

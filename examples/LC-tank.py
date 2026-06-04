@@ -19,7 +19,7 @@ circuit.add(C1, [1, 0])
 circuit.add(L1, [0, 1])
 
 t_stop = .001
-t, v, i = solve_transient(circuit,t_stop=t_stop, dt=t_stop/1000)
+t, v, i = solve_transient(circuit,t_stop=t_stop, dt=t_stop/5000)
 
 plt.plot(t, np.real(v[1]),'k',label='Voltage at node 1')
 plt.xlabel('Time (s)')
