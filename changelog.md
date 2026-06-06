@@ -1,3 +1,15 @@
+## [2.1.0] - 2026-05-28
+
+- better implementation for initial voltages for capacitors and
+  initial currents for inductors. All test scipts pass the test
+  and all example scripts run fine. There is definitely some more
+  polishing to do, maybe even some large refactoring with API changes.
+- new example script w2aew_105.py which implements a relaxation oscillator
+  described as in https://youtu.be/2a1I1X3RV0g. This is a tough
+  circuit to simulate, and takes more time to run than the other
+  example scripts. It does run fine however.
+
+
 ## [2.0.1] - 2026-05-28
 
 - implementation of a new diode soft limiter in diode.py. This work has been

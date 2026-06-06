@@ -181,6 +181,13 @@ Applies a Dirac-like pulse to an RC circuit and observes the response.
 ![Alt text](images/dirac-pulse.png)
 
 ---
+### 5 Relaxation oscillator
+
+This is a relaxation oscillator as described in https://youtu.be/2a1I1X3RV0g. This is a hard circuit to simulate and takes more than than the other typical example scripts.
+
+![Alt text](images/w2aew_105.png)
+
+---
 
 ## 🧠 Design Philosophy
 

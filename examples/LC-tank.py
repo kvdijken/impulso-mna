@@ -12,7 +12,7 @@ l1 = 1e-3
 c1 = 1e-6
 
 L1 = Inductor(inductance=l1, id='L1', initial_current=1e-3)
-C1 = Capacitor(capacitance=c1, id='C1')
+C1 = Capacitor(capacitance=c1, id='C1', initial_voltage=0.0)
 
 circuit = Circuit()
 circuit.add(C1, [1, 0])

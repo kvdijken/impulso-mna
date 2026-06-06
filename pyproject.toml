@@ -10,7 +10,7 @@ include = ["src/impulso"]
 
 [project]
 name = "impulso_mna"
-version = "2.0.1"
+version = "2.1.0"
 authors = [
   { name="kvdijken", email="sla_nippers_0x@icloud.com" },
 ]
@@ -21,9 +21,10 @@ dependencies = [
 description = "A package for the simulation of analog electronic circuits using Modified Nodal Analysis"
 readme = "README.md"
 requires-python = ">=3.14"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 

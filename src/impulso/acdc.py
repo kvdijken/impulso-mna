@@ -25,16 +25,19 @@ class Solver_ACDC():
                  circuit: Circuit,
                  ):
         self.circuit = circuit
+        self.initialize()
+
+
+    def initialize(self):
         self._prepared = False
-        self.nodes = circuit.nodes
-        self.components = circuit.components
-        self.ground_node = circuit.ground_node
+        self.nodes = self.circuit.nodes
+        self.components = self.circuit.components
+        self.ground_node = self.circuit.ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
         self.ctx = self.create_context()
 
         self._stamping_components = [] # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
         self._current_components = [] # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
-
 
 
     def create_context(self) -> Context:

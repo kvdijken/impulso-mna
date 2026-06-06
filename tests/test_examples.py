@@ -13,7 +13,6 @@ EXAMPLES_DIR = Path("examples")
 
 SCRIPTS = sorted(EXAMPLES_DIR.glob("*.py"))
 
-
 @pytest.mark.parametrize("script", SCRIPTS)
 def test_example_script(script):
     result = subprocess.run(

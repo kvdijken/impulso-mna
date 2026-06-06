@@ -77,6 +77,10 @@ class InductorGroup(StampingHelper):
     def returns_current(self) -> bool:
         return False
 
+    def init_state(self):
+        for ind in self._inductors.values():
+            ind.previous_current = ind.__initial_current
+
     def _stamp_ac(self, ctx: Context):
         Z = ctx.s * self._L
         k = np.array(self._local_to_global_idx)
@@ -89,28 +93,44 @@ class InductorGroup(StampingHelper):
         ix_ = np.ix_(k, k)
         ctx.Y[ix_] -= z_eq
 
-        i_prev = np.array([ctx.current_history[-1][ind] for ind in self._inductors])
+#        i_prev = np.array([ctx.current_history[-1][ind] for ind in self._inductors])
+        i_prev = np.array([ind.previous_current for ind in self._inductors])
         ctx.z[k] -= z_eq @ i_prev
 
-    def stamp(self, ctx: Context):
-        # Stamp topology
-        for m in range(self._n):
-            k = self._local_to_global_idx[m]
-            i, j = self._node_indices[m]
-            if i is not None:
-                ctx.Y[i, k] += 1
-                ctx.Y[k, i] += 1
-            if j is not None:
-                ctx.Y[j, k] -= 1
-                ctx.Y[k, j] -= 1
+    def _stamp_initial_condition(self, ctx: Context):
+        # Stamp as a current source corresponding to the initial current condition.
+        for ind in self._inductors:
+            if ind._has_initial_condition():
+                p, q = ctx.idx_query_fn(ind)
+                # In AC analysis, we treat a DC current source as an open circuit, so we don't stamp anything.
+                i = ind.initial_current
+                if p is not None:
+                    ctx.z[p] -= i # amps
+                if q is not None:
+                    ctx.z[q] += i # amps
 
-        # Stamp constitutive
-        if ctx.analysis_type == Analysis.DC:
-            pass
-        elif ctx.analysis_type == Analysis.AC:
-            self._stamp_ac(ctx)
-        elif ctx.analysis_type == Analysis.TRANSIENT:
-            self._stamp_transient(ctx)
+    def stamp(self, ctx: Context):
+        if ctx.analysis_type == Analysis.IC:
+            self._stamp_initial_condition(ctx)
+        else:
+            # Stamp topology
+            for m in range(self._n):
+                k = self._local_to_global_idx[m]
+                i, j = self._node_indices[m]
+                if i is not None:
+                    ctx.Y[i, k] += 1
+                    ctx.Y[k, i] += 1
+                if j is not None:
+                    ctx.Y[j, k] -= 1
+                    ctx.Y[k, j] -= 1
+
+            # Stamp constitutive
+            if ctx.analysis_type == Analysis.DC:
+                pass
+            elif ctx.analysis_type == Analysis.AC:
+                self._stamp_ac(ctx)
+            elif ctx.analysis_type == Analysis.TRANSIENT:
+                self._stamp_transient(ctx)
 
     def current(self, ctx: Context) -> complex:
         raise NotImplementedError("InductorGroup does not have a current, it's just a helper for managing inductors")
@@ -148,15 +168,30 @@ class Inductor(Component):
 
     def _has_initial_condition(self) -> bool:
         return self.initial_current is not None
-    
+
+    # TODO: maybe split into update_state and initialize_transient_state, native for Component
+    # This makes it more explicit
+    def update_state(self, ctx: Context):
+        if ctx.analysis_type == Analysis.IC:
+            if self._has_initial_condition():
+                self.previous_current = self.initial_current
+            else:
+                self.previous_current = 0.0
+        else:
+            augm = ctx.augm_query_fn(self)
+            self.previous_current = ctx.x[augm]
+
     def stamps(self) -> bool:
         return False
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
 
-    def augments(self):
-        return True
+    def augments(self, ctx: Context) -> bool:
+        # In the IC analysis, we don't want the inductor to augment
+        # the system of equations, we just want it to contribute a
+        # current source corresponding to the initial current condition.
+        return ctx.analysis_type != Analysis.IC
 
     def current(self, ctx: Context) -> complex:
         idx = ctx.augm_query_fn(self)
@@ -221,10 +256,14 @@ class InductorGroupFactory(Factory):
         inductors = [c for c in circuit.components if isinstance(c, Inductor)]
         if len(inductors) == 0:
             return None
-        group = self._groups.get(circuit,None)
-        if group is None:
-            group = InductorGroup(circuit, ctx)
-            self._groups[circuit] = group
+        # In principle there is one InductorGroup per Circuit,
+        # but since for one Circuit we may decide to solve
+        # for different type of analysis (IC, TRANSIENT) which
+        # need different initialisation for InductorGroup,
+        # we let the responsibility of creating a Inductorgroup
+        # or not to the caller.
+        group = InductorGroup(circuit, ctx)
+        self._groups[circuit] = group
         return group
 
 

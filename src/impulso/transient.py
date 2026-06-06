@@ -222,6 +222,12 @@ class Solver_Transient(Solver_ACDC):
         for comp in self.components:
             comp.update_state(self.ctx)
 
+        self.initialize()
+        self.ctx.analysis_type = Analysis.TRANSIENT
+        self.node_administration()
+        self.ctx.t = times[0]
+        self.ctx.dt = dt
+
         # Prepare history with the initial voltages for all nodes
         # now at t=0
         self.ctx.voltage_history = [voltage.copy()]
@@ -233,8 +239,6 @@ class Solver_Transient(Solver_ACDC):
 
         with ProgressReporter(self.ctx, total=t_stop) as progress:
             try:
-                self.ctx.analysis_type = Analysis.TRANSIENT
-                self.node_administration()
                 for t in times[1:]:
                     self.ctx.t = t
                     voltage, current = self.solve_mna(return_real=True)
