@@ -34,9 +34,6 @@ class Rout(Component):
         self.npn = npn
         super().__init__(id=f"{npn.id}_Rout")
 
-    def augments(self):
-        return False
-
     def admittance(self, s: Optional[complex] = None) -> complex:
         assert False, "Rout is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
 
@@ -215,9 +212,6 @@ class BJT(CompoundComponent):
     def admittance(self, s: Optional[complex] = None) -> complex:
         # Should never be called
         assert False, "NPN is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
-
-    def augments(self) -> None:
-        return False
 
     def current(self, ctx: Context) -> Tuple[complex,complex,complex]:
         # All currents positive going out of the terminal

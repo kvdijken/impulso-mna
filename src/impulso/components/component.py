@@ -79,8 +79,7 @@ class Component(CircuitItem):
         """Calculate admittance (1/impedance) for AC analysis."""
         pass
 
-    @abc.abstractmethod
-    def augments(self) -> bool:
+    def augments(self, ctx: Context) -> bool:
         return False
 
     def stamps(self) -> bool:

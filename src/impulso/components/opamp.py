@@ -36,7 +36,7 @@ class Opamp(Component):
     def gain(self) -> float:
         return self.A
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):

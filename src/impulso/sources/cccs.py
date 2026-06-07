@@ -24,9 +24,6 @@ class CCCS(PowerSource, Stamper):
         assert(isinstance(component, (Resistor, Capacitor, DCVoltageSource)))
         self.component = component
 
-    def augments(self):
-        return False
-
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self) # indices for this CCCS
         control = self.component # controlling component

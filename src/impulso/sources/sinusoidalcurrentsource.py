@@ -42,9 +42,6 @@ class SinusoidalCurrentSource(PowerSource):
     def current_at_time(self, t) -> float:
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
-    def augments(self):
-        return False
-
     def stamp(self, ctx: Context):
         ac_analysis = ctx.analysis_type == Analysis.AC
 

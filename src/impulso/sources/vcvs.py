@@ -29,7 +29,7 @@ class VCVS(PowerSource):
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):

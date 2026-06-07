@@ -32,9 +32,6 @@ class DCCurrentSource(PowerSource, Stamper):
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
 
-    def augments(self):
-        return False
-
     def stamp(self, ctx: Context):
         p, q = ctx.idx_query_fn(self)
         if ctx.analysis_type != Analysis.AC:

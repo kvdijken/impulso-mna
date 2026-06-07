@@ -58,7 +58,7 @@ class PulseVoltageSource(PowerSource, Stamper):
         else:
             return self.v1
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):

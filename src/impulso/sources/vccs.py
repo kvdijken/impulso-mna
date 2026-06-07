@@ -39,9 +39,6 @@ class VCCS(PowerSource):
         # Controlling voltage is V(vnodes[1]) - V(vnodes[0]), and the current injected is gm * control_voltage.
         self.vnodes = vnodes
 
-    def augments(self):
-        return False
-
     def stamp(self, ctx: Context):
         gm = self.gm
         nodes = ctx.idx_query_fn(self)

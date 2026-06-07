@@ -25,6 +25,7 @@ class Solver_ACDC():
                  circuit: Circuit,
                  ):
         self.circuit = circuit
+        self._prev_analysis_type = None
         self.initialize()
 
 
@@ -95,8 +96,17 @@ class Solver_ACDC():
 
 
     def node_administration(self):
+        # Must be called after change of analysis type, since some components may be
+        # included/excluded from the node administration for certain analysis types.
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
+        if self.ctx.analysis_type != self._prev_analysis_type:
+            self._prev_analysis_type = self.ctx.analysis_type
+            print(f"Node administration complete.")
+            print(f"Ground node: {self.ground_node}.")
+            print(f"Number of components: {len(self.components)}.")
+            print(f"Number of nodes (excluding ground): {len(self.node_index)}.")
+            print(f"Total size of MNA matrix: {self.N}.")
 
 
     def all_nodes(self) -> List[int]:
@@ -278,15 +288,9 @@ class Solver_ACDC():
         '''
         self.augm_idx = {}
         for comp in self.components:
-            try:
-                # TODO Temporary fix for initial conditions, need to find a better way to handle this
-                if comp.augments(self.ctx):
-                    self.augm_idx[comp] = N
-                    N = N + 1
-            except TypeError:
-                if comp.augments():
-                    self.augm_idx[comp] = N
-                    N = N + 1
+            if comp.augments(self.ctx):
+                self.augm_idx[comp] = N
+                N = N + 1
         return N
 
 

@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 LARGE_CONDUCTANCE = 1e12
 
+TEST = True
+
 
 class InductorGroup(StampingHelper):
     """
@@ -92,8 +94,6 @@ class InductorGroup(StampingHelper):
         k = np.array(self._local_to_global_idx)
         ix_ = np.ix_(k, k)
         ctx.Y[ix_] -= z_eq
-
-#        i_prev = np.array([ctx.current_history[-1][ind] for ind in self._inductors])
         i_prev = np.array([ind.previous_current for ind in self._inductors])
         ctx.z[k] -= z_eq @ i_prev
 
@@ -102,12 +102,28 @@ class InductorGroup(StampingHelper):
         for ind in self._inductors:
             if ind._has_initial_condition():
                 p, q = ctx.idx_query_fn(ind)
-                # In AC analysis, we treat a DC current source as an open circuit, so we don't stamp anything.
                 i = ind.initial_current
                 if p is not None:
                     ctx.z[p] -= i # amps
                 if q is not None:
                     ctx.z[q] += i # amps
+            else:
+                if TEST:
+                    # No initial condition specified.
+                    # Treat as DC analysis.
+                    # Stamp as short
+                    # Assume (assert) the inductor has augmented the matrix
+                    k = ctx.augm_query_fn(ind)
+                    i, j = ctx.idx_query_fn(ind)
+                    if i is not None:
+                        ctx.Y[i, k] += 1
+                        ctx.Y[k, i] += 1
+                    if j is not None:
+                        ctx.Y[j, k] -= 1
+                        ctx.Y[k, j] -= 1
+                else:
+                    pass
+
 
     def stamp(self, ctx: Context):
         if ctx.analysis_type == Analysis.IC:
@@ -173,32 +189,52 @@ class Inductor(Component):
         if self._has_initial_condition():
             self.previous_current = self.initial_current
         else:
-            # No initial current specified for this inductor.
-            # We need to initialize it to something for the transient analysis,
-            # but since we don't have an initial condition from the IC analysis,
-            # we don't know what it should be,
-            # so we will initialize it to 0.
-            self.previous_current = 0.0
+            if TEST:
+                # No initial current specified for this inductor.
+                # Treat as DC analysis, so we will initialize it to the current obtained from the IC analysis at t=0.
+                augm = ctx.augm_query_fn(self)
+                self.previous_current = ctx.x[augm]
+            else:
+                # No initial current specified for this inductor.
+                # We need to initialize it to something for the transient analysis,
+                # but since we don't have an initial condition from the IC analysis,
+                # we don't know what it should be,
+                # so we will initialize it to 0.
+                self.previous_current = 0.0
 
     def update_state(self, ctx: Context):
         augm = ctx.augm_query_fn(self)
         self.previous_current = ctx.x[augm]
 
     def stamps(self) -> bool:
+        # Let the stamping helper handle the stamping of the inductor.
         return False
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 1 / (s * self.inductance())
 
     def augments(self, ctx: Context) -> bool:
-        # In the IC analysis, we don't want the inductor to augment
-        # the system of equations, we just want it to contribute a
-        # current source corresponding to the initial current condition.
-        return ctx.analysis_type != Analysis.IC
+        if ctx.analysis_type != Analysis.IC:
+            return True
+        else:
+            if TEST:
+                return not self._has_initial_condition()
+            else:
+                return False
+
+        if TEST:
+            return ctx.analysis_type != Analysis.IC or not self._has_initial_condition()
+        else:
+            # In the IC analysis, we don't want the inductor to augment
+            # the system of equations, we just want it to contribute a
+            # current source corresponding to the initial current condition.
+            # A current source can be stamped without augmenting the system,
+            # so we return False for augments in the IC analysis.
+            return ctx.analysis_type != Analysis.IC
 
     def current(self, ctx: Context) -> complex:
-        idx = ctx.augm_query_fn(self)
-        return ctx.x[idx]
+        augm = ctx.augm_query_fn(self)
+        return ctx.x[augm]
 
 
 class MutualInductance(CircuitItem):
@@ -236,7 +272,7 @@ class MutualInductance(CircuitItem):
             sign = -1.0
         return sign * M
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return False
 
     def is_directive(self):

@@ -14,9 +14,6 @@ class DCVoltageSource(VoltageSource, Stamper):
         """Calculate admittance (1/impedance) for AC analysis."""
         pass
 
-    def augments(self):
-        return True
-
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)

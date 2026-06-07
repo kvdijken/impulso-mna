@@ -30,7 +30,7 @@ class SinusoidalVoltageSource(PowerSource):
     def voltage_at_time(self, t) -> float:
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):

@@ -90,9 +90,6 @@ class Diode(Component, Stamper):
         # Should never be called
         assert False, "Diode is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
 
-    def augments(self):
-        return False
-
     def linear(self):
         return False
 

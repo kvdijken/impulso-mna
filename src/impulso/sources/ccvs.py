@@ -41,7 +41,7 @@ class CCVS(PowerSource, Stamper):
         # This assumes the current through a voltage source has been corrected already
         return self.rm * currents[self.component]
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):

@@ -16,9 +16,6 @@ class Resistor(Component, Stamper):
     def admittance(self, s: Optional[complex] = None) -> complex:
         return self.g
 
-    def augments(self):
-        return False
-
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         if i is not None:

@@ -129,18 +129,21 @@ class Solver_Transient(Solver_ACDC):
 
         # Initial conditions
         self.ctx.analysis_type = Analysis.IC
+        print("\nSolving for initial conditions...")
         self.node_administration()
         for comp in self.components:
             comp.init_state()
         self.ctx.t = times[0]
         voltage, current = self.solve_mna(return_real=True)
 
+        print("\nTransferring state from initial conditions...")
         # Transfer state from Initicial Conditions solve to the components,
         # so that they can use this state during the transient solve
         for comp in self.components:
             comp.initialize_transient_state(self.ctx)
 
-        self.initialize()
+        self.initialize(self.ctx)
+        print("\nStarting transient solve...")
         self.ctx.analysis_type = Analysis.TRANSIENT
         self.node_administration()
         self.ctx.t = times[0]

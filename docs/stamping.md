@@ -304,17 +304,17 @@ Every inductor augments the admittance matrix with its own row. This row defines
 
 #### Transient simulation
 
-Using backward Euler, you get:
+Using Backward Euler, you get:
 
-$$\frac{di}{dt} \approx \frac{i^{n} - i^{n-1}}{\Delta t}$$
+$$\frac{di^{(n)}}{dt} \approx \frac{i^{(n)} - i^{(n-1)}}{\Delta t}$$
 
-So:
+So, after multiplying with $\mathbf{L}$:
 
-$$v^{n} = \mathbf{L} \cdot \frac{i^{n} - i^{n-1}}{\Delta t}$$
+$$v^{(n)} = \mathbf{L}\frac{di^{(n)}}{dt} \approx \mathbf{L} \cdot \frac{i^{(n)} - i^{(n-1)}}{\Delta t}$$
 
 Rearrange:
 
-$$v^{n} = \underbrace{\frac{\mathbf{L}}{\Delta t}}_{\mathbf{Z}_{eq}} i^{(n)}
+$$v^{n} \approx \underbrace{\frac{\mathbf{L}}{\Delta t}}_{\mathbf{Z}_{eq}} i^{(n)}
 
 - \underbrace{\frac{\mathbf{L}}{\Delta t}}_{\mathbf{Z}_{eq}} i^{(n-1)}$$
 
@@ -324,7 +324,7 @@ So the equivalent is:
   $$\mathbf{Z}_{eq} = \frac{\mathbf{L}}{\Delta t}$$
 
 * parallel with a **history voltage source**
-  $$v_{hist} = \frac{\mathbf{L}}{\Delta t} i^{(n-1)}$$
+  $$v^{(n-1)} = \frac{\mathbf{L}}{\Delta t} i^{(n-1)}$$
 
 The matrix impedance $\mathbf{Z}_{eq}$ stamps the matrix $\mathbf{Y}$ as:
 $$
@@ -344,7 +344,7 @@ $$
 $$
 where $L_1$ is the inductor between nodes $i$ and $j$, and $L_2$ the inductor between $p$ and $q$. Note that $M_{12}=M_{21}$.
 
-The history voltage source stamps in the RHS vector $\vec{z}$ as:
+The history voltage $\vec{v}^{(n-1)}$ source stamps in the RHS vector $\vec{z}$ as:
 $$
 \Delta \vec{z} =
 \left[
@@ -365,7 +365,7 @@ $$
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
+\end{bmatrix}^{(n)}
 -\mathbf{Z}_{eq}
 \begin{bmatrix}
 i_1 \\

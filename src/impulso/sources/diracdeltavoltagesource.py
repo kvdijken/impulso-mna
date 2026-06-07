@@ -33,7 +33,7 @@ class DiracDeltaVoltageSource(PowerSource, Stamper):
     def reset(self):
         self.before = True
 
-    def augments(self):
+    def augments(self, ctx: Context):
         return True
 
     def stamp(self, ctx: Context):
