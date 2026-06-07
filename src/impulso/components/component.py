@@ -32,8 +32,8 @@ class CircuitItem(abc.ABC):
         """Initialize any internal state for transient analysis."""
         pass
 
-    def initial_conditions(self) -> None:
-        """Return initial conditions for transient analysis."""
+    def initialize_transient_state(self, ctx: Context) -> None:
+        """Initialize any internal state for transient analysis based on the context."""
         pass
 
     def update_state(self, ctx: Context) -> None:

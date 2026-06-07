@@ -169,17 +169,20 @@ class Inductor(Component):
     def _has_initial_condition(self) -> bool:
         return self.initial_current is not None
 
-    # TODO: maybe split into update_state and initialize_transient_state, native for Component
-    # This makes it more explicit
-    def update_state(self, ctx: Context):
-        if ctx.analysis_type == Analysis.IC:
-            if self._has_initial_condition():
-                self.previous_current = self.initial_current
-            else:
-                self.previous_current = 0.0
+    def initialize_transient_state(self, ctx: Context):
+        if self._has_initial_condition():
+            self.previous_current = self.initial_current
         else:
-            augm = ctx.augm_query_fn(self)
-            self.previous_current = ctx.x[augm]
+            # No initial current specified for this inductor.
+            # We need to initialize it to something for the transient analysis,
+            # but since we don't have an initial condition from the IC analysis,
+            # we don't know what it should be,
+            # so we will initialize it to 0.
+            self.previous_current = 0.0
+
+    def update_state(self, ctx: Context):
+        augm = ctx.augm_query_fn(self)
+        self.previous_current = ctx.x[augm]
 
     def stamps(self) -> bool:
         return False

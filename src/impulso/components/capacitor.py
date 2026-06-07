@@ -89,6 +89,9 @@ class Capacitor(Component, Stamper):
         # For transient analysis, we can initialize the voltage across the capacitor at t=0
         self.previous_voltage = self.initial_voltage
 
+    def initialize_transient_state(self, ctx: Context):
+        self.update_state(ctx)
+        
     def update_state(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         if i is None:

@@ -118,88 +118,6 @@ class Solver_Transient(Solver_ACDC):
         super().node_administration()
 
 
-    def _solve(self,
-              t_stop: float,
-              dt: float
-              ) -> Tuple[np.ndarray, List[Dict[int, float]], List[Dict[str | Component, float]]]:
-        '''              ^time       ^node voltages          ^component currents
-        '''
-        self.node_administration()
-
-        # Create time series
-        times = np.arange(0, t_stop + dt / 2, dt)
-
-        voltage = {n: 0.0 for n in self.all_nodes()}
-        current = {comp.id: 0.0 for comp in self.components}
-
-        # For inductors set initial current at t=0
-        initial_currents = {}
-        for ind in self.all.get(Inductor, []):
-            i_initial = ind.initial_current
-            current[ind] = i_initial
-            initial_currents[ind] = i_initial
-
-        # Prepare history
-        self.ctx.voltage_history = [voltage.copy()]
-        self.ctx.current_history = [current.copy()]
-
-        # Get the initial voltages for the other nodes
-        self.ctx.t = times[0]
-        voltage, current = self.solve_mna(return_real=True)
-
-        # For capacitors set initial voltage across terminals at t=0
-        initial_voltages = {}
-        for cap in self.all.get(Capacitor, []):
-            n1, n2 = self.nodes[cap]
-            v_initial = cap.initial_voltage # v_initial = v2 - v1
-            if n2 != self.ground_node:
-                voltage[n2] = voltage.get(n1) + v_initial # there has already been a solve_mna call,
-                                                          # so voltage[n1] should be set to the correct
-                                                          # value for n1 at t=0
-                # Check for conflicts with the voltage at n2 that may have already been set by
-                # another capacitor. This should not happen because we expect the user to
-                # only set the initial voltage for each node once, but we check for this
-                # just in case to avoid silent errors.
-                assert initial_voltages.get(n2, voltage[n2]) == voltage[n2], f"Conflicting initial voltages for node {n2}."
-                initial_voltages[n2] = voltage[n2]
-            else:
-                # n2 is ground
-                voltage[n1] = -v_initial
-                # Check for conflicts with the voltage at n1 that may have already been set by
-                # another capacitor. This should not happen because we expect the user to
-                # only set the initial voltage for each node once, but we check for this
-                # just in case to avoid silent errors.
-                assert initial_voltages.get(n1, -v_initial) == -v_initial, f"Conflicting initial voltages for node {n1}."
-                initial_voltages[n1] = -v_initial
-
-        # Overwrite the voltage history at t=0 with the initial
-        # voltages for the capacitor nodes
-        for n in initial_voltages.keys():
-            voltage[n] = initial_voltages[n]
-
-        # Overwrite the current history at t=0 with the initial
-        # currents for the inductor components
-        for ind in initial_currents.keys():
-            current[ind] = initial_currents[ind]
-
-        # Prepare history with the initial voltages for all nodes
-        # now at t=0
-        self.ctx.voltage_history = [voltage.copy()]
-        self.ctx.current_history = [current.copy()]
-
-        for t in times:
-            self.ctx.t = t
-            if os.environ.get("IMPULSO_DEBUG", '0') == '1':
-                print(f"Time: {t} s\n")
-            voltage, current = self.solve_mna(return_real=True)
-            self.ctx.voltage_history.append(voltage.copy())
-            self.ctx.current_history.append(current.copy())
-
-        # TODO: check capacitor current
-        # TODO: describe why we do not return entire history (we return history[:-1] because the last entry is after the last time step)
-        return times, self.ctx.voltage_history[:-1], self.ctx.current_history[:-1]
-
-
     def solve(self,
               t_stop: float,
               dt: float
@@ -220,7 +138,7 @@ class Solver_Transient(Solver_ACDC):
         # Transfer state from Initicial Conditions solve to the components,
         # so that they can use this state during the transient solve
         for comp in self.components:
-            comp.update_state(self.ctx)
+            comp.initialize_transient_state(self.ctx)
 
         self.initialize()
         self.ctx.analysis_type = Analysis.TRANSIENT
