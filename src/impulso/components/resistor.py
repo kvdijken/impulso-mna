@@ -11,23 +11,23 @@ class Resistor(Component, Stamper):
             raise ValueError(f"Resistance must be non-negative, got {resistance}")
         super().__init__(id)
         self.resistance = resistance
+        self.g = 1.0 / resistance
 
     def admittance(self, s: Optional[complex] = None) -> complex:
-        return 1 / self.resistance
+        return self.g
 
     def augments(self):
         return False
 
     def stamp(self, ctx: Context):
-        g = 1.0 / self.resistance
         i, j = ctx.idx_query_fn(self)
         if i is not None:
-            ctx.Y[i, i] += g
+            ctx.Y[i, i] += self.g
         if j is not None:
-            ctx.Y[j, j] += g
+            ctx.Y[j, j] += self.g
         if i is not None and j is not None:
-            ctx.Y[i, j] -= g
-            ctx.Y[j, i] -= g
+            ctx.Y[i, j] -= self.g
+            ctx.Y[j, i] -= self.g
 
 
     def current(self, ctx: Context) -> complex:
@@ -40,5 +40,5 @@ class Resistor(Component, Stamper):
             vj = 0
         else:
             vj = ctx.x[j]
-        return (vi - vj) / self.resistance
+        return (vi - vj) * self.g
 
