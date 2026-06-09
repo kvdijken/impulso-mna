@@ -973,9 +973,9 @@ class Test_transient:
         assert(within(IR1,0.001,0.1))
 
 
-# Test_Circuit().test_4()
+Test_Circuit().test_1()
 # Test_transient().test_1()
-Test_AC().test_5()
+# Test_AC().test_5()
 # Test_DC().test_11()
 # Test_DC().test_12()
 # Test_DC().test_13()

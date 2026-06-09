@@ -33,7 +33,7 @@ circuit.add(Q5, ['Q5_E', 'GND', 'Q5_C'])
 circuit.add(R10, ['VCC','Q5_C'])
 
 dc = solve_dc(circuit)
-t, v, i = solve_transient(circuit,t_stop=0.001, dt=0.000005)
+t, v, i = solve_transient(circuit,t_stop=0.001, dt=0.000005, show_output=True)
 
 fig, ax = plt.subplots()
 ax2 = ax.twinx()

@@ -7,6 +7,7 @@ plt.rcParams['axes.xmargin'] = 0
 
 @np.vectorize
 def current(v):
+    global first
     V1 = DCVoltageSource(voltage=v, id='V1')
     R1 = Resistor(resistance=0.568, id='R1')
     D1 = Diode(id='D1')

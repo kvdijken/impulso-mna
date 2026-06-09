@@ -21,7 +21,7 @@ circuit.add(D1, ['N1', 'GND'])
 
 # Perform a DC sweep from 0V to 1V
 v1_ = np.linspace(0, 1, 1000)
-voltages, currents = dc_sweep(circuit, V1, v1_)
+voltages, currents = dc_sweep(circuit, V1, v1_, show_output=True)
 id_ = magify(i_pivot(currents)['D1'])
 iv1_ = magify(i_pivot(currents)['V1'])
 

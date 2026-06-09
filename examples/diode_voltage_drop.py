@@ -11,7 +11,7 @@ circuit.add(V1, [0, 1])
 circuit.add(R1, [1, 2])
 circuit.add(D1, [2, 0])
 
-voltages, currents = solve_dc(circuit)
+voltages, currents = solve_dc(circuit, show_output=True)
 
 v2 = voltages[2]
 print("Voltage 2:", np.real(v2))

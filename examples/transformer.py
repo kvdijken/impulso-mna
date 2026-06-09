@@ -2,7 +2,6 @@
 # and dots on opposite sides of the inductors.
 
 import matplotlib.pyplot as plt
-import pickle
 
 from impulso import Circuit, Resistor, Inductor, MutualInductance, SinusoidalVoltageSource, solve_transient
 
@@ -21,7 +20,7 @@ circuit.add(L2, [2, 0])
 circuit.add(R1, [2, 0])
 circuit.add_instruction(K1)
 
-time, voltages, currents = solve_transient(circuit, t_stop=0.1, dt=1e-4)
+time, voltages, currents = solve_transient(circuit, t_stop=0.1, dt=1e-4, show_output=True)
 # Plot the results
 plt.plot(time, voltages[1], label='Voltage across L1')
 plt.plot(time, voltages[2], label='Voltage across L2')
@@ -31,6 +30,3 @@ plt.title('Transient Analysis of Transformer Circuit')
 plt.legend()
 plt.grid()
 plt.show()
-
-with open('data.pickle', 'wb') as f:
-    pickle.dump((time, voltages, currents), f, pickle.HIGHEST_PROTOCOL)

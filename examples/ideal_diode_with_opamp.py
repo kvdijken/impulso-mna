@@ -27,7 +27,8 @@ stop = 0.005
 t = np.linspace(0, stop, 1000)
 t,v,c, = solve_transient(circuit,
                          t_stop=stop,
-                         dt=stop/1000)
+                         dt=stop/1000,
+                         show_output=True)
 
 plt.plot(t, v[pos], label="Input voltage")
 plt.plot(t, v[neg], label="Output voltage")

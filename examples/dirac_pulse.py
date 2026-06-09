@@ -20,7 +20,7 @@ circuit.add(R1,[1, 2])
 circuit.add(C1,[2, 0])
 
 
-time, voltages, currents = solve_transient(circuit, t_stop=2, dt=dt)
+time, voltages, currents = solve_transient(circuit, t_stop=2, dt=dt, show_output=True)
 plt.plot(time, np.real(voltages[2]),'k')
 plt.suptitle('Voltage across capacitor')
 plt.title(f'R={r1} Ohms, C={c1} F, Voltage pulse = {v1}V Dirac Delta pulse')

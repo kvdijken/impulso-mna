@@ -8,7 +8,7 @@ import numpy as np
 
 from .components.component import *
 from .sources.source import *
-from .acdc import Solver_ACDC
+from .acdc import Solver_ACDC, Statistics, print_statistics
 from .components.capacitor import Capacitor
 from .components.inductor import Inductor
 from .circuit import Circuit
@@ -104,10 +104,16 @@ class Solver_Transient(Solver_ACDC):
     def __init__(self,
                  circuit: Circuit,
                  dt: float):
+        # augment context for transient analysis
+        self.dt = dt
         super().__init__(circuit)
 
-        # augment context for transient analysis
-        self.ctx.dt = dt
+
+    def create_context(self, freq: float | None) -> Context:
+        ctx = super().create_context(freq)
+        ctx.dt = self.dt
+        ctx.analysis_type = Analysis.TRANSIENT
+        return ctx
 
 
     def node_administration(self):
@@ -120,30 +126,40 @@ class Solver_Transient(Solver_ACDC):
 
     def solve(self,
               t_stop: float,
-              dt: float
+              dt: float,
+              show_output: bool = False,
+              stats: Statistics = None # if not None, this function will not own the stats and not print them
               ) -> Tuple[np.ndarray, List[Dict[int, float]], List[Dict[str | Component, float]]]:
         '''              ^time       ^node voltages          ^component currents
         '''
+        self._show_output = show_output
+        self._stats = stats
+        if self.show_output and not stats:
+            self._stats = Statistics()
+        self.ctx = self.create_context(freq=None) # create context with transient analysis type
         # Create time series
         times = np.arange(0, t_stop + dt / 2, dt)
 
         # Initial conditions
         self.ctx.analysis_type = Analysis.IC
-        print("\nSolving for initial conditions...")
+        if show_output:
+            print("\nSolving for initial conditions:")
         self.node_administration()
         for comp in self.components:
             comp.init_state()
         self.ctx.t = times[0]
         voltage, current = self.solve_mna(return_real=True)
 
-        print("\nTransferring state from initial conditions...")
+        if show_output:
+            print("\nTransferring state from initial conditions:")
         # Transfer state from Initicial Conditions solve to the components,
         # so that they can use this state during the transient solve
         for comp in self.components:
             comp.initialize_transient_state(self.ctx)
 
-        self.initialize(self.ctx)
-        print("\nStarting transient solve...")
+        self.initialize()
+        if show_output:
+            print("\nStarting transient solve:")
         self.ctx.analysis_type = Analysis.TRANSIENT
         self.node_administration()
         self.ctx.t = times[0]
@@ -163,7 +179,8 @@ class Solver_Transient(Solver_ACDC):
                 for t in times[1:]:
                     self.ctx.t = t
                     voltage, current = self.solve_mna(return_real=True)
-                    progress.update(t)
+                    if show_output:
+                        progress.update(t)
                     if os.environ.get("IMPULSO_DEBUG", '0') == '1':
                         print(f"Time: {t} s\n")
                     self.ctx.voltage_history.append(voltage.copy())
@@ -177,14 +194,19 @@ class Solver_Transient(Solver_ACDC):
                 # some point during the transient simulation. In this
                 # case, we print an error message and return the
                 # results up until the point where the error occurred.
-                print(f"Linear algebra error at time {self.ctx.t}: {e}")
+                if show_output:
+                    print(f"Linear algebra error at time {self.ctx.t}: {e}")
                 times = times[:len(self.ctx.voltage_history)]
+        if self.show_output and not stats:
+            print_statistics(self._stats)
         return times, self.ctx.voltage_history, self.ctx.current_history
 
 
 def solve_transient(circuit: Circuit,
                     t_stop: float,
                     dt: float,
+                    show_output: bool = False,
+                    stats: Statistics = None
                     ) -> Tuple[np.ndarray,          # time
                                Dict[int,            # node
                                     List[float]],   # voltage over time
@@ -193,9 +215,14 @@ def solve_transient(circuit: Circuit,
                                ]]:
     solver = Solver_Transient(circuit,
                               dt=dt)
-    time, _v, _c = solver.solve(t_stop, dt)
+    _stats = stats
+    if show_output and not stats:
+        _stats = Statistics()
+    time, _v, _c = solver.solve(t_stop, dt, show_output=show_output, stats=_stats)
     _v = transpose_dicts(_v)
     _c = transpose_dicts(_c)
+    if show_output and not stats:
+        print_statistics(_stats)
     return time, _v, _c
 
 

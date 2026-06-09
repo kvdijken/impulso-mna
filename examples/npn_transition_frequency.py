@@ -36,7 +36,7 @@ circuit.add(Re, ['Q1_E', 'GND'])
 circuit.add(Q1, ['Q1_E', 'Q1_B', 'Q1_C'])
 
 freqs = np.logspace(1, 10, 500)
-results = solve_ac(circuit,freqs)
+results = solve_ac(circuit,freqs,show_output=True)
 
 freqs, node_voltages, _c = freq_pivot_and_select(results,
                                             voltage_nodes=['Q1_C'],

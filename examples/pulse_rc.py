@@ -31,7 +31,7 @@ circuit.add(V1,[0,1])
 circuit.add(R1,[1,2])
 circuit.add(C1,[2,0])
 
-time, voltages, currents = solve_transient(circuit,1, .01)
+time, voltages, currents = solve_transient(circuit,1, .01, show_output=True)
 plt.plot(time, np.real(voltages[2]),'k')
 plt.suptitle('Voltage across capacitor')
 plt.title('R=50 Ohms, C=1mF, Pulse width=0.1s, Pulse amplitude=1V')

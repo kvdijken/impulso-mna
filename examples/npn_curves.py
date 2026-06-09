@@ -3,7 +3,7 @@ import numpy as np
 
 #from labellines import labelLines
 
-from impulso import profile, NPN, Circuit, DCVoltageSource, DCCurrentSource, solve_dc
+from impulso import profile, NPN, Circuit, DCVoltageSource, DCCurrentSource, solve_dc, Statistics, print_statistics
 
 plt.rcParams['axes.xmargin'] = 0
 
@@ -32,14 +32,17 @@ def main():
     ib_ = np.linspace(0, 0.1, 10) # base current in mA
     vce_ = np.linspace(0, 4.5, 100) # collector-emitter voltage in V
 
+    stats = Statistics()
     for ib in ib_:
         ic = []
         for vce in vce_:
             c = circuit(ib/1000,vce)
-            v, i = solve_dc(c)
+            v, i = solve_dc(c,stats=stats)
             ic.append(-np.real(i['Q1'][collector])*1000)
         plt.plot(vce_, ic, 'k', lw=0.75, label=f"Ib={ib:.2f}mA")
 
+    print_statistics(stats)
+    
     plt.grid()
     plt.title('NPN Transistor Output Characteristics')
     plt.xlabel(f'Vce (V)')

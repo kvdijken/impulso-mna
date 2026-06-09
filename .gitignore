@@ -114,6 +114,7 @@ docs/_build/
 # IDEs (optional extras)
 # =========================
 .idea/
+.tmp\
 
 # =========================
 # Local config / secrets

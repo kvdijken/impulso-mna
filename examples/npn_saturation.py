@@ -26,7 +26,7 @@ circuit.add(Vcc, [0,1])
 circuit.add(Vin, [0,2])
 circuit.add(C1, [2,3])
 
-t, v, c = solve_transient(circuit, t_stop=0.005, dt=0.000005)
+t, v, c = solve_transient(circuit, t_stop=0.005, dt=0.000005, show_output=True)
 
 fig, ax = plt.subplots()
 ax2 = ax.twinx()

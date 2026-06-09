@@ -3,12 +3,31 @@ import os
 from typing import Dict, List, Tuple
 import numpy as np
 from functools import cache
+from dataclasses import dataclass
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
 from .circuit import Circuit
 from .sources.source import PowerSource
 from .helperregistry import registry, StampingHelper
+
+
+@dataclass
+class Statistics():
+    solves: int = 0
+    singulars: int = 0
+    dc_analysis: int = 0
+    ac_analysis: int = 0
+    not_converged: int = 0
+
+def print_statistics(stats: Statistics):
+    print("\nStatistics:")
+    print(f"Number of matrix solves: {stats.solves}")
+    print(f"Number of singular matrices: {stats.singulars}")
+    print(f"Number of DC analyses: {stats.dc_analysis}")
+    print(f"Number of AC analyses: {stats.ac_analysis}")
+    print(f"Number of re-solve because of not converged system: {stats.not_converged}")
+
 
 
 class Solver_ACDC():
@@ -22,11 +41,12 @@ class Solver_ACDC():
                                         # voltage sources, etc.)
 
     def __init__(self,
-                 circuit: Circuit,
-                 ):
+                 circuit: Circuit):
+        circuit.validate()
         self.circuit = circuit
         self._prev_analysis_type = None
         self.initialize()
+        self._stats = None
 
 
     def initialize(self):
@@ -35,16 +55,19 @@ class Solver_ACDC():
         self.components = self.circuit.components
         self.ground_node = self.circuit.ground_node
         self.x_prev = None # previous solution vector, used for nonlinear iteration
-        self.ctx = self.create_context()
-
         self._stamping_components = [] # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
         self._current_components = [] # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
 
 
-    def create_context(self) -> Context:
+    def create_context(self, freq: float | None) -> Context:
         ctx = Context()
-        ctx.analysis_type = None
-        ctx.s = None
+        match freq:
+            case None | 0.0 | 0:
+                ctx.analysis_type = Analysis.DC
+                ctx.s = 0
+            case _:
+                ctx.analysis_type = Analysis.AC
+                ctx.s = 1j * 2 * np.pi * freq
         ctx.ground_node = self.ground_node
         ctx.idx_query_fn = self.get_node_indices
         ctx.augm_query_fn = self.get_augm_index
@@ -81,7 +104,9 @@ class Solver_ACDC():
 
 
     def solve(self,
-              freq: float
+              freq: float,
+              show_output: bool = False,
+              stats: Statistics = None
               ) -> Tuple[Dict[int | str, complex], # node voltages
                          Dict[str | Component, complex]]: # currents through components
         """
@@ -91,8 +116,15 @@ class Solver_ACDC():
             voltages: dict node -> complex voltage
             currents: dict comp_id | component -> complex current
         """
+        self._show_output = show_output
+        self._stats = stats
+        self.ctx = self.create_context(freq)
         self.node_administration()
         return self.solve_mna(freq)
+
+
+    def show_output(self) -> bool:
+        return self._show_output
 
 
     def node_administration(self):
@@ -100,13 +132,22 @@ class Solver_ACDC():
         # included/excluded from the node administration for certain analysis types.
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
-        if self.ctx.analysis_type != self._prev_analysis_type:
+        if (self.ctx.analysis_type != self._prev_analysis_type) and self.show_output():
             self._prev_analysis_type = self.ctx.analysis_type
             print(f"Node administration complete.")
-            print(f"Ground node: {self.ground_node}.")
-            print(f"Number of components: {len(self.components)}.")
-            print(f"Number of nodes (excluding ground): {len(self.node_index)}.")
-            print(f"Total size of MNA matrix: {self.N}.")
+            print(f"Ground node: {self.ground_node}")
+            print(f"Number of components: {len(self.components)}")
+            print(f"Number of non-linear components: {self.number_of_non_linear_components()}")
+            print(f"Number of nodes (excluding ground): {len(self.node_index)}")
+            print(f"Total size of MNA matrix: {self.N}")
+
+
+    def number_of_non_linear_components(self):
+        n = 0
+        for comp in self.components:
+            if not comp.linear():
+                n += 1
+        return n
 
 
     def all_nodes(self) -> List[int]:
@@ -137,6 +178,12 @@ class Solver_ACDC():
             voltages: dict node -> complex voltage
             currents: dict comp_id | component -> complex current
         """
+        if self._stats:
+            if freq == 0:
+                self._stats.dc_analysis += 1
+            else:
+                self._stats.ac_analysis += 1
+
         converged = False
 
         self.ctx.s = 1j * 2 * np.pi * freq
@@ -176,6 +223,8 @@ class Solver_ACDC():
                 times += 1
                 if times >= n_times:
                     converged = self.check_convergence()
+                    if self._stats and not converged:
+                        self._stats.not_converged += 1
             else:
                 converged = True
         voltages = self.extract_node_voltages()
@@ -242,7 +291,15 @@ class Solver_ACDC():
     def solve_matrix_equation(self):
         '''
         '''
-        return np.linalg.solve(self.ctx.Y, self.ctx.z)
+        if self._stats:
+            self._stats.solves += 1
+        try:
+            return np.linalg.solve(self.ctx.Y, self.ctx.z)
+        except np.linalg.LinAlgError as e:
+            if self._stats:
+                self._stats.singulars += 1
+            raise e
+
 
 
     def zero_RHS(self, N):
@@ -299,46 +356,28 @@ class Solver_ACDC():
             comp.stamp(self.ctx)
 
 
-def _solve_acdc(circuit: Circuit,
-               freq: float, # frequency for AC analysis, ignored for DC analysis
-               ctx: Context = None
-               ) -> Tuple[Dict[int | str, complex], # node voltages
-                          Dict[str | Component, complex]]: # currents through components
-    '''
-    Convenience function to solve a circuit without
-    needing to create a Solver_ACDC instance.
-
-    Make sure that if doing an AC analysis, the
-    operating point has already been solved and
-    the nonlinear components have their admittance
-    set for AC analysis, otherwise the results may
-    be meaningless.
-    '''
-    assert ctx is None or isinstance(ctx, Context), "ctx must be an instance of Context or None"
-    if ctx is not None:
-        if freq > 0:
-            assert ctx.analysis_type in (None, Analysis.AC), "Context analysis type must be AC or None for AC analysis"
-
-    circuit.validate()
-    solver = Solver_ACDC(circuit)
-    return solver.solve(freq)
-
-
 def solve_dc(circuit: Circuit,
-             ctx: Context = None
+             show_output: bool = False,
+             stats: Statistics = None
              ) -> Tuple[Dict[int | str, complex], # node voltages
                         Dict[str | Component, complex]]: # currents through components
     '''
     Convenience function to solve a circuit for DC analysis.
     '''
-    if ctx is None:
-        ctx = Context()
-    ctx.analysis_type = Analysis.DC
-    return _solve_acdc(circuit, freq=0, ctx=ctx)
+    solver = Solver_ACDC(circuit)
+    _stats = stats
+    if show_output and stats is None:
+        _stats = Statistics()
+    result = solver.solve(freq=0, show_output=show_output, stats=_stats)
+    if show_output and stats is None:
+        print_statistics(_stats)
+    return result
 
 
 def solve_ac(circuit: Circuit,
-             freq: float | List[float]
+             freq: float | List[float],
+             show_output: bool = False,
+             stats: Statistics = None
              ) -> Tuple[Dict[int | str, complex], # node voltages
                         Dict[str | Component, complex]]: # currents through components
     '''
@@ -354,22 +393,35 @@ def solve_ac(circuit: Circuit,
         if not comp.linear():
             non_linears.add(comp)
 
+    solver = Solver_ACDC(circuit)
+    _stats = stats
+    if show_output and stats is None:
+        _stats = Statistics()
+    if show_output:
+        print("\nPerforming DC operating point analysis:")
     if len(non_linears) > 0:
         # First do a operating point analysis
-        _, idc = solve_dc(circuit)
+        _, idc = solver.solve(freq=0, show_output=show_output, stats=_stats)
         for comp in non_linears:
             comp.set_admittance_for_ac(idc[comp])
 
-    ctx = Context()
-    ctx.analysis_type = Analysis.AC
-
     if isinstance(freq, float):
         # single frequency AC analysis
-        return _solve_acdc(circuit, freq, ctx)
+        if show_output:
+            print("\nPerforming single frequency AC analysis:")
+        results = solver.solve(freq=freq, show_output=show_output, stats=_stats)
     else:
         # AC sweep over multiple frequencies
         results = {}
+        if show_output:
+            print("\nPerforming frequency range AC analysis:")
+        first = True
         for f in freq:
-            results[f] = _solve_acdc(circuit, f, ctx)
-        return results
+            results[f] = solver.solve(freq=f, show_output=show_output and first, stats=_stats)
+            first = False
+
+    if show_output and stats is None:
+        print_statistics(_stats)
+    return results
+
 

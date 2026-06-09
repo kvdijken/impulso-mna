@@ -20,7 +20,7 @@ circuit = Circuit()
 circuit.add(V1,[0,1])
 circuit.add(R1,[1,0])
 
-time, voltages, currents = solve_transient(circuit, 5, 0.01)
+time, voltages, currents = solve_transient(circuit, 5, 0.01, show_output=True)
 plt.plot(time, voltages[1],'k')
 plt.title('Pulsed Voltage Source')
 plt.xlabel('Time (s)')
