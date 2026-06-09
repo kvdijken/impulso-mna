@@ -16,22 +16,23 @@ class Statistics():
     def __init__(self,
                  show: bool,
                  owner: Statistics = None):
-        self._owning = not owner
         self._show = show
-        if self._owning:
+        if owner:
+            self._owner = owner
+        else:
             self._owner = self
             self.zero()
-        else:
-            self._owner = owner
 
     def zero(self):
+        if self._owner != self:
+            raise RuntimeError("Statistics: only the owner can zero the data")
         self.solves = 0
         self.singulars = 0
         self.dc_analysis = 0
         self.ac_analysis = 0
         self.not_converged = 0
 
-    def print_statistics(self):
+    def print(self):
         print("\nStatistics:")
         print(f"Number of matrix solves: {self._owner.solves}")
         print(f"Number of singular matrices: {self._owner.singulars}")
@@ -43,8 +44,8 @@ class Statistics():
         return self._owner
 
     def __exit__(self, exc_type, exc, tb):
-        if self._show and self._owning:
-            self.print_statistics()
+        if self._show and (self._owner == self):
+            self.print()
         return False
 
 
