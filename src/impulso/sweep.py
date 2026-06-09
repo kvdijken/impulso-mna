@@ -2,7 +2,7 @@ from typing import List, Tuple, Dict, Iterable, Any
 
 from .base import Analysis
 from .circuit import Circuit
-from .acdc import solve_ac, solve_dc, Statistics, print_statistics
+from .acdc import solve_ac, solve_dc, Statistics, StatisticsScope
 from .components.component import Component, Context
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
@@ -23,15 +23,11 @@ def ac_sweep(circuit: Circuit,
     Returns:
         dict freq -> (node_voltage, comp_currents)
     """
-    _stats = stats
-    if show_output and stats is None:
-        _stats = Statistics()
-    result = solve_ac(circuit,
-                    freqs,
-                    show_output=show_output,
-                    stats=_stats)
-    if show_output and stats is None:
-        print_statistics(_stats)
+    with StatisticsScope(show_output,stats) as _stats:
+        result = solve_ac(circuit,
+                        freqs,
+                        show_output=show_output,
+                        stats=_stats)
     return result
 
 
@@ -74,22 +70,18 @@ def dc_sweep(circuit: Circuit,
     vdc_ = []
     idc_ = []
     first = True
-    _stats = stats
-    if show_output and stats is None:
-        _stats = Statistics()
-    for dc in dc_range:
-        if isinstance(dc_source, DCVoltageSource):
-            dc_source.voltage = dc
-        elif isinstance(dc_source, DCCurrentSource):
-            dc_source.set_current(dc)
-        vdc, idc = solve_dc(circuit,
-                            show_output=show_output and first,
-                            stats=_stats)
-        first = False
-        vdc_.append(vdc)
-        idc_.append(idc)
-    if show_output and stats is None:
-        print_statistics(_stats)
+    with StatisticsScope(show_output,stats) as _stats:
+        for dc in dc_range:
+            if isinstance(dc_source, DCVoltageSource):
+                dc_source.voltage = dc
+            elif isinstance(dc_source, DCCurrentSource):
+                dc_source.set_current(dc)
+            vdc, idc = solve_dc(circuit,
+                                show_output=show_output and first,
+                                stats=_stats)
+            first = False
+            vdc_.append(vdc)
+            idc_.append(idc)
     return vdc_, idc_
 
 

@@ -1,3 +1,13 @@
+## [2.2.0] -
+
+- extensive output of statistics. Statistics are collected in a Statistics
+  variable which in API methods can be given as a parameter, of if not, will
+  be created within the API method. If show_output, the stats will be printed
+  at the level where the Statistics variable is created. That is the method
+  which owns the Statistics variable and is responsible for printing it.
+- improved initial conditions handling
+
+
 ## [2.1.0] - 2026-05-28
 
 - better implementation for initial voltages for capacitors and

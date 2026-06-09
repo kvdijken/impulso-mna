@@ -1,4 +1,4 @@
-from .acdc import Solver_ACDC, solve_ac, solve_dc, Statistics, print_statistics
+from .acdc import Solver_ACDC, solve_ac, solve_dc, Statistics, StatisticsScope
 from .base import TopologyError, Analysis
 from .circuit import Circuit
 from .components.bjt import BJT, NPN, PNP, emitter_current, collector_current, base_current

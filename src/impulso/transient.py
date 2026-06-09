@@ -8,7 +8,7 @@ import numpy as np
 
 from .components.component import *
 from .sources.source import *
-from .acdc import Solver_ACDC, Statistics, print_statistics
+from .acdc import Solver_ACDC, Statistics, StatisticsScope
 from .components.capacitor import Capacitor
 from .components.inductor import Inductor
 from .circuit import Circuit
@@ -133,72 +133,68 @@ class Solver_Transient(Solver_ACDC):
         '''              ^time       ^node voltages          ^component currents
         '''
         self._show_output = show_output
-        self._stats = stats
-        if self.show_output and not stats:
-            self._stats = Statistics()
-        self.ctx = self.create_context(freq=None) # create context with transient analysis type
-        # Create time series
-        times = np.arange(0, t_stop + dt / 2, dt)
+        with StatisticsScope(show_output,stats) as self._stats:
+            self.ctx = self.create_context(freq=None) # create context with transient analysis type
+            # Create time series
+            times = np.arange(0, t_stop + dt / 2, dt)
 
-        # Initial conditions
-        self.ctx.analysis_type = Analysis.IC
-        if show_output:
-            print("\nSolving for initial conditions:")
-        self.node_administration()
-        for comp in self.components:
-            comp.init_state()
-        self.ctx.t = times[0]
-        voltage, current = self.solve_mna(return_real=True)
+            # Initial conditions
+            self.ctx.analysis_type = Analysis.IC
+            if show_output:
+                print("\nSolving for initial conditions:")
+            self.node_administration()
+            for comp in self.components:
+                comp.init_state()
+            self.ctx.t = times[0]
+            voltage, current = self.solve_mna(return_real=True)
 
-        if show_output:
-            print("\nTransferring state from initial conditions:")
-        # Transfer state from Initicial Conditions solve to the components,
-        # so that they can use this state during the transient solve
-        for comp in self.components:
-            comp.initialize_transient_state(self.ctx)
+            if show_output:
+                print("\nTransferring state from initial conditions:")
+            # Transfer state from Initicial Conditions solve to the components,
+            # so that they can use this state during the transient solve
+            for comp in self.components:
+                comp.initialize_transient_state(self.ctx)
 
-        self.initialize()
-        if show_output:
-            print("\nStarting transient solve:")
-        self.ctx.analysis_type = Analysis.TRANSIENT
-        self.node_administration()
-        self.ctx.t = times[0]
-        self.ctx.dt = dt
+            self.initialize()
+            if show_output:
+                print("\nStarting transient solve:")
+            self.ctx.analysis_type = Analysis.TRANSIENT
+            self.node_administration()
+            self.ctx.t = times[0]
+            self.ctx.dt = dt
 
-        # Prepare history with the initial voltages for all nodes
-        # now at t=0
-        self.ctx.voltage_history = [voltage.copy()]
-        self.ctx.current_history = [current.copy()]
+            # Prepare history with the initial voltages for all nodes
+            # now at t=0
+            self.ctx.voltage_history = [voltage.copy()]
+            self.ctx.current_history = [current.copy()]
 
-        self._reset_cache() # clear cache after initial conditions have been set and solved for,
-                            # so that we don't accidentally use cached values from the IC solve
-                            # during the transient solve
+            self._reset_cache() # clear cache after initial conditions have been set and solved for,
+                                # so that we don't accidentally use cached values from the IC solve
+                                # during the transient solve
 
-        with ProgressReporter(self.ctx, total=t_stop) as progress:
-            try:
-                for t in times[1:]:
-                    self.ctx.t = t
-                    voltage, current = self.solve_mna(return_real=True)
+            with ProgressReporter(self.ctx, total=t_stop) as progress:
+                try:
+                    for t in times[1:]:
+                        self.ctx.t = t
+                        voltage, current = self.solve_mna(return_real=True)
+                        if show_output:
+                            progress.update(t)
+                        if os.environ.get("IMPULSO_DEBUG", '0') == '1':
+                            print(f"Time: {t} s\n")
+                        self.ctx.voltage_history.append(voltage.copy())
+                        self.ctx.current_history.append(current.copy())
+                        for comp in self.components:
+                            comp.update_state(self.ctx)
+                except np.linalg.LinAlgError as e:
+                    # Catch linear algebra errors that may occur during
+                    # the solve_mna calls, which may be due to numerical
+                    # issues or due to the circuit becoming unsolvable at
+                    # some point during the transient simulation. In this
+                    # case, we print an error message and return the
+                    # results up until the point where the error occurred.
                     if show_output:
-                        progress.update(t)
-                    if os.environ.get("IMPULSO_DEBUG", '0') == '1':
-                        print(f"Time: {t} s\n")
-                    self.ctx.voltage_history.append(voltage.copy())
-                    self.ctx.current_history.append(current.copy())
-                    for comp in self.components:
-                        comp.update_state(self.ctx)
-            except np.linalg.LinAlgError as e:
-                # Catch linear algebra errors that may occur during
-                # the solve_mna calls, which may be due to numerical
-                # issues or due to the circuit becoming unsolvable at
-                # some point during the transient simulation. In this
-                # case, we print an error message and return the
-                # results up until the point where the error occurred.
-                if show_output:
-                    print(f"Linear algebra error at time {self.ctx.t}: {e}")
-                times = times[:len(self.ctx.voltage_history)]
-        if self.show_output and not stats:
-            print_statistics(self._stats)
+                        print(f"Linear algebra error at time {self.ctx.t}: {e}")
+                    times = times[:len(self.ctx.voltage_history)]
         return times, self.ctx.voltage_history, self.ctx.current_history
 
 
@@ -213,16 +209,11 @@ def solve_transient(circuit: Circuit,
                                Dict[str|Component, # component
                                     List[float]     # current over time
                                ]]:
-    solver = Solver_Transient(circuit,
-                              dt=dt)
-    _stats = stats
-    if show_output and not stats:
-        _stats = Statistics()
-    time, _v, _c = solver.solve(t_stop, dt, show_output=show_output, stats=_stats)
-    _v = transpose_dicts(_v)
-    _c = transpose_dicts(_c)
-    if show_output and not stats:
-        print_statistics(_stats)
+    solver = Solver_Transient(circuit, dt=dt)
+    with StatisticsScope(show_output,stats) as _stats:
+        time, _v, _c = solver.solve(t_stop, dt, show_output=show_output, stats=_stats)
+        _v = transpose_dicts(_v)
+        _c = transpose_dicts(_c)
     return time, _v, _c
 
 

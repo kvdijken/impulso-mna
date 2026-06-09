@@ -20,14 +20,33 @@ class Statistics():
     ac_analysis: int = 0
     not_converged: int = 0
 
-def print_statistics(stats: Statistics):
-    print("\nStatistics:")
-    print(f"Number of matrix solves: {stats.solves}")
-    print(f"Number of singular matrices: {stats.singulars}")
-    print(f"Number of DC analyses: {stats.dc_analysis}")
-    print(f"Number of AC analyses: {stats.ac_analysis}")
-    print(f"Number of re-solve because of not converged system: {stats.not_converged}")
+class StatisticsScope():
 
+    def __init__(self,
+                 show: bool,
+                 stats: Statistics = None):
+        self._owning = not stats
+        self._show = show
+        if self._owning:
+            self._stats = Statistics()
+        else:
+            self._stats = stats
+
+    def print_statistics(self):
+        print("\nStatistics:")
+        print(f"Number of matrix solves: {self._stats.solves}")
+        print(f"Number of singular matrices: {self._stats.singulars}")
+        print(f"Number of DC analyses: {self._stats.dc_analysis}")
+        print(f"Number of AC analyses: {self._stats.ac_analysis}")
+        print(f"Number of re-solve because of not converged system: {self._stats.not_converged}")
+
+    def __enter__(self):
+        return self._stats
+
+    def __exit__(self, exc_type, exc, tb):
+        if self._show and self._owning:
+            self.print_statistics()
+        return False
 
 
 class Solver_ACDC():
@@ -365,13 +384,8 @@ def solve_dc(circuit: Circuit,
     Convenience function to solve a circuit for DC analysis.
     '''
     solver = Solver_ACDC(circuit)
-    _stats = stats
-    if show_output and stats is None:
-        _stats = Statistics()
-    result = solver.solve(freq=0, show_output=show_output, stats=_stats)
-    if show_output and stats is None:
-        print_statistics(_stats)
-    return result
+    with StatisticsScope(show_output,stats) as _stats:
+        return solver.solve(freq=0, show_output=show_output, stats=_stats)
 
 
 def solve_ac(circuit: Circuit,
@@ -394,34 +408,30 @@ def solve_ac(circuit: Circuit,
             non_linears.add(comp)
 
     solver = Solver_ACDC(circuit)
-    _stats = stats
-    if show_output and stats is None:
-        _stats = Statistics()
-    if show_output:
-        print("\nPerforming DC operating point analysis:")
-    if len(non_linears) > 0:
-        # First do a operating point analysis
-        _, idc = solver.solve(freq=0, show_output=show_output, stats=_stats)
-        for comp in non_linears:
-            comp.set_admittance_for_ac(idc[comp])
-
-    if isinstance(freq, float):
-        # single frequency AC analysis
+    with StatisticsScope(show=show_output, stats=stats) as _stats:
         if show_output:
-            print("\nPerforming single frequency AC analysis:")
-        results = solver.solve(freq=freq, show_output=show_output, stats=_stats)
-    else:
-        # AC sweep over multiple frequencies
-        results = {}
-        if show_output:
-            print("\nPerforming frequency range AC analysis:")
-        first = True
-        for f in freq:
-            results[f] = solver.solve(freq=f, show_output=show_output and first, stats=_stats)
-            first = False
+            print("\nPerforming DC operating point analysis:")
+        if len(non_linears) > 0:
+            # First do a operating point analysis
+            _, idc = solver.solve(freq=0, show_output=show_output, stats=_stats)
+            for comp in non_linears:
+                comp.set_admittance_for_ac(idc[comp])
 
-    if show_output and stats is None:
-        print_statistics(_stats)
+        if isinstance(freq, float):
+            # single frequency AC analysis
+            if show_output:
+                print("\nPerforming single frequency AC analysis:")
+            results = solver.solve(freq=freq, show_output=show_output, stats=_stats)
+        else:
+            # AC sweep over multiple frequencies
+            results = {}
+            if show_output:
+                print("\nPerforming frequency range AC analysis:")
+            first = True
+            for f in freq:
+                results[f] = solver.solve(freq=f, show_output=show_output and first, stats=_stats)
+                first = False
+
     return results
 
 
