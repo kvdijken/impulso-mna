@@ -2,7 +2,7 @@ from typing import List, Tuple, Dict, Iterable, Any
 
 from .base import Analysis
 from .circuit import Circuit
-from .acdc import solve_ac, solve_dc, Statistics, StatisticsScope
+from .acdc import solve_ac, solve_dc, Statistics, Statistics
 from .components.component import Component, Context
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
@@ -23,7 +23,7 @@ def ac_sweep(circuit: Circuit,
     Returns:
         dict freq -> (node_voltage, comp_currents)
     """
-    with StatisticsScope(show_output,stats) as _stats:
+    with Statistics(show_output,stats) as _stats:
         result = solve_ac(circuit,
                         freqs,
                         show_output=show_output,
@@ -70,7 +70,7 @@ def dc_sweep(circuit: Circuit,
     vdc_ = []
     idc_ = []
     first = True
-    with StatisticsScope(show_output,stats) as _stats:
+    with Statistics(show_output,stats) as _stats:
         for dc in dc_range:
             if isinstance(dc_source, DCVoltageSource):
                 dc_source.voltage = dc

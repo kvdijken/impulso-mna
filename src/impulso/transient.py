@@ -8,7 +8,7 @@ import numpy as np
 
 from .components.component import *
 from .sources.source import *
-from .acdc import Solver_ACDC, Statistics, StatisticsScope
+from .acdc import Solver_ACDC, Statistics, Statistics
 from .components.capacitor import Capacitor
 from .components.inductor import Inductor
 from .circuit import Circuit
@@ -133,7 +133,7 @@ class Solver_Transient(Solver_ACDC):
         '''              ^time       ^node voltages          ^component currents
         '''
         self._show_output = show_output
-        with StatisticsScope(show_output,stats) as self._stats:
+        with Statistics(show_output,stats) as self._stats:
             self.ctx = self.create_context(freq=None) # create context with transient analysis type
             # Create time series
             times = np.arange(0, t_stop + dt / 2, dt)
@@ -210,7 +210,7 @@ def solve_transient(circuit: Circuit,
                                     List[float]     # current over time
                                ]]:
     solver = Solver_Transient(circuit, dt=dt)
-    with StatisticsScope(show_output,stats) as _stats:
+    with Statistics(show_output,stats) as _stats:
         time, _v, _c = solver.solve(t_stop, dt, show_output=show_output, stats=_stats)
         _v = transpose_dicts(_v)
         _c = transpose_dicts(_c)

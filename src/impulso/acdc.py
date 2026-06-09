@@ -12,36 +12,36 @@ from .sources.source import PowerSource
 from .helperregistry import registry, StampingHelper
 
 
-@dataclass
 class Statistics():
-    solves: int = 0
-    singulars: int = 0
-    dc_analysis: int = 0
-    ac_analysis: int = 0
-    not_converged: int = 0
-
-class StatisticsScope():
 
     def __init__(self,
                  show: bool,
-                 stats: Statistics = None):
-        self._owning = not stats
+                 owner: Statistics = None):
+        self._owning = not owner
         self._show = show
         if self._owning:
-            self._stats = Statistics()
+            self._owner = self
+            self.zero()
         else:
-            self._stats = stats
+            self._owner = owner
+
+    def zero(self):
+        self.solves = 0
+        self.singulars = 0
+        self.dc_analysis = 0
+        self.ac_analysis = 0
+        self.not_converged = 0
 
     def print_statistics(self):
         print("\nStatistics:")
-        print(f"Number of matrix solves: {self._stats.solves}")
-        print(f"Number of singular matrices: {self._stats.singulars}")
-        print(f"Number of DC analyses: {self._stats.dc_analysis}")
-        print(f"Number of AC analyses: {self._stats.ac_analysis}")
-        print(f"Number of re-solve because of not converged system: {self._stats.not_converged}")
+        print(f"Number of matrix solves: {self._owner.solves}")
+        print(f"Number of singular matrices: {self._owner.singulars}")
+        print(f"Number of DC analyses: {self._owner.dc_analysis}")
+        print(f"Number of AC analyses: {self._owner.ac_analysis}")
+        print(f"Number of re-solve because of not converged system: {self._owner.not_converged}")
 
     def __enter__(self):
-        return self._stats
+        return self._owner
 
     def __exit__(self, exc_type, exc, tb):
         if self._show and self._owning:
@@ -384,7 +384,7 @@ def solve_dc(circuit: Circuit,
     Convenience function to solve a circuit for DC analysis.
     '''
     solver = Solver_ACDC(circuit)
-    with StatisticsScope(show_output,stats) as _stats:
+    with Statistics(show_output,stats) as _stats:
         return solver.solve(freq=0, show_output=show_output, stats=_stats)
 
 
@@ -408,7 +408,7 @@ def solve_ac(circuit: Circuit,
             non_linears.add(comp)
 
     solver = Solver_ACDC(circuit)
-    with StatisticsScope(show=show_output, stats=stats) as _stats:
+    with Statistics(show=show_output, owner=stats) as _stats:
         if show_output:
             print("\nPerforming DC operating point analysis:")
         if len(non_linears) > 0:

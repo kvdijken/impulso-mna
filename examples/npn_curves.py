@@ -3,7 +3,7 @@ import numpy as np
 
 #from labellines import labelLines
 
-from impulso import profile, NPN, Circuit, DCVoltageSource, DCCurrentSource, solve_dc, StatisticsScope
+from impulso import profile, NPN, Circuit, DCVoltageSource, DCCurrentSource, solve_dc, Statistics
 
 plt.rcParams['axes.xmargin'] = 0
 
@@ -32,7 +32,7 @@ def main():
     ib_ = np.linspace(0, 0.1, 10) # base current in mA
     vce_ = np.linspace(0, 4.5, 100) # collector-emitter voltage in V
 
-    with StatisticsScope(show=True) as stats:
+    with Statistics(show=True) as stats:
         for ib in ib_:
             ic = []
             for vce in vce_:
