@@ -3,7 +3,6 @@ import os
 from typing import Dict, List, Tuple
 import numpy as np
 from functools import cache
-from dataclasses import dataclass
 
 from .base import Analysis, TopologyError
 from .components.component import Component, Context
