@@ -1,5 +1,7 @@
 from typing import Optional
 
+from quantiphy import Quantity
+
 from ..base import Analysis
 from .source import PowerSource
 from ..components.component import Context, Stamper
@@ -30,7 +32,7 @@ class DCCurrentSource(PowerSource, Stamper):
         return "DCCS"
 
     def __value__(self) -> str | None:
-        return self.current +" A"
+        return Quantity(self.current,"A").render(form="si",spacer="")
 
     def set_current(self, current: float):
         self._current = current

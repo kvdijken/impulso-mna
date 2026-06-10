@@ -40,6 +40,8 @@ evaluation.
 
 from typing import Optional
 
+from quantiphy import Quantity
+
 from .component import Component, Context, Stamper
 from ..base import Analysis
 
@@ -80,7 +82,7 @@ class Capacitor(Component, Stamper):
         return "C"
 
     def __value__(self) -> str | None:
-        return str(self.capacitance) + "F"
+        return Quantity(self.capacitance,"F").render(form="si",spacer="")
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return s * self.capacitance()

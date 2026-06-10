@@ -1,5 +1,7 @@
 from typing import Optional
 
+from quantiphy import Quantity
+
 import numpy as np
 
 from ..base import Analysis
@@ -37,7 +39,7 @@ class SinusoidalCurrentSource(PowerSource):
         return "SINCS"
 
     def __value__(self) -> str | None:
-        return "{A=" + self.amplitude + " A, phi=" + self.phase + " rad, DC=" + self.dc + "V, f=" + self.frequency + "}"
+        return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + self.phase + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def set_amplitude(self, current: float):
         self.amplitude = current

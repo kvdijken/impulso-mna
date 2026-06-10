@@ -1,5 +1,7 @@
 from typing import Optional
 
+from quantiphy import Quantity
+
 from .component import Component, Context, Stamper
 
 
@@ -17,7 +19,8 @@ class Resistor(Component, Stamper):
         return "R"
 
     def __value__(self) -> str | None:
-        return str(self.resistance) + "Ω"
+        return Quantity(self.resistance,"Ω").render(form="si",spacer="")
+#        return str(self.resistance) + "Ω"
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return self.g

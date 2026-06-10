@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import List, Optional, Type, TYPE_CHECKING
 import numpy as np
 
+from quantiphy import Quantity
+
 from .component import Component, CircuitItem, Context
 from ..base import Analysis
 from ..helperregistry import registry, StampingHelper, Factory
@@ -189,7 +191,7 @@ class Inductor(Component):
         return "L"
 
     def __value__(self) -> str | None:
-        return str(self.inductance) + "H"
+        return Quantity(self.inductance,"H").render(form="si",spacer="")
 
     def _has_initial_condition(self) -> bool:
         return self.initial_current is not None

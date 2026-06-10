@@ -2,6 +2,7 @@ from typing import Optional
 from unittest import case
 
 import numpy as np
+from quantiphy import Quantity
 
 from ..base import Analysis
 from .source import PowerSource
@@ -28,7 +29,7 @@ class SinusoidalVoltageSource(PowerSource):
         return "SINVS"
 
     def __value__(self) -> str | None:
-        return "{A=" + str(self.amplitude) + " V, phi=" + str(self.phase) + " rad, DC=" + str(self.dc) + "V, f=" + str(self.frequency) +"}"
+        return "{A=" + Quantity(self.amplitude,"V").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"V").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
