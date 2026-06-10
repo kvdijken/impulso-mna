@@ -52,6 +52,7 @@ class Circuit:
                 lines.append(
                     f"  {comp} ({comp.__repr__()})"
             )
+        lines.append("")
 
         return "\n".join(lines)
 
