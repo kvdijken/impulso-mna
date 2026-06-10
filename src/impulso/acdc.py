@@ -33,6 +33,7 @@ class Statistics():
         self.not_converged = 0
 
     def print(self):
+        # Can also print data when it is not the owner.
         print("\nStatistics:")
         print(f"Number of matrix solves: {self._owner.solves}")
         print(f"Number of singular matrices: {self._owner.singulars}")
@@ -151,6 +152,7 @@ class Solver_ACDC():
         # included/excluded from the node administration for certain analysis types.
         self.N, self.node_index = self.assign_node_indices()
         self.N = self.assign_augmented_slots(self.N)
+        # TODO: Better to separate its purpose from the printing.
         if (self.ctx.analysis_type != self._prev_analysis_type) and self.show_output():
             self._prev_analysis_type = self.ctx.analysis_type
             print(f"Node administration complete.")
