@@ -27,16 +27,20 @@ class Statistics():
         if self._owner != self:
             raise RuntimeError("Statistics: only the owner can zero the data")
         self.solves = 0
+        self.resolves = 0
+        self.max_resolves = 0
+        self.not_converged = 0
         self.singulars = 0
         self.dc_analysis = 0
         self.ac_analysis = 0
-        self.not_converged = 0
 
     def print(self):
         # Can also print data when it is not the owner.
         print("\nStatistics:")
         print(f"Linear system solves: {self._owner.solves}")
-        print(f"Additional solves due to non-convergence {self._owner.not_converged}")
+        print(f"Additional solves due to non-convergence {self._owner.resolves}")
+        print(f"Max additional solves due to non-convergence {self._owner.max_resolves}")
+        print(f"Failed to converge {self._owner.not_converged}")
         print(f"Singular matrices: {self._owner.singulars}")
         print(f"DC analyses: {self._owner.dc_analysis}")
         print(f"AC analyses: {self._owner.ac_analysis}")
@@ -231,9 +235,11 @@ class Solver_ACDC():
 
         self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
 
-        times = 0
-        n_times = 1 # number of iterations to perform before checking for convergence
-        while not converged:
+        solves = 0
+        check_for_convergence_after = 1 # number of iterations to perform before checking for convergence
+        max_resolves = None
+        convergence_fail = False
+        while not converged and not convergence_fail:
             self.ctx.Y = self._zero_MNA_matrix(self.N)
             self.ctx.z = self._zero_RHS(self.N)
             self._stamp()
@@ -242,11 +248,23 @@ class Solver_ACDC():
             if return_real:
                 self.ctx.x = np.real(self.ctx.x)
             if self._has_nonlinear_components():
-                times += 1
-                if times >= n_times:
+                solves += 1
+                if solves >= check_for_convergence_after:
+                    # Check for convergence
                     converged = self._check_convergence()
-                    if self._stats and not converged:
-                        self._stats.not_converged += 1
+                    if not converged:
+                        # Check if we should stop trying to get convergence
+                        if max_resolves and solves > max_resolves:
+                            # failed to converge
+                            if self._stats:
+                                convergence_fail = True
+                                self._stats.not_converged += 1
+                        elif self._stats:
+                            # retry convergence
+                            self._stats.resolves += 1
+                            # Check if we have a new max for convergence attempts
+                            if self._stats.max_resolves < solves:
+                                self._stats.max_resolves = solves
             else:
                 converged = True
         voltages = self._extract_node_voltages()
