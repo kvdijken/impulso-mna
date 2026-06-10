@@ -18,6 +18,8 @@ circuit = Circuit()
 circuit.add(C1, [1, 0])
 circuit.add(L1, [0, 1])
 
+print(circuit)
+
 t_stop = .001
 t, v, i = solve_transient(circuit,t_stop=t_stop, dt=t_stop/5000, show_output=True)
 

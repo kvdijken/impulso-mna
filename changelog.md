@@ -7,6 +7,8 @@
   which owns the Statistics variable and is responsible for printing it.
 - improved initial conditions handling
 - in Solver_ACDC the names of all non-API methods have been preceeded by _
+- Component, CircuitItem and Circuit have new __repr__() and __str__() now,
+  wich allow for pretty printing.
 
 
 ## [2.1.0] - 2026-05-28

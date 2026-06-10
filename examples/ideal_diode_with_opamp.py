@@ -23,6 +23,8 @@ circuit.add(OA1, [pos, neg, out])
 circuit.add(D1, [out, neg])
 circuit.add(R1, [neg, gnd])
 
+print(circuit)
+
 stop = 0.005
 t = np.linspace(0, stop, 1000)
 t,v,c, = solve_transient(circuit,

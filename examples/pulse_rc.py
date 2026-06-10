@@ -31,6 +31,8 @@ circuit.add(V1,[0,1])
 circuit.add(R1,[1,2])
 circuit.add(C1,[2,0])
 
+print(circuit)
+
 time, voltages, currents = solve_transient(circuit,1, .01, show_output=True)
 plt.plot(time, np.real(voltages[2]),'k')
 plt.suptitle('Voltage across capacitor')
