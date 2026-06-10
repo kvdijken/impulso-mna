@@ -35,11 +35,11 @@ class Statistics():
     def print(self):
         # Can also print data when it is not the owner.
         print("\nStatistics:")
-        print(f"Number of matrix solves: {self._owner.solves}")
-        print(f"Number of singular matrices: {self._owner.singulars}")
-        print(f"Number of DC analyses: {self._owner.dc_analysis}")
-        print(f"Number of AC analyses: {self._owner.ac_analysis}")
-        print(f"Number of re-solve because of not converged system: {self._owner.not_converged}")
+        print(f"Linear system solves: {self._owner.solves}")
+        print(f"Additional solves due to non-convergence {self._owner.not_converged}")
+        print(f"Singular matrices: {self._owner.singulars}")
+        print(f"DC analyses: {self._owner.dc_analysis}")
+        print(f"AC analyses: {self._owner.ac_analysis}")
 
     def __enter__(self):
         return self._owner

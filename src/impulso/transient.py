@@ -149,7 +149,7 @@ class Solver_Transient(Solver_ACDC):
             voltage, current = self.solve_mna(return_real=True)
 
             if show_output:
-                print("\nTransferring state from initial conditions:")
+                print("\nTransferring state from initial conditions.")
             # Transfer state from Initicial Conditions solve to the components,
             # so that they can use this state during the transient solve
             for comp in self.components:
