@@ -34,6 +34,9 @@ class Rout(Component):
         self.npn = npn
         super().__init__(id=f"{npn.id}_Rout")
 
+    def __value__(self) -> str | None:
+        return None
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         assert False, "Rout is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
 
@@ -120,6 +123,9 @@ class BJT(CompoundComponent):
         self._c02 = f"{self.id}_c02"
         self.cbc = cbc
         self.cbe = cbe
+
+    def __value__(self) -> str | None:
+        return None
 
     def stamps(self) -> bool:
         return False
@@ -244,6 +250,7 @@ class NPN(BJT):
                          cbc=cbc,
                          cbe=cbe,
                          Va=Va)
+
 
 
 class PNP(BJT):

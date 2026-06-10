@@ -16,6 +16,8 @@ circuit.add(D1, [1, 2])
 circuit.add(R1, [2, 0])
 circuit.add(C1, [2, 0])
 
+print(circuit)
+
 t, v, i = solve_transient(circuit,t_stop=2, dt=0.001, show_output=True)
 plt.plot(t, np.real(v[1]),'k--',lw=.75,label='Voltage at node 1')
 plt.plot(t, np.real(v[2]),'k',label='rectified at node 2')
@@ -25,4 +27,3 @@ plt.title('Half-wave Rectifier')
 plt.grid()
 plt.legend()
 plt.show()
-

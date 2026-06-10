@@ -11,6 +11,12 @@ class Wire(Component, Stamper):
     def __init__(self, id: Optional[str] = None):
         super().__init__(id)
 
+    def __component_typename__(self) -> str:
+        return "W"
+
+    def __value__(self) -> str | None:
+        return None
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return LARGE_CONDUCTANCE
 

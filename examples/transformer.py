@@ -20,6 +20,8 @@ circuit.add(L2, [2, 0])
 circuit.add(R1, [2, 0])
 circuit.add_instruction(K1)
 
+print(circuit)
+
 time, voltages, currents = solve_transient(circuit, t_stop=0.1, dt=1e-4, show_output=True)
 # Plot the results
 plt.plot(time, voltages[1], label='Voltage across L1')

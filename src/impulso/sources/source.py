@@ -31,6 +31,9 @@ class VoltageSource(PowerSource):
         self.voltage = voltage
         super().__init__(id=id)
 
+    def __value__(self) -> str | None:
+        return str(self.voltage) + "V"
+
     def set_voltage(self, voltage: float):
         self.voltage = voltage
 

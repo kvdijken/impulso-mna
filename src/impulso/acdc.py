@@ -65,11 +65,11 @@ class Solver_ACDC():
         circuit.validate()
         self.circuit = circuit
         self._prev_analysis_type = None
-        self.initialize()
+        self._initialize()
         self._stats = None
 
 
-    def initialize(self):
+    def _initialize(self):
         self._prepared = False
         self.nodes = self.circuit.nodes
         self.components = self.circuit.components
@@ -79,7 +79,7 @@ class Solver_ACDC():
         self._current_components = [] # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
 
 
-    def create_context(self, freq: float | None) -> Context:
+    def _create_context(self, freq: float | None) -> Context:
         ctx = Context()
         match freq:
             case None | 0.0 | 0:
@@ -89,38 +89,38 @@ class Solver_ACDC():
                 ctx.analysis_type = Analysis.AC
                 ctx.s = 1j * 2 * np.pi * freq
         ctx.ground_node = self.ground_node
-        ctx.idx_query_fn = self.get_node_indices
-        ctx.augm_query_fn = self.get_augm_index
-        ctx.nodes_query_fn = self.get_nodes
+        ctx.idx_query_fn = self._get_node_indices
+        ctx.augm_query_fn = self._get_augm_index
+        ctx.nodes_query_fn = self._get_nodes
         return ctx
 
 
     @cache
-    def get_nodes(self, comp):
+    def _get_nodes(self, comp):
         return self.nodes.get(comp, None)
 
 
     @cache
-    def get_augm_index(self, comp):
+    def _get_augm_index(self, comp):
         return self.augm_idx.get(comp, None)
 
 
     @cache
-    def get_node_indices(self,
+    def _get_node_indices(self,
                      comp: Component
     ) -> List[int]:
         '''
         Return the indices of the nodes connected to the given component in the MNA matrix.
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
         '''
-        return [self.node_index.get(n, None) for n in self.get_nodes(comp)]
+        return [self.node_index.get(n, None) for n in self._get_nodes(comp)]
 
 
     def _reset_cache(self):
-        self.get_nodes.cache_clear()
-        self.get_augm_index.cache_clear()
-        self.get_node_indices.cache_clear()
-        self.has_nonlinear_components.cache_clear()
+        self._get_nodes.cache_clear()
+        self._get_augm_index.cache_clear()
+        self._get_node_indices.cache_clear()
+        self._has_nonlinear_components.cache_clear()
 
 
     def solve(self,
@@ -131,6 +131,7 @@ class Solver_ACDC():
                          Dict[str | Component, complex]]: # currents through components
         """
         Solve the circuit for the given frequency and ground node.
+        This is an API method.
 
         Returns:
             voltages: dict node -> complex voltage
@@ -138,29 +139,29 @@ class Solver_ACDC():
         """
         self._show_output = show_output
         self._stats = stats
-        self.ctx = self.create_context(freq)
-        self.node_administration()
-        return self.solve_mna(freq)
+        self.ctx = self._create_context(freq)
+        self._node_administration()
+        return self._solve_mna(freq)
 
 
     def show_output(self) -> bool:
         return self._show_output
 
 
-    def node_administration(self):
+    def _node_administration(self):
         # Must be called after change of analysis type, since some components may be
         # included/excluded from the node administration for certain analysis types.
-        self.N, self.node_index = self.assign_node_indices()
-        self.N = self.assign_augmented_slots(self.N)
+        self.N, self.node_index = self._assign_node_indices()
+        self.N = self._assign_augmented_slots(self.N)
         # TODO: Better to separate its purpose from the printing.
         if (self.ctx.analysis_type != self._prev_analysis_type) and self.show_output():
             self._prev_analysis_type = self.ctx.analysis_type
             print(f"Node administration complete.")
             print(f"Ground node: {self.ground_node}")
-            print(f"Number of components: {len(self.components)}")
-            print(f"Number of non-linear components: {self.number_of_non_linear_components()}")
-            print(f"Number of nodes (excluding ground): {len(self.node_index)}")
-            print(f"Total size of MNA matrix: {self.N}")
+            print(f"Components: {len(self.components)}")
+            print(f"Non-linear components: {self.number_of_non_linear_components()}")
+            print(f"Nodes (excluding ground): {len(self.node_index)}")
+            print(f"Size of MNA matrix: {self.N}")
 
 
     def number_of_non_linear_components(self):
@@ -171,12 +172,12 @@ class Solver_ACDC():
         return n
 
 
-    def all_nodes(self) -> List[int]:
+    def _all_nodes(self) -> List[int]:
         """Return a list of all nodes in the circuit."""
         return self.node_index.keys()
 
 
-    def prepare_for_solving(self) -> None:
+    def _prepare_for_solving(self) -> None:
         # Prepare the circuit for solving
 
         # Get all the stamping helpers
@@ -187,7 +188,7 @@ class Solver_ACDC():
                 stamping_helper.prepare(self.circuit, self.ctx)
 
 
-    def solve_mna(self,
+    def _solve_mna(self,
                   freq: float = 0,
                   return_real: bool = False
                   ) -> Tuple[Dict[int, complex],
@@ -215,7 +216,7 @@ class Solver_ACDC():
         # Do this at the very last moment just before solving, when everything  is ready,
         # since some components may need to know the node indices for preparation.
         if not self._prepared:
-            self.prepare_for_solving()
+            self._prepare_for_solving()
 
             # Collect all stamping component instances and current-returning
             # components in the circuit, including those provided by helpers.
@@ -233,40 +234,40 @@ class Solver_ACDC():
         times = 0
         n_times = 1 # number of iterations to perform before checking for convergence
         while not converged:
-            self.ctx.Y = self.zero_MNA_matrix(self.N)
-            self.ctx.z = self.zero_RHS(self.N)
-            self.stamp()
+            self.ctx.Y = self._zero_MNA_matrix(self.N)
+            self.ctx.z = self._zero_RHS(self.N)
+            self._stamp()
             self.x_prev = self.ctx.x
-            self.ctx.x = self.solve_matrix_equation()
+            self.ctx.x = self._solve_matrix_equation()
             if return_real:
                 self.ctx.x = np.real(self.ctx.x)
-            if self.has_nonlinear_components():
+            if self._has_nonlinear_components():
                 times += 1
                 if times >= n_times:
-                    converged = self.check_convergence()
+                    converged = self._check_convergence()
                     if self._stats and not converged:
                         self._stats.not_converged += 1
             else:
                 converged = True
-        voltages = self.extract_node_voltages()
-        currents = self.extract_currents()
+        voltages = self._extract_node_voltages()
+        currents = self._extract_currents()
         if os.environ.get("IMPULSO_DEBUG", '0') == '1':
             print("Y-matrix:\n", self.ctx.Y,"\n")
             print("x-vector:\n", self.ctx.x, "\n")
             print("z-vector:\n", self.ctx.z, "\n")
-            self.print_voltages(voltages)
-            self.print_currents(currents)
+            self._print_voltages(voltages)
+            self._print_currents(currents)
         return voltages, currents
 
 
-    def print_voltages(self, voltages: Dict[int, complex]):
+    def _print_voltages(self, voltages: Dict[int, complex]):
         print("Node voltages:")
         for node, voltage in voltages.items():
             print(f"Node {node}: {voltage} V")
         print()
 
 
-    def print_currents(self, currents: Dict[str | Component, complex]):
+    def _print_currents(self, currents: Dict[str | Component, complex]):
         print("Currents through components:")
         for comp, current in currents.items():
             if isinstance(comp, Component):
@@ -275,7 +276,7 @@ class Solver_ACDC():
 
 
     @cache
-    def has_nonlinear_components(self) -> bool:
+    def _has_nonlinear_components(self) -> bool:
         """Check if the circuit contains any nonlinear components."""
         for comp in self.components:
             if not comp.linear():
@@ -283,7 +284,7 @@ class Solver_ACDC():
         return False
 
 
-    def check_convergence(self) -> bool:
+    def _check_convergence(self) -> bool:
         dx = self.ctx.x - self.x_prev
         tol = 1e-6
         err = np.max(np.abs(dx))
@@ -292,7 +293,7 @@ class Solver_ACDC():
         return True
 
 
-    def extract_currents(self) -> dict:
+    def _extract_currents(self) -> dict:
         currents = {}
         for comp in self._current_components:
             i = comp.current(self.ctx)
@@ -301,7 +302,7 @@ class Solver_ACDC():
         return currents
 
 
-    def extract_node_voltages(self) -> Dict[int, complex]: # dict node id -> voltage
+    def _extract_node_voltages(self) -> Dict[int, complex]: # dict node id -> voltage
         '''
         '''
         voltages = {node: self.ctx.x[i] for node, i in self.node_index.items()}
@@ -309,7 +310,7 @@ class Solver_ACDC():
         return voltages
 
 
-    def solve_matrix_equation(self):
+    def _solve_matrix_equation(self):
         '''
         '''
         if self._stats:
@@ -323,19 +324,19 @@ class Solver_ACDC():
 
 
 
-    def zero_RHS(self, N):
+    def _zero_RHS(self, N):
         '''
         '''
         return np.zeros(N, dtype=complex)
 
 
-    def zero_MNA_matrix(self, N):
+    def _zero_MNA_matrix(self, N):
         '''
         '''
         return np.zeros((N,N), dtype=complex)
 
 
-    def assign_node_indices(self) -> Tuple[int, Dict[int,int]]:
+    def _assign_node_indices(self) -> Tuple[int, Dict[int,int]]:
         '''
         '''
         # --- Collect nodes ---
@@ -359,7 +360,7 @@ class Solver_ACDC():
         return num_nodes, node_index
 
 
-    def assign_augmented_slots(self, N) -> int:
+    def _assign_augmented_slots(self, N) -> int:
         '''
         Assign a slot to all components that require one in the
         MNA matrix (voltage sources, VCVS, CCVS, Wires, Inductors, Opamps)
@@ -372,9 +373,11 @@ class Solver_ACDC():
         return N
 
 
-    def stamp(self):
+    def _stamp(self):
         for comp in self._stamping_components:
             comp.stamp(self.ctx)
+
+
 
 
 def solve_dc(circuit: Circuit,

@@ -76,6 +76,12 @@ class Capacitor(Component, Stamper):
         self.capacitance = capacitance
         self.initial_voltage = initial_voltage
 
+    def __component_typename__(self) -> str:
+        return "C"
+
+    def __value__(self) -> str | None:
+        return str(self.capacitance) + "F"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return s * self.capacitance()
 
@@ -91,7 +97,7 @@ class Capacitor(Component, Stamper):
 
     def initialize_transient_state(self, ctx: Context):
         self.update_state(ctx)
-        
+
     def update_state(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
         if i is None:

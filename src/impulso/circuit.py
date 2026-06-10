@@ -36,6 +36,42 @@ class Circuit:
         return None
 
 
+    def __str__(self):
+        lines = [
+            f"Circuit with {len(self.components)} components "
+            f"and {self.num_nodes()} nodes:"
+        ]
+        lines.append(f"Ground at {self.ground_node.__repr__()}")
+
+        for comp in self.components:
+            nodes = self.nodes.get(comp,None)
+            if nodes:
+                lines.append(
+                    f"  {comp} ({comp.__repr__()}) @ {nodes}")
+            else:
+                lines.append(
+                    f"  {comp} ({comp.__repr__()})"
+            )
+
+        return "\n".join(lines)
+
+    def __repr__(self):
+        return (
+            f"Circuit("
+            f"components={self.components!r}, "
+            f"nodes={self.nodes!r}"
+            f")"
+        )
+
+    def num_nodes(self):
+        return len(
+            set(
+                node
+                for nodes in self.nodes.values()
+                for node in nodes
+            )
+        )
+
     def add(self,
             comp: Component,
             nodes: List[int]

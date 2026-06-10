@@ -26,6 +26,12 @@ class DCCurrentSource(PowerSource, Stamper):
         self._current = current
         super().__init__(id=id)
 
+    def __component_typename__(self) -> str:
+        return "DCCS"
+
+    def __value__(self) -> str | None:
+        return self.current +" A"
+
     def set_current(self, current: float):
         self._current = current
 

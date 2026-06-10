@@ -24,6 +24,12 @@ class SinusoidalVoltageSource(PowerSource):
         self.phase = phase
         self.dc = dc
 
+    def __component_typename__(self) -> str:
+        return "SINVS"
+
+    def __value__(self) -> str | None:
+        return "{A=" + str(self.amplitude) + " V, phi=" + str(self.phase) + " rad, DC=" + str(self.dc) + "V, f=" + str(self.frequency) +"}"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
 

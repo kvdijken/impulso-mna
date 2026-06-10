@@ -16,6 +16,8 @@ circuit.add(Vin, [0, 1])
 circuit.add(C1, [1, 2])
 circuit.add(R1, [2, 0])
 
+print(circuit)
+
 f_ = np.logspace(1, 6, 1000)
 results = ac_sweep(circuit, f_, show_output=True)
 

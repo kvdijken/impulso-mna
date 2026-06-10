@@ -26,6 +26,12 @@ class VCVS(PowerSource):
         self.A = A
         super().__init__(id=id)
 
+    def __component_typename__(self) -> str:
+        return "VCVS"
+
+    def __value__(self) -> str | None:
+        return str(self.A) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
 

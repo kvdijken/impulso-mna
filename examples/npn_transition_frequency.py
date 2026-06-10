@@ -35,6 +35,8 @@ circuit.add(Rc, ['VCC', 'Q1_C'])
 circuit.add(Re, ['Q1_E', 'GND'])
 circuit.add(Q1, ['Q1_E', 'Q1_B', 'Q1_C'])
 
+print(circuit)
+
 freqs = np.logspace(1, 10, 500)
 results = solve_ac(circuit,freqs,show_output=True)
 

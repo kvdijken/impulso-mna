@@ -62,6 +62,8 @@ ckt.add(R3, [5, 0]) # load for AC response
 ckt.add(D2, [5, 0]) # clamping diode
 ckt.add(D3, [0, 5]) # clamping diode
 
+print(ckt)
+
 times, voltages, currents = solve_transient(ckt, t_stop=stop, dt=dt, show_output=True)
 
 

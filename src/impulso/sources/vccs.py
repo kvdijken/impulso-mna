@@ -26,6 +26,12 @@ class VCCS(PowerSource):
         self.gm = gm
         super().__init__(id=id)
 
+    def __component_typename__(self) -> str:
+        return "VCCS"
+
+    def __value__(self) -> str | None:
+        return str(self.gm) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
 

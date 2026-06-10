@@ -10,6 +10,9 @@ class DCVoltageSource(VoltageSource, Stamper):
     Voltage source component.
     """
 
+    def __component_typename__(self) -> str:
+        return "DCVS"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         """Calculate admittance (1/impedance) for AC analysis."""
         pass

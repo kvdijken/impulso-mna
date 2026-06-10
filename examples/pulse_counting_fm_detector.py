@@ -12,7 +12,7 @@ Q4 = NPN(id='Q4')
 C5 = Capacitor(capacitance=470e-12, id='C5')
 D1 = Diode(id='D1')
 Q5 = NPN(id='Q5',alpha_f=0.999)
-R10 = Resistor(resistance=4700, id='R1-')
+R10 = Resistor(resistance=4700, id='R1')
 
 Q3 = PNP(id='Q3')
 R8 = Resistor(resistance=30_000, id='R8')
@@ -31,6 +31,8 @@ circuit.add(R9, ['Q4_E', 'GND'])
 circuit.add(D1, ['Q5_E', 'GND'])
 circuit.add(Q5, ['Q5_E', 'GND', 'Q5_C'])
 circuit.add(R10, ['VCC','Q5_C'])
+
+print(circuit)
 
 dc = solve_dc(circuit)
 t, v, i = solve_transient(circuit,t_stop=0.001, dt=0.000005, show_output=True)

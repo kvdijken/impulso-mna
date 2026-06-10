@@ -13,6 +13,12 @@ class Resistor(Component, Stamper):
         self.resistance = resistance
         self.g = 1.0 / resistance
 
+    def __component_typename__(self) -> str:
+        return "R"
+
+    def __value__(self) -> str | None:
+        return str(self.resistance) + "Ω"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return self.g
 

@@ -28,6 +28,25 @@ class CircuitItem(abc.ABC):
     def __init__(self, id: Optional[str] = None):
         self.id = id or uuid.uuid4().hex
 
+    def __str__(self) -> str:
+        return self.id
+
+    def __repr__(self) -> str:
+        try:
+            value = self.__value__()
+            _type_name = self.__component_typename__()
+            if value is None:
+                return _type_name
+            else:
+                if not isinstance(value,str):
+                    value = str(value)
+                return _type_name + "=" + value
+        except:
+            return self.__str__()
+
+    def __component_typename__(self) -> str:
+        return self.__class__.__name__
+
     def init_state(self) -> None:
         """Initialize any internal state for transient analysis."""
         pass
@@ -73,6 +92,20 @@ class Component(CircuitItem):
     """
     Base class for all circuit components.
     """
+
+    def __repr__(self) -> str:
+        value = self.__value__()
+        _type_name = self.__component_typename__()
+        if value is None:
+            return _type_name
+        else:
+            if not isinstance(value,str):
+                value = str(value)
+            return _type_name + "=" + value
+
+    @abc.abstractmethod
+    def __value__(self) -> str | None:
+        ...
 
     @abc.abstractmethod
     def admittance(self, s: Optional[complex] = None) -> complex:

@@ -18,6 +18,9 @@ class CCVS(PowerSource, Stamper):
         self.rm = rm
         super().__init__(id=id)
 
+    def __value__(self) -> str | None:
+        return str(self.rm) + "*I(" + self.component.id + ")"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf
 

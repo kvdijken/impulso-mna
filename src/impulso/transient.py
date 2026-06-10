@@ -60,7 +60,7 @@ class ProgressReporter:
             line1 = (
                 f"Simulation: {t:12.4e}s / "
                 f"{self.total:12.4e}s "
-                f"({pct:6.2f}%)"
+                f"({int(pct)}%)"
             )
 
             line2 = (
@@ -92,7 +92,6 @@ class ProgressReporter:
     # ---------------- finish ----------------
     def finish(self):
         if self._active:
-            print()
             self._active = False
 
 
@@ -109,19 +108,19 @@ class Solver_Transient(Solver_ACDC):
         super().__init__(circuit)
 
 
-    def create_context(self, freq: float | None) -> Context:
-        ctx = super().create_context(freq)
+    def _create_context(self, freq: float | None) -> Context:
+        ctx = super()._create_context(freq)
         ctx.dt = self.dt
         ctx.analysis_type = Analysis.TRANSIENT
         return ctx
 
 
-    def node_administration(self):
+    def _node_administration(self):
         # --- Separate components by their type ---
         self.all = defaultdict(list)
         for comp in self.components:
             self.all[type(comp)].append(comp)
-        super().node_administration()
+        super()._node_administration()
 
 
     def solve(self,
@@ -134,7 +133,7 @@ class Solver_Transient(Solver_ACDC):
         '''
         self._show_output = show_output
         with Statistics(show_output,stats) as self._stats:
-            self.ctx = self.create_context(freq=None) # create context with transient analysis type
+            self.ctx = self._create_context(freq=None) # create context with transient analysis type
             # Create time series
             times = np.arange(0, t_stop + dt / 2, dt)
 
@@ -142,11 +141,11 @@ class Solver_Transient(Solver_ACDC):
             self.ctx.analysis_type = Analysis.IC
             if show_output:
                 print("\nSolving for initial conditions:")
-            self.node_administration()
+            self._node_administration()
             for comp in self.components:
                 comp.init_state()
             self.ctx.t = times[0]
-            voltage, current = self.solve_mna(return_real=True)
+            voltage, current = self._solve_mna(return_real=True)
 
             if show_output:
                 print("\nTransferring state from initial conditions.")
@@ -155,11 +154,11 @@ class Solver_Transient(Solver_ACDC):
             for comp in self.components:
                 comp.initialize_transient_state(self.ctx)
 
-            self.initialize()
+            self._initialize()
             if show_output:
                 print("\nStarting transient solve:")
             self.ctx.analysis_type = Analysis.TRANSIENT
-            self.node_administration()
+            self._node_administration()
             self.ctx.t = times[0]
             self.ctx.dt = dt
 
@@ -176,7 +175,7 @@ class Solver_Transient(Solver_ACDC):
                 try:
                     for t in times[1:]:
                         self.ctx.t = t
-                        voltage, current = self.solve_mna(return_real=True)
+                        voltage, current = self._solve_mna(return_real=True)
                         if show_output:
                             progress.update(t)
                         if os.environ.get("IMPULSO_DEBUG", '0') == '1':
@@ -196,6 +195,8 @@ class Solver_Transient(Solver_ACDC):
                         print(f"Linear algebra error at time {self.ctx.t}: {e}")
                     times = times[:len(self.ctx.voltage_history)]
         return times, self.ctx.voltage_history, self.ctx.current_history
+
+
 
 
 def solve_transient(circuit: Circuit,

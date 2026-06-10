@@ -33,6 +33,12 @@ class SinusoidalCurrentSource(PowerSource):
         self.dc = dc
         super().__init__(ac_source=ac_source, id=id)
 
+    def __component_typename__(self) -> str:
+        return "SINCS"
+
+    def __value__(self) -> str | None:
+        return "{A=" + self.amplitude + " A, phi=" + self.phase + " rad, DC=" + self.dc + "V, f=" + self.frequency + "}"
+
     def set_amplitude(self, current: float):
         self.amplitude = current
 
@@ -40,6 +46,7 @@ class SinusoidalCurrentSource(PowerSource):
         return 0.0
 
     def current_at_time(self, t) -> float:
+        # TODO self.frequency not defined, never been tested
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
     def stamp(self, ctx: Context):

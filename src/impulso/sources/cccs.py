@@ -17,6 +17,9 @@ class CCCS(PowerSource, Stamper):
         self.A = A
         super().__init__(id=id)
 
+    def __value__(self) -> str | None:
+        return str(self.A) + "*I(" + self.component.id + ")"
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return 0.0
 

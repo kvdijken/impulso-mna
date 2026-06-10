@@ -6,6 +6,7 @@
   at the level where the Statistics variable is created. That is the method
   which owns the Statistics variable and is responsible for printing it.
 - improved initial conditions handling
+- in Solver_ACDC the names of all non-API methods have been preceeded by _
 
 
 ## [2.1.0] - 2026-05-28

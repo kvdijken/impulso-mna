@@ -32,6 +32,8 @@ ckt.add(Q3, [0, 6, 5])
 ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
+print(ckt)
+
 # Solve transient response
 t, v, i = solve_transient(ckt, t_stop=1e-3, dt=1e-6, show_output=True)
 

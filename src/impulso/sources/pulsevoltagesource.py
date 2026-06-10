@@ -28,6 +28,12 @@ class PulseVoltageSource(PowerSource, Stamper):
         self.period = period
         self.n_periods = n_periods
 
+    def __component_typename__(self) -> str:
+        return "PULSEVS"
+
+    def __value__(self) -> str | None:
+        return None
+
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf  # ideal voltage source has infinite admittance (zero impedance)
 

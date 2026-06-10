@@ -68,6 +68,9 @@ class InductorGroup(StampingHelper):
         self._validate_L()
 
 
+    def __value__(self) -> str | None:
+        return None
+
     def _validate_L(self):
         # Symmetry
         assert(np.allclose(self._L, self._L.T)) # L must be symmetric
@@ -182,6 +185,12 @@ class Inductor(Component):
         self.inductance = inductance
         self.initial_current = initial_current
 
+    def __component_typename__(self) -> str:
+        return "L"
+
+    def __value__(self) -> str | None:
+        return str(self.inductance) + "H"
+
     def _has_initial_condition(self) -> bool:
         return self.initial_current is not None
 
@@ -258,6 +267,12 @@ class MutualInductance(CircuitItem):
         self.L1 = L1
         self.L2 = L2
         self.k = coupling
+
+    def __component_typename__(self) -> str:
+        return "K"
+
+    def __value__(self) -> str | None:
+        return self.L1.id + "," + self.L2.id + "," + str(self.k)
 
     def stamps(self) -> bool:
         return False
