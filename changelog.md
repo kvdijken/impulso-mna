@@ -9,6 +9,11 @@
 - in Solver_ACDC the names of all non-API methods have been preceeded by _
 - Component, CircuitItem and Circuit have new __repr__() and __str__() now,
   wich allow for pretty printing.
+- class Array implemented, to create an array of Components
+- Circuit.add_array() and Circuit.shunt() added, to add an Array of Components
+  to the circuit in one call (used in example w2aew_105.py for shunting
+  all nodes to ground with a small conductance)
+
 
 
 ## [2.1.0] - 2026-05-28

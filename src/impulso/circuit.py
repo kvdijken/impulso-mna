@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence, Iterable
+from collections import defaultdict
 
 from .base import TopologyError
 from .sources.source import *
 from .components.inductor import MutualInductance
-
+from .components.array import Array
 
 class Circuit:
     """
@@ -13,7 +14,7 @@ class Circuit:
     Supports arbitrary topologies with resistors and voltage sources.
     """
 
-    nodes: Dict[Component, List[int]]  # component -> connected nodes
+    nodes: Dict[Component, List[int | str]]  # component -> connected nodes
     components: list[Component]  # component_id -> Component instance
 
 
@@ -72,7 +73,7 @@ class Circuit:
 
     def add(self,
             comp: Component,
-            nodes: List[int]
+            nodes: List[int | str]
             ) -> Circuit:
         """ Add a component to the circuit. """
 
@@ -111,6 +112,33 @@ class Circuit:
         return self
 
 
+    def add_array(
+        self,
+        array: Array,
+        nodes: Sequence[Sequence[int|str]]
+    ) -> None:
+
+        if len(nodes) != len(array.components):
+            raise ValueError(
+                f"Expected {len(array.components)} node lists, "
+                f"got {len(nodes)}"
+            )
+
+        for i, component_nodes in enumerate(nodes):
+            self.add(array[i], list(component_nodes))
+
+
+    def shunt(
+        self,
+        array: Array,
+        nodes: Iterable[int | str]
+    ):
+        self.add_array(
+            array,
+            [[node, self.ground_node] for node in nodes]
+        )
+
+
     def add_instruction(self, instruction: Component):
 #        assert(isinstance(instruction, MutualInductance))
         try:
@@ -145,5 +173,6 @@ class Circuit:
             raise TopologyError(f"Ground node {self.ground_node} is not connected to any component in the circuit.")
         if len(self.components) == 0:
             raise TopologyError("Circuit must contain at least one component.")
+
 
 

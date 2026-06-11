@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from impulso import Circuit, Resistor, NPN, PNP, Capacitor, DCVoltageSource, solve_transient, emitter_current, collector_current
+from impulso import *
 
 plt.rcParams['axes.xmargin'] = 0
 
@@ -32,10 +32,16 @@ ckt.add(Q3, [0, 6, 5])
 ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
+n=5
+ckt.shunt(
+    Array(Resistor, n=n, resistance=1e6, id_prefix="_"),
+    nodes=range(1, n + 1)
+)
+
 print(ckt)
 
 # Solve transient response
-t, v, i = solve_transient(ckt, t_stop=3e-3, dt=1e-6, show_output=True)
+t, v, i = solve_transient(ckt, t_stop=3e-3, dt=10e-6, show_output=True)
 
 # Define output node
 OUT = 4
