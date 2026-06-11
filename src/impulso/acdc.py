@@ -110,8 +110,8 @@ class Solver_ACDC():
 
     @cache
     def _get_node_indices(self,
-                     comp: Component
-    ) -> List[int]:
+                          comp: Component
+                          ) -> List[int]:
         '''
         Return the indices of the nodes connected to the given component in the MNA matrix.
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
@@ -386,7 +386,11 @@ class Solver_ACDC():
             all_nodes.remove(None)
         # Node administration for the MNA matrix:
         node_list = list(all_nodes - {self.ground_node})
-        node_list.sort(key=lambda x: str(x))
+        node_list.sort(key=lambda x: str(x)) # Sort the mode_list to remove randomness from the systenm.
+                                             # node_list was created from a set, which is unordered,
+                                             # and whose traversal changes on every run of Python.
+                                             # When not sorted reproducibility suffers in
+                                             # difficult simulations.
         node_index = {n: i for i, n in enumerate(node_list)} # index from node number into its location in the MNA matrix
         num_nodes = len(node_list)
         return num_nodes, node_index
