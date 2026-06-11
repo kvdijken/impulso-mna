@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from impulso import Circuit, Resistor, NPN, PNP, Capacitor, DCVoltageSource, solve_transient, emitter_current
+from impulso import Circuit, Resistor, NPN, PNP, Capacitor, DCVoltageSource, solve_transient, emitter_current, collector_current
 
 plt.rcParams['axes.xmargin'] = 0
 
@@ -46,6 +46,7 @@ axR = axL.twinx()
 axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
 #axR.plot(t, [6], 'r', label='V(6)')
 axR.plot(t,emitter_current(i[Q3]), 'r')
+axR.plot(t,collector_current(i[Q1]), 'green')
 axL.grid()
 axL.set_xlabel('Time (s)')
 axL.set_ylabel('Voltage (V)')
