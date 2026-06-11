@@ -102,14 +102,14 @@ class Capacitor(Component, Stamper):
 
     def update_state(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)
-        if i is None:
-            v1 = 0
-        else:
+        if i is not None:
             v1 = ctx.x[i]
-        if j is None:
-            v2 = 0
         else:
+            v1 = 0
+        if j is not None:
             v2 = ctx.x[j]
+        else:
+            v2 = 0
         self.previous_voltage = v2 - v1
 
     def stamp(self, ctx: Context):

@@ -21,9 +21,6 @@ class Circuit:
         """Initialize an empty circuit."""
         self.components = []
         self.component_not_added = {}
-        self._node_voltage_cache: Optional[Dict[int, float]] = None
-        self._comp_currents_cache: Optional[Dict[str, float]] = None
-        self._topology_hash: Optional[str] = None
         self.nodes = {}
         self.ground_node = ground_node
         self._prepared = False

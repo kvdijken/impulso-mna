@@ -29,7 +29,10 @@ class SinusoidalVoltageSource(PowerSource):
         return "SINVS"
 
     def __value__(self) -> str | None:
-        return "{A=" + Quantity(self.amplitude,"V").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"V").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
+        if self.ac_source:
+            return "{A=" + Quantity(self.amplitude,"V").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"V").render(form="si",spacer="") + ", AC}"
+        else:
+            return "{A=" + Quantity(self.amplitude,"V").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"V").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return np.inf

@@ -110,12 +110,6 @@ class Diode(Component, Stamper):
             case Analysis.IC:
                 self._stamp_for_dc(ctx)
 
-        if False:
-            if ctx.analysis_type == Analysis.AC:
-                self._stamp_for_ac(ctx)
-            else:
-                self._stamp_for_dc(ctx)
-
 
     def _stamp_for_ac(self, ctx: Context):
         g = self.admittance_ac

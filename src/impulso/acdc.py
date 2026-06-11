@@ -27,7 +27,7 @@ class Statistics():
         if self._owner != self:
             raise RuntimeError("Statistics: only the owner can zero the data")
         self.solves = 0
-        self.resolves = 0
+        self.additional_solves = 0
         self.max_resolves = 0
         self.not_converged = 0
         self.singulars = 0
@@ -38,7 +38,7 @@ class Statistics():
         # Can also print data when it is not the owner.
         print("\nStatistics:")
         print(f"Linear system solves: {self._owner.solves}")
-        print(f"Additional solves due to non-convergence {self._owner.resolves}")
+        print(f"Additional solves due to non-convergence {self._owner.additional_solves}")
         print(f"Max additional solves due to non-convergence {self._owner.max_resolves}")
         print(f"Failed to converge {self._owner.not_converged}")
         print(f"Singular matrices: {self._owner.singulars}")
@@ -78,7 +78,6 @@ class Solver_ACDC():
         self.nodes = self.circuit.nodes
         self.components = self.circuit.components
         self.ground_node = self.circuit.ground_node
-        self.x_prev = None # previous solution vector, used for nonlinear iteration
         self._stamping_components = [] # components that need to be stamped in the MNA matrix (e.g. voltage sources, inductors, opamps, etc.)
         self._current_components = [] # components for which we want to extract currents after solving (e.g. voltage sources, inductors, opamps, etc.)
 
@@ -157,6 +156,7 @@ class Solver_ACDC():
         # included/excluded from the node administration for certain analysis types.
         self.N, self.node_index = self._assign_node_indices()
         self.N = self._assign_augmented_slots(self.N)
+
         # TODO: Better to separate its purpose from the printing.
         if (self.ctx.analysis_type != self._prev_analysis_type) and self.show_output():
             self._prev_analysis_type = self.ctx.analysis_type
@@ -192,6 +192,10 @@ class Solver_ACDC():
                 stamping_helper.prepare(self.circuit, self.ctx)
 
 
+    def _estimate_solution(self):
+        return np.zeros(self.N, dtype=complex)
+
+
     def _solve_mna(self,
                   freq: float = 0,
                   return_real: bool = False
@@ -209,8 +213,6 @@ class Solver_ACDC():
                 self._stats.dc_analysis += 1
             else:
                 self._stats.ac_analysis += 1
-
-        converged = False
 
         self.ctx.s = 1j * 2 * np.pi * freq
         if self.ctx.analysis_type is None:
@@ -233,38 +235,44 @@ class Solver_ACDC():
 
             self._prepared = True
 
-        self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector, used for nonlinear iteration
+#        self.ctx.x = np.zeros(self.N, dtype=complex) # initial guess for solution vector,
+#                                                     # used for nonlinear iteration
+#        x_prev = np.zeros(self.N, dtype=complex)
 
-        solves = 0
+        self.ctx.x = self._estimate_solution() # initial guess for solution vector,
+                                               # used for nonlinear iteration
+
+        converged = False
+        attempts = 0
         check_for_convergence_after = 1 # number of iterations to perform before checking for convergence
-        max_resolves = None
-        convergence_fail = False
-        while not converged and not convergence_fail:
+        max_attempts = None
+        fail = False
+        while not converged and not fail:
             self.ctx.Y = self._zero_MNA_matrix(self.N)
             self.ctx.z = self._zero_RHS(self.N)
             self._stamp()
-            self.x_prev = self.ctx.x
+            x_prev = self.ctx.x # no deepcopy needed as in the next line ctx.x will get newly allocated array
             self.ctx.x = self._solve_matrix_equation()
             if return_real:
                 self.ctx.x = np.real(self.ctx.x)
             if self._has_nonlinear_components():
-                solves += 1
-                if solves >= check_for_convergence_after:
+                attempts += 1
+                if attempts >= check_for_convergence_after:
                     # Check for convergence
-                    converged = self._check_convergence()
+                    converged = self._check_convergence(x_prev)
                     if not converged:
                         # Check if we should stop trying to get convergence
-                        if max_resolves and solves > max_resolves:
+                        if max_attempts and attempts > max_attempts:
                             # failed to converge
                             if self._stats:
-                                convergence_fail = True
+                                fail = True
                                 self._stats.not_converged += 1
                         elif self._stats:
                             # retry convergence
-                            self._stats.resolves += 1
+                            self._stats.additional_solves += 1
                             # Check if we have a new max for convergence attempts
-                            if self._stats.max_resolves < solves:
-                                self._stats.max_resolves = solves
+                            if self._stats.max_resolves < attempts:
+                                self._stats.max_resolves = attempts
             else:
                 converged = True
         voltages = self._extract_node_voltages()
@@ -302,13 +310,11 @@ class Solver_ACDC():
         return False
 
 
-    def _check_convergence(self) -> bool:
-        dx = self.ctx.x - self.x_prev
+    def _check_convergence(self, x_prev) -> bool:
+        dx = self.ctx.x - x_prev
         tol = 1e-6
         err = np.max(np.abs(dx))
-        if err >= tol:
-            return False
-        return True
+        return err < tol
 
 
     def _extract_currents(self) -> dict:
@@ -355,6 +361,13 @@ class Solver_ACDC():
 
 
     def _assign_node_indices(self) -> Tuple[int, Dict[int,int]]:
+
+        def node_key(x: str | int) -> str:
+            if isinstance(x, int):
+                return str(x)
+            else:
+                return x
+
         '''
         '''
         # --- Collect nodes ---
@@ -373,6 +386,7 @@ class Solver_ACDC():
             all_nodes.remove(None)
         # Node administration for the MNA matrix:
         node_list = list(all_nodes - {self.ground_node})
+        node_list.sort(key=lambda x: str(x))
         node_index = {n: i for i, n in enumerate(node_list)} # index from node number into its location in the MNA matrix
         num_nodes = len(node_list)
         return num_nodes, node_index
