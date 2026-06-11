@@ -79,7 +79,7 @@ class Diode(Component, Stamper):
         # sophisticated limiter allows the diode to be accurately modeled
         # up to much higher voltages, but it may make some simulations
         # harder to converge.
-        self._simple_limiter = False # set to False to use the more sophisticated limiter instead of simple clipping
+        self._simple_limiter = True # set to False to use the more sophisticated limiter instead of simple clipping
 
 
     # TODO only required because the MNA solver expects

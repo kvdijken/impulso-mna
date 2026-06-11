@@ -16,7 +16,7 @@ R5 = Resistor(resistance=10e3, id='R5')
 Q1 = PNP(id='Q1')
 Q2 = PNP(id='Q2')
 Q3 = NPN(id='Q3')
-C1 = Capacitor(capacitance=10e-9, id='C1', initial_voltage=-3)
+C1 = Capacitor(capacitance=10e-9, id='C1', initial_voltage=0)
 V1 = DCVoltageSource(voltage=9, id='V1')
 
 # Define circuit and add components
@@ -35,7 +35,7 @@ ckt.add(R5, [5, 0])
 print(ckt)
 
 # Solve transient response
-t, v, i = solve_transient(ckt, t_stop=1e-3, dt=1e-6, show_output=True)
+t, v, i = solve_transient(ckt, t_stop=3e-3, dt=1e-6, show_output=True)
 
 # Define output node
 OUT = 4
@@ -44,7 +44,8 @@ OUT = 4
 fig, axL = plt.subplots()
 axR = axL.twinx()
 axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
-axR.plot(t, v[6], 'r', label='V(6)')
+#axR.plot(t, [6], 'r', label='V(6)')
+axR.plot(t,emitter_current(i[Q3]), 'r')
 axL.grid()
 axL.set_xlabel('Time (s)')
 axL.set_ylabel('Voltage (V)')
