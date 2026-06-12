@@ -41,7 +41,7 @@ ckt.shunt(
 print(ckt)
 
 # Solve transient response
-t, v, i = solve_transient(ckt, t_stop=3e-3, dt=10e-6, show_output=True)
+t, v, i = solve_transient(ckt, t_stop=4e-3, dt=10e-6, show_output=True)
 
 # Define output node
 OUT = 4
