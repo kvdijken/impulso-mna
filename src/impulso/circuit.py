@@ -5,6 +5,7 @@ from collections import defaultdict
 from .base import TopologyError
 from .sources.source import *
 from .components.inductor import MutualInductance
+from .components.resistor import Resistor
 from .components.array import Array
 
 class Circuit:
@@ -70,6 +71,18 @@ class Circuit:
                 for node in nodes
             )
         )
+
+    def all_non_ground_nodes(self) -> set:
+        '''
+        Returns a set of all nodes except
+        ground in the circuit.
+        '''
+        return {
+            node
+            for connected_nodes in self.nodes.values()
+            for node in connected_nodes
+            if node != self.ground_node
+        }
 
     def add(self,
             comp: Component,
@@ -137,6 +150,22 @@ class Circuit:
             array,
             [[node, self.ground_node] for node in nodes]
         )
+
+    def gshunt(self, g: float, id_prefix: str = None):
+        '''
+        Constructs shunt conductances between every node
+        in the circuit and ground.
+
+        Note that this method may create duplicate id's
+        if called twice with id_prefix is None. When
+        calling more than once, use custom prefix.
+        '''
+        nodes = self.all_non_ground_nodes()
+        array = Array(Resistor,
+                      n=len(nodes),
+                      resistance=1/g,
+                      id_prefix=id_prefix if id_prefix else 'gshunt_')
+        self.shunt(array, nodes)
 
 
     def add_instruction(self, instruction: Component):

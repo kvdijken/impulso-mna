@@ -123,14 +123,6 @@ class Solver_Transient(Solver_ACDC):
         super()._node_administration()
 
 
-    def __estimate_solution(self):
-        # TODO This is not safe, layout of ctx.x may have changed
-        if True and hasattr(self.ctx, 'x') and (self.ctx.x is not None) and (len(self.ctx.x) == self.N):
-            return np.copy(self.ctx.x)
-        else:
-            return np.zeros(self.N, dtype=complex)
-
-
     def solve(self,
               t_stop: float,
               dt: float,

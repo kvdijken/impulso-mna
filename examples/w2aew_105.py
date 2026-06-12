@@ -32,11 +32,7 @@ ckt.add(Q3, [0, 6, 5])
 ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
-n=5
-ckt.shunt(
-    Array(Resistor, n=n, resistance=1e6, id_prefix="_"),
-    nodes=range(1, n + 1)
-)
+ckt.gshunt(1e-12)
 
 print(ckt)
 
