@@ -33,6 +33,7 @@ ckt.add(R4, [1, 5])
 ckt.add(R5, [5, 0])
 
 ckt.gshunt(1e-12)
+ckt.cshunt(1e-12)
 
 print(ckt)
 
@@ -48,7 +49,6 @@ axR = axL.twinx()
 axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
 #axR.plot(t, [6], 'r', label='V(6)')
 axR.plot(t,emitter_current(i[Q3]), 'r')
-axR.plot(t,collector_current(i[Q1]), 'green')
 axL.grid()
 axL.set_xlabel('Time (s)')
 axL.set_ylabel('Voltage (V)')

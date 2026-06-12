@@ -13,6 +13,11 @@
 - Circuit.add_array() and Circuit.shunt() added, to add an Array of Components
   to the circuit in one call (used in example w2aew_105.py for shunting
   all nodes to ground with a small conductance)
+- Circuit.gshunt() added, to add shunt conductances between every node
+  and ground.
+- Circuit.cshunt() added, to add shunt capacitances between every node
+  and ground.
+
 
 
 

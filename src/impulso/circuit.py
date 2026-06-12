@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from .base import TopologyError
 from .sources.source import *
+from .components.capacitor import Capacitor
 from .components.inductor import MutualInductance
 from .components.resistor import Resistor
 from .components.array import Array
@@ -145,13 +146,16 @@ class Circuit:
         self,
         array: Array,
         nodes: Iterable[int | str]
-    ):
+    ) -> None:
         self.add_array(
             array,
             [[node, self.ground_node] for node in nodes]
         )
 
-    def gshunt(self, g: float, id_prefix: str = None):
+
+    def gshunt(self,
+               g: float,
+               id_prefix: str=None) -> None:
         '''
         Constructs shunt conductances between every node
         in the circuit and ground.
@@ -165,6 +169,25 @@ class Circuit:
                       n=len(nodes),
                       resistance=1/g,
                       id_prefix=id_prefix if id_prefix else 'gshunt_')
+        self.shunt(array, nodes)
+
+
+    def cshunt(self,
+               c: float,
+               id_prefix: str=None) -> None:
+        '''
+        Constructs shunt capacitances between every node
+        in the circuit and ground.
+
+        Note that this method may create duplicate id's
+        if called twice with id_prefix is None. When
+        calling more than once, use custom prefix.
+        '''
+        nodes = self.all_non_ground_nodes()
+        array = Array(Capacitor,
+                      n=len(nodes),
+                      capacitance=c,
+                      id_prefix=id_prefix if id_prefix else 'cshunt_')
         self.shunt(array, nodes)
 
 

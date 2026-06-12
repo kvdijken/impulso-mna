@@ -15,6 +15,7 @@ from impulso.pivot import i_pivot, magify
 circuit = Circuit(ground_node='GND')
 V1 = DCVoltageSource(voltage=1, id='V1')  # 1V source
 D1 = Diode(id='D1')
+D1._simple_limiter = False
 
 circuit.add(V1, ['GND', 'N1'])
 circuit.add(D1, ['N1', 'GND'])
