@@ -1,4 +1,5 @@
 import abc
+from typing import Dict
 
 from quantiphy import Quantity
 
