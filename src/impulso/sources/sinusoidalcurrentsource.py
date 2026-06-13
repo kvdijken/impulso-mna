@@ -19,6 +19,7 @@ class SinusoidalCurrentSource(PowerSource):
     def __init__(
         self, *,
         amplitude: float,
+        frequency: float = None,
         phase: float = 0, # in radians
         dc: float = 0.0,          # DC offset
         ac_source: bool = False,     # whether this source should be included in AC analysis
@@ -30,23 +31,27 @@ class SinusoidalCurrentSource(PowerSource):
             nodes: [n1, n2] (current flows n1 -> n2)
             current: current in Amperes
         """
+        super().__init__(ac_source=ac_source, id=id)
+        self.frequency = frequency
         self.amplitude = amplitude
         self.phase = phase
         self.dc = dc
-        super().__init__(ac_source=ac_source, id=id)
 
     def __component_typename__(self) -> str:
         return "SINCS"
 
     def __value__(self) -> str | None:
-        return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + self.phase + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
-
-    def set_amplitude(self, current: float):
-        self.amplitude = current
+        if self.ac_source:
+            return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", AC}"
+        else:
+            return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def current_at_time(self, t) -> float:
         # TODO self.frequency not defined, never been tested
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
+
+    def augments(self, ctx):
+        return False
 
     def stamp(self, ctx: Context):
         ac_analysis = ctx.analysis_type == Analysis.AC
