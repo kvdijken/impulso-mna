@@ -8,10 +8,10 @@ from ..base import Analysis
 from .source import PowerSource
 from ..components.component import Context
 
-
+# TODO Create test for SINCS
 class SinusoidalCurrentSource(PowerSource):
     """
-    Independent DC current source.
+    Independent Sinusoidal current source.
 
     Positive current flows from nodes[0] → nodes[1].
     """
@@ -47,7 +47,6 @@ class SinusoidalCurrentSource(PowerSource):
             return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def current_at_time(self, t) -> float:
-        # TODO self.frequency not defined, never been tested
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
     def augments(self, ctx):
