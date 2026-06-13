@@ -1,4 +1,4 @@
-## [2.2.0] -
+## [2.2.0] - 2026-06-12
 
 - extensive output of statistics. Statistics are collected in a Statistics
   variable which in API methods can be given as a parameter, of if not, will
