@@ -14,7 +14,7 @@ class SinusoidalVoltageSource(PowerSource):
     '''
     def __init__(self, *,
                  amplitude: float,  # amplitude is half Vpp, not used in AC simulation
-                 frequency: float = None,
+                 frequency: Optional[float] = None,
                  phase: float = 0.0,        # in radians
                  dc: float = 0.0,          # DC offset
                  ac_source: bool = False,     # whether this source should be included in AC analysis
@@ -59,22 +59,6 @@ class SinusoidalVoltageSource(PowerSource):
                 v = self.voltage_at_time(ctx.t)
             case Analysis.IC:
                 v = self.voltage_at_time(0)
-
-
-        if False:
-            if ctx.analysis_type == Analysis.AC:
-                if self.ac_source:
-                    v = self.amplitude * np.exp(1j * self.phase) # phasor representation of the sinusoidal voltage
-                else:
-                    v = 0
-            else:
-                if self.ac_source:
-                    # In DC analysis, we treat the AC source
-                    # as a short circuit, so the voltage is
-                    # the DC offset.
-                    v = self.dc
-                else:
-                    v = self.voltage_at_time(ctx.t)
 
         i, j = ctx.idx_query_fn(self)
         augm = ctx.augm_query_fn(self)

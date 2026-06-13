@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Sequence, Iterable
 from collections import defaultdict
 
-from .base import TopologyError
+from .base import TopologyError, Node
 from .sources.source import *
 from .components.capacitor import Capacitor
 from .components.inductor import MutualInductance
@@ -16,7 +16,7 @@ class Circuit:
     Supports arbitrary topologies with resistors and voltage sources.
     """
 
-    nodes: Dict[Component, List[int | str]]  # component -> connected nodes
+    nodes: Dict[Component, List[Node]]  # component -> connected nodes
     components: list[Component]  # component_id -> Component instance
 
 
@@ -29,7 +29,7 @@ class Circuit:
         self._prepared = False
 
 
-    def __getitem__(self, id: str) -> Component:
+    def __getitem__(self, id: str) -> Optional[Component]:
         for c in self.components:
             if c.id == id:
                 return c
@@ -129,7 +129,7 @@ class Circuit:
     def add_array(
         self,
         array: Array,
-        nodes: Sequence[Sequence[int|str]]
+        nodes: Sequence[Sequence[Node]]
     ) -> None:
 
         if len(nodes) != len(array.components):
@@ -145,7 +145,7 @@ class Circuit:
     def shunt(
         self,
         array: Array,
-        nodes: Iterable[int | str]
+        nodes: Iterable[Node]
     ) -> None:
         self.add_array(
             array,
@@ -155,7 +155,7 @@ class Circuit:
 
     def gshunt(self,
                g: float,
-               id_prefix: str=None) -> None:
+               id_prefix: Optional[str]=None) -> None:
         '''
         Constructs shunt conductances between every node
         in the circuit and ground.
@@ -174,7 +174,7 @@ class Circuit:
 
     def cshunt(self,
                c: float,
-               id_prefix: str=None) -> None:
+               id_prefix: Optional[str]=None) -> None:
         '''
         Constructs shunt capacitances between every node
         in the circuit and ground.
@@ -202,7 +202,7 @@ class Circuit:
         return self
 
 
-    def all_nodes(self) -> List[int]:
+    def all_nodes(self) -> List[Node]:
         """Return a sorted list of all nodes in the circuit."""
         _nodes = set()
         for c in self.components:

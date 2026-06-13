@@ -34,7 +34,7 @@ class Opamp(Component):
         return "OA"
 
     def __value__(self) -> str | None:
-        return self.A
+        return str(self.A)
 
     def gain(self) -> float:
         return self.A

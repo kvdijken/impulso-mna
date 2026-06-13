@@ -67,6 +67,8 @@ class InductorGroup(StampingHelper):
         # Validation
         self._validate_L()
 
+    def prepare(self, circuit: Circuit, ctx: Context):
+        pass
 
     def __value__(self) -> str | None:
         return None
@@ -82,18 +84,19 @@ class InductorGroup(StampingHelper):
     def returns_current(self) -> bool:
         return False
 
+    # TODO test
     def init_state(self):
-        for ind in self._inductors.values():
-            ind.previous_current = ind.__initial_current
+        for ind in self._inductors.keys():
+            ind.previous_current = ind.initial_current
 
     def _stamp_ac(self, ctx: Context):
-        Z = ctx.s * self._L
+        Z = ctx.s * self._L # pyright: ignore[reportAttributeAccessIssue]
         k = np.array(self._local_to_global_idx)
         ix_ = np.ix_(k, k)
         ctx.Y[ix_] -= Z
 
     def _stamp_transient(self, ctx: Context):
-        z_eq = self._L / ctx.dt
+        z_eq = self._L / ctx.dt # pyright: ignore[reportAttributeAccessIssue]
         k = np.array(self._local_to_global_idx)
         ix_ = np.ix_(k, k)
         ctx.Y[ix_] -= z_eq
@@ -281,7 +284,7 @@ class InductorGroupFactory(Factory):
 
     def create_helper(self,
                       circuit: Circuit,
-                      ctx: Context) -> StampingHelper:
+                      ctx: Context) -> Optional[StampingHelper]:
         inductors = [c for c in circuit.components if isinstance(c, Inductor)]
         if len(inductors) == 0:
             return None

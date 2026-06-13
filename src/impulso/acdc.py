@@ -1,6 +1,6 @@
 import os
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import numpy as np
 from functools import cache
 
@@ -15,7 +15,7 @@ class Statistics():
 
     def __init__(self,
                  show: bool,
-                 owner: Statistics = None):
+                 owner: Optional[Statistics] = None):
         self._show = show
         if owner:
             self._owner = owner

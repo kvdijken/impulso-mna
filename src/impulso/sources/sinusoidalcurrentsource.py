@@ -19,7 +19,7 @@ class SinusoidalCurrentSource(PowerSource):
     def __init__(
         self, *,
         amplitude: float,
-        frequency: float = None,
+        frequency: Optional[float] = None,
         phase: float = 0, # in radians
         dc: float = 0.0,          # DC offset
         ac_source: bool = False,     # whether this source should be included in AC analysis

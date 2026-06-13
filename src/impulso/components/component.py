@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import List, Protocol, Tuple, Optional, Callable, TYPE_CHECKING
+from typing import List, Protocol, Tuple, Optional, Callable, TYPE_CHECKING, Any
 import uuid
 import abc
 
 import numpy as np
 from numpy.typing import NDArray
 
-from ..base import Analysis
+from ..base import Analysis, Node
 
 if TYPE_CHECKING:
     from ..circuit import Circuit
@@ -32,6 +32,7 @@ class HasAdmittance(Protocol):
 
 class CircuitItem(abc.ABC):
     """Base class for items in the circuit (components and instructions)."""
+    __value__: Any
 
     def __init__(self, id: Optional[str] = None):
         self.id = id or uuid.uuid4().hex
@@ -135,7 +136,7 @@ class Component(CircuitItem):
 
     def before_add(self,
                    circuit: Circuit,
-                   nodes: List[int]
+                   nodes: List[Node]
                    ) -> bool:
         """
         Hook called before adding to circuit. Can be used to modify the circuit.

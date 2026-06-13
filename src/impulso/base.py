@@ -9,3 +9,6 @@ class Analysis(Enum):
 class TopologyError(Exception):
     pass
 
+type Node = int | str
+
+
