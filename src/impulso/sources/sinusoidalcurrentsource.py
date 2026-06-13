@@ -44,9 +44,6 @@ class SinusoidalCurrentSource(PowerSource):
     def set_amplitude(self, current: float):
         self.amplitude = current
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return 0.0
-
     def current_at_time(self, t) -> float:
         # TODO self.frequency not defined, never been tested
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)

@@ -222,9 +222,6 @@ class Inductor(Component):
         # Let the stamping helper handle the stamping of the inductor.
         return False
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return 1 / (s * self.inductance())
-
     def augments(self, ctx: Context) -> bool:
         if ctx.analysis_type != Analysis.IC:
             return True

@@ -32,9 +32,6 @@ class VCVS(PowerSource):
     def __value__(self) -> str | None:
         return str(self.A) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf
-
     def augments(self, ctx: Context):
         return True
 

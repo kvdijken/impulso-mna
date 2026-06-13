@@ -36,9 +36,6 @@ class Opamp(Component):
     def __value__(self) -> str | None:
         return self.A
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return LARGE_CONDUCTANCE  # ideal op-amp has zero output impedance, so infinite admittance
-
     def gain(self) -> float:
         return self.A
 

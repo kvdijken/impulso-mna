@@ -34,9 +34,6 @@ class SinusoidalVoltageSource(PowerSource):
         else:
             return "{A=" + Quantity(self.amplitude,"V").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"V").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf
-
     def voltage_at_time(self, t) -> float:
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 

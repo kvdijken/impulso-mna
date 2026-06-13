@@ -37,9 +37,6 @@ class Rout(Component):
     def __value__(self) -> str | None:
         return None
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        assert False, "Rout is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
-
     def linear(self):
         return False
 
@@ -214,10 +211,6 @@ class BJT(CompoundComponent):
         return False
         # False: do not add this BJT itself
         # True: does deliver current info
-
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        # Should never be called
-        assert False, "NPN is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
 
     def current(self, ctx: Context) -> Tuple[complex,complex,complex]:
         # All currents positive going out of the terminal

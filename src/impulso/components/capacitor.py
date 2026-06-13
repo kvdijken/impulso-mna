@@ -42,11 +42,11 @@ from typing import Optional
 
 from quantiphy import Quantity
 
-from .component import Component, Context, Stamper
+from .component import Component, Context, Stamper, HasAdmittance
 from ..base import Analysis
 
 
-class Capacitor(Component, Stamper):
+class Capacitor(Component, Stamper, HasAdmittance):
 
     def __init__(self,
                  capacitance: float,

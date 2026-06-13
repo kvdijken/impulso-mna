@@ -32,9 +32,6 @@ class VCCS(PowerSource):
     def __value__(self) -> str | None:
         return str(self.gm) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return 0.0
-
     def connect(self, vnodes: Tuple[int,int]):
         # Connect the VCCS to its controlling voltage nodes.
         # This is separate from the main circuit connections to allow flexibility in defining the control voltage.

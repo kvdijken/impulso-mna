@@ -22,6 +22,14 @@ class Stamper(Protocol):
         ...
 
 
+
+class HasAdmittance(Protocol):
+
+    @abc.abstractmethod
+    def admittance(self):
+        pass
+
+
 class CircuitItem(abc.ABC):
     """Base class for items in the circuit (components and instructions)."""
 
@@ -106,11 +114,6 @@ class Component(CircuitItem):
     @abc.abstractmethod
     def __value__(self) -> str | None:
         ...
-
-    @abc.abstractmethod
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        """Calculate admittance (1/impedance) for AC analysis."""
-        pass
 
     def augments(self, ctx: Context) -> bool:
         return False

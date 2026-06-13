@@ -17,9 +17,6 @@ class Wire(Component, Stamper):
     def __value__(self) -> str | None:
         return None
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return LARGE_CONDUCTANCE
-
     def augments(self, ctx: Context):
         return True
 

@@ -81,15 +81,6 @@ class Diode(Component, Stamper):
         # harder to converge.
         self._simple_limiter = True # set to False to use the more sophisticated limiter instead of simple clipping
 
-
-    # TODO only required because the MNA solver expects
-    # this method to exist for all components. We should
-    # refactor the solver to not require this for
-    # non-linear components.
-    def admittance(self):
-        # Should never be called
-        assert False, "Diode is a non-linear component and does not have a fixed admittance. Use the stamp method to account for its non-linearity."
-
     def __component_typename__(self) -> str:
         return "D"
 

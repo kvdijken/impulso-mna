@@ -2,10 +2,10 @@ from typing import Optional
 
 from quantiphy import Quantity
 
-from .component import Component, Context, Stamper
+from .component import Component, Context, Stamper, HasAdmittance
 
 
-class Resistor(Component, Stamper):
+class Resistor(Component, Stamper, HasAdmittance):
     """Resistor component."""
 
     def __init__(self, resistance: float, id: Optional[str] = None):

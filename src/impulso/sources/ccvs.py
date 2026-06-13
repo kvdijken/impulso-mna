@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, Optional
 
 from .source import PowerSource
-from ..components.component import Component, Context, Stamper
+from ..components.component import Component, Context, Stamper, HasAdmittance
 from ..components.resistor import Resistor
 from ..components.capacitor import Capacitor
 from .dcvoltagesource import DCVoltageSource
@@ -21,10 +21,7 @@ class CCVS(PowerSource, Stamper):
     def __value__(self) -> str | None:
         return str(self.rm) + "*I(" + self.component.id + ")"
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf
-
-    def connect(self, component: Component):
+    def connect(self, component: HasAdmittance):
         # Test the component is valid for connection
         if not isinstance(component, (Resistor,Capacitor,DCVoltageSource)):
             raise TypeError(f"CCVS can only be connected to a Resistor, Capacitor, or DCVoltageSource, got {type(component)}")

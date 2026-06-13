@@ -34,9 +34,6 @@ class PulseVoltageSource(PowerSource, Stamper):
     def __value__(self) -> str | None:
         return None
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf  # ideal voltage source has infinite admittance (zero impedance)
-
     def voltage_at_time(self, t) -> float:
         # This is a simplified implementation and does
         # not handle all edge cases (e.g., rise/fall

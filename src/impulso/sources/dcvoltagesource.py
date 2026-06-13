@@ -2,10 +2,10 @@ from typing import Optional
 
 from ..base import Analysis
 from .source import VoltageSource
-from ..components.component import Context, Stamper
+from ..components.component import Context, Stamper, HasAdmittance
 
 
-class DCVoltageSource(VoltageSource, Stamper):
+class DCVoltageSource(VoltageSource, Stamper, HasAdmittance):
     """
     Voltage source component.
     """

@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple, Optional, Type, Any
 import numpy as np
 
 from .source import PowerSource
-from ..components.component import Component, Context, Stamper
+from ..components.component import Component, Context, Stamper, HasAdmittance
 from .dcvoltagesource import DCVoltageSource
 from ..components.resistor import Resistor
 from ..components.capacitor import Capacitor
@@ -20,10 +20,7 @@ class CCCS(PowerSource, Stamper):
     def __value__(self) -> str | None:
         return str(self.A) + "*I(" + self.component.id + ")"
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return 0.0
-
-    def connect(self, component: Component):
+    def connect(self, component: HasAdmittance):
         assert(isinstance(component, (Resistor, Capacitor, DCVoltageSource)))
         self.component = component
 

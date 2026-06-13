@@ -39,9 +39,6 @@ class VoltageSource(PowerSource):
     def set_voltage(self, voltage: float):
         self.voltage = voltage
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf  # ideal voltage source has infinite admittance (zero impedance)
-
     def augments(self, ctx: Context):
         return True
 

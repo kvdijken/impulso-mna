@@ -37,9 +37,6 @@ class DCCurrentSource(PowerSource, Stamper):
     def set_current(self, current: float):
         self._current = current
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return 0.0
-
     def stamp(self, ctx: Context):
         p, q = ctx.idx_query_fn(self)
         if ctx.analysis_type != Analysis.AC:

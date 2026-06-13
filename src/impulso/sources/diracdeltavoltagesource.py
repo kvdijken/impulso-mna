@@ -26,9 +26,6 @@ class DiracDeltaVoltageSource(PowerSource, Stamper):
     def __value__(self) -> str | None:
         return None
 
-    def admittance(self, s: Optional[complex] = None) -> complex:
-        return np.inf  # ideal voltage source has infinite admittance (zero impedance)
-
     def voltage_at_time(self, t) -> float:
         if self.before and t >= self.delay:
             self.before = False
