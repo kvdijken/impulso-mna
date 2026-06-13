@@ -1,3 +1,5 @@
+import abc
+
 from quantiphy import Quantity
 
 from ..components.component import *
@@ -42,6 +44,7 @@ class VoltageSource(PowerSource):
     def augments(self, ctx: Context):
         return True
 
+    @abc.abstractmethod
     def stamp(self,
               x: Dict[int, float],             # previous node voltages
               Y: Dict[Tuple[int, int], float], # admittance matrix
@@ -50,6 +53,7 @@ class VoltageSource(PowerSource):
               ):
         pass
 
+    @abc.abstractmethod
     def current(self,
                 x: Dict[int, float], # solution vector
                 idx_query_fn: callable # function to query indices
