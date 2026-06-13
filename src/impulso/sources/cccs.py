@@ -37,6 +37,10 @@ class CCCS(PowerSource, Stamper):
             if j is not None:
                 ctx.Y[j,augm_vs] -= self.A
         else:
+            # It has already been ascertained that the controlling
+            # component is a DCVoltageSource, Resistor or
+            # Capacitor. At this point we can assume it is either
+            # Resistor or Capacitor, no more cheks needed.
             p, q = ctx.idx_query_fn(control)
             Ypq = control.admittance()
             # CCCS is connected from i to j

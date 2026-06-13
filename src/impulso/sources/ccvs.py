@@ -59,16 +59,20 @@ class CCVS(PowerSource, Stamper):
 
         # Control current contribution
         comp = self.component # controlling component
-        if isinstance(comp, (Resistor, Capacitor)):
+        if isinstance(comp,DCVoltageSource):
+            augm_vs = ctx.augm_query_fn(comp)
+            ctx.Y[augm, augm_vs] -= self.rm
+        else:
+            # It has already been ascertained that the controlling
+            # component is a DCVoltageSource, Resistor or
+            # Capacitor. At this point we can assume it is either
+            # Resistor or Capacitor, no more cheks needed.
             Ypq = comp.admittance(ctx.s)
             p, q = ctx.idx_query_fn(comp)
             if p is not None:
                 ctx.Y[augm, p] += self.rm * Ypq
             if q is not None:
                 ctx.Y[augm, q] -= self.rm * Ypq
-        elif isinstance(comp,DCVoltageSource):
-            augm_vs = ctx.augm_query_fn(comp)
-            ctx.Y[augm, augm_vs] -= self.rm
 
 
 
