@@ -20,7 +20,6 @@ class Resistor(Component, Stamper):
 
     def __value__(self) -> str | None:
         return Quantity(self.resistance,"Ω").render(form="si",spacer="")
-#        return str(self.resistance) + "Ω"
 
     def admittance(self, s: Optional[complex] = None) -> complex:
         return self.g
