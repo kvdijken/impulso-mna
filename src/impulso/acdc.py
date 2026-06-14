@@ -5,6 +5,8 @@ import numpy as np
 from numpy.typing import NDArray
 from functools import cache
 
+from quantiphy import Quantity
+
 from .base import Analysis, TopologyError, Node
 from .components.component import Component, Context
 from .circuit import Circuit
@@ -489,6 +491,9 @@ def solve_ac(circuit: Circuit,
             results = {}
             if show_output:
                 print("\nPerforming frequency range AC analysis:")
+                f0 = Quantity(freq[0],"Hz").render(form='si',spacer='') # type: ignore
+                f1 = Quantity(freq[-1],"Hz").render(form='si',spacer='') # type: ignore
+                print(f'Frequency range: {f0}..{f1}')
             first = True
             for f in freq: # type: ignore
                 results[f] = solver.solve(freq=f, show_output=show_output and first, stats=_stats)
