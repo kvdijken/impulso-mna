@@ -485,6 +485,7 @@ def solve_ac(circuit: Circuit,
             # single frequency AC analysis
             if show_output:
                 print("\nPerforming single frequency AC analysis:")
+                print(f'Frequency: {Quantity(freq,"Hz").render(form='si',spacer='')}')
             results = solver.solve(freq=freq, show_output=show_output, stats=_stats)
         else:
             # AC sweep over multiple frequencies

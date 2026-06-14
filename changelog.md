@@ -1,3 +1,8 @@
+## [2.3.0] = 2026
+
+- print single frequency or frequency range for AC analysis
+
+
 ## [2.2.1] - 2026-06-14
 
 - NPNLike renamed to BJTLike
