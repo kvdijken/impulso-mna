@@ -91,7 +91,7 @@ class Circuit:
 
     def add(self,
             comp: Component,
-            nodes: List[int | str]
+            nodes: List[Node]
             ) -> Circuit:
         """ Add a component to the circuit. """
 
