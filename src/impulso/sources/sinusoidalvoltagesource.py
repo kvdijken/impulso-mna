@@ -20,7 +20,12 @@ class SinusoidalVoltageSource(PowerSource):
                  ac_source: bool = False,     # whether this source should be included in AC analysis
                  id: Optional[str] = None):
         super().__init__(ac_source=ac_source, id=id)
-        self.frequency = frequency
+        if frequency is None:
+            assert self.is_ac()
+            self.frequency = 0
+        else:
+            assert not self.is_ac()
+            self.frequency = frequency
         self.amplitude = amplitude
         self.phase = phase
         self.dc = dc

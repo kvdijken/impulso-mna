@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 
 from .source import PowerSource
 from ..components.component import Context
-
+from ..base import Node
 
 class VCCS(PowerSource):
     """
@@ -32,11 +32,13 @@ class VCCS(PowerSource):
     def __value__(self) -> str | None:
         return str(self.gm) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
 
-    def connect(self, vnodes: Tuple[int,int]):
+    def connect(self, vnodes: Tuple[Node, Node]):
         # Connect the VCCS to its controlling voltage nodes.
         # This is separate from the main circuit connections to allow flexibility in defining the control voltage.
-        # The main circuit connections (self.nodes) define where the current source injects current, while vnodes define how the control voltage is measured.
-        # For example, a VCCS could inject current between nodes A and B, but be controlled by the voltage difference between nodes C and D.
+        # The main circuit connections (self.nodes) define where the current source injects current, while vnodes
+        # define how the control voltage is measured.
+        # For example, a VCCS could inject current between nodes A and B, but be controlled by the voltage
+        # difference between nodes C and D.
         # This separation allows for more complex circuit configurations and is common in SPICE-like simulators.
         # The user must call this method to set the control voltage nodes after adding the VCCS to the circuit.
         # Controlling voltage is V(vnodes[1]) - V(vnodes[0]), and the current injected is gm * control_voltage.

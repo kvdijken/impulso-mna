@@ -48,6 +48,9 @@ from ..base import Analysis
 
 class Capacitor(Component, Stamper, HasAdmittance):
 
+    initial_voltage: Optional[float]
+    previous_voltage: Optional[float]
+
     def __init__(self,
                  capacitance: float,
                  initial_voltage: float | None = None, # initial voltage V[1]-V[0]
@@ -85,7 +88,10 @@ class Capacitor(Component, Stamper, HasAdmittance):
         return Quantity(self.capacitance,"F").render(form="si",spacer="")
 
     def admittance(self, s: Optional[complex] = None) -> complex:
-        return s * self.capacitance()
+        if s is None:
+            return 0
+        else:
+            return s * self.capacitance
 
     def _has_initial_condition(self) -> bool:
         return self.initial_voltage is not None
@@ -128,7 +134,10 @@ class Capacitor(Component, Stamper, HasAdmittance):
             ctx.z[augm] = self.initial_voltage # volts
 
         def stamp_ac_dc():
-            y = ctx.s * self.capacitance
+            if ctx.s is None: # pyright: ignore[reportAttributeAccessIssue]
+                y = 0
+            else:
+                y = ctx.s * self.capacitance# pyright: ignore[reportAttributeAccessIssue]
             i, j = ctx.idx_query_fn(self)
             if i is not None:
                 ctx.Y[i, i] += y
@@ -149,8 +158,8 @@ class Capacitor(Component, Stamper, HasAdmittance):
                     ctx.Y[i, j] -= g
                     ctx.Y[j, i] -= g
 
-            G = self.capacitance / ctx.dt
-            i_eq = G * self.previous_voltage
+            G = self.capacitance / ctx.dt # pyright: ignore[reportAttributeAccessIssue]
+            i_eq = G * self.previous_voltage # pyright: ignore[reportOperatorIssue]
 
             i, j = ctx.idx_query_fn(self)
             stamp_as_resistor(i,j,G)
@@ -180,7 +189,7 @@ class Capacitor(Component, Stamper, HasAdmittance):
             else:
                 vj = ctx.x[j]
             v_curr = vj - vi
-            return -self.capacitance * (v_curr - self.previous_voltage) / ctx.dt
+            return -self.capacitance * (v_curr - self.previous_voltage) / ctx.dt # pyright: ignore[reportAttributeAccessIssue, reportOperatorIssue]
 
         def current_not_transient():
             i, j = ctx.idx_query_fn(self)
@@ -192,7 +201,10 @@ class Capacitor(Component, Stamper, HasAdmittance):
                 vj = 0
             else:
                 vj = ctx.x[j]
-            return ctx.s * self.capacitance * (vi - vj)
+            if ctx.s is None: # pyright: ignore[reportAttributeAccessIssue]
+                return 0
+            else:
+                return ctx.s * self.capacitance * (vi - vj) # pyright: ignore[reportAttributeAccessIssue]
 
         if ctx.analysis_type == Analysis.TRANSIENT:
             return current_transient()

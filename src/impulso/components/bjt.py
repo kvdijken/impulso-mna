@@ -8,7 +8,9 @@ from typing import List, Tuple, Optional, Protocol, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..circuit import Circuit
 
-from ..base import Analysis
+import numpy as np
+
+from ..base import Analysis, Node
 from .diode import Diode
 from .capacitor import Capacitor
 from ..sources.cccs import CCCS
@@ -16,7 +18,7 @@ from .component import Component, CompoundComponent, Context
 from ..sources.dcvoltagesource import DCVoltageSource
 
 
-class NPNLike(Protocol):
+class BJTLike(Protocol):
     Va: float # Early voltage
 
     # internal nodes
@@ -24,15 +26,22 @@ class NPNLike(Protocol):
     _e0: str # internal node between emitter and base-emitter diode
     _c0: str # internal node between collector and base-collector diode
 
+    # Zero volt voltage sources for current measurement
+    v0b: DCVoltageSource # base
+    v0e: DCVoltageSource # emitter
+    v0c: DCVoltageSource # collector
+
+    def get_id(self) -> str:
+        ...
 
 class Rout(Component):
     ''' Output resistance, which is a CCR. '''
 
     def __init__(self,
-                 npn: NPNLike,
+                 bjt: BJTLike,
                  ):
-        self.npn = npn
-        super().__init__(id=f"{npn.id}_Rout")
+        self.bjt = bjt
+        super().__init__(id=f"{bjt.get_id()}_Rout")
 
     def __value__(self) -> str | None:
         return None
@@ -45,10 +54,10 @@ class Rout(Component):
             g = self.admittance_ac
         else:
             # collector current
-            ic = -self.npn.v0c.current(ctx)
+            ic = np.abs(self.bjt.v0c.current(ctx))
 
             # calculate rout
-            g = max(ic, 1e-12) / self.npn.Va
+            g = max(ic, 1e-12) / self.bjt.Va
 
         # stamp
         i, j = ctx.idx_query_fn(self)
@@ -60,7 +69,7 @@ class Rout(Component):
         ctx.Y[j, i] -= g
 
     def set_admittance_for_ac(self, i_dc: float):
-        self.admittance_ac = i_dc / self.npn.Va
+        self.admittance_ac = i_dc / self.bjt.Va
 
     def current(self, ctx: Context) -> complex:
         i, j = ctx.idx_query_fn(self)
@@ -73,11 +82,12 @@ class Rout(Component):
         else:
             vj = ctx.x[j]
         vd = (vi - vj) # voltage over Rout
-        ic = -self.npn.v0c.current(ctx) # collector current
-        g = max(ic, 1e-12) / self.npn.Va
+        ic = np.abs(self.bjt.v0c.current(ctx)) # collector current
+        g = max(ic, 1e-12) / self.bjt.Va
         return vd * g
 
-class BJT(CompoundComponent):
+
+class BJT(CompoundComponent, BJTLike):
     # Ebers-Moll approximation for a BJT
 
     # Should be connected as [emitter, base, collector]
@@ -90,10 +100,6 @@ class BJT(CompoundComponent):
     _b0: str # internal node between base and base-emitter diode
     _e0: str # internal node between emitter and base-emitter diode
     _c0: str # internal node between collector and base-collector diode
-
-    # Early voltage
-    Va: float
-
 
     def __init__(self,
                  bjttype: str,
@@ -121,6 +127,9 @@ class BJT(CompoundComponent):
         self.cbc = cbc
         self.cbe = cbe
 
+    def get_id(self) -> str:
+        return self.id
+
     def __value__(self) -> str | None:
         return None
 
@@ -129,7 +138,7 @@ class BJT(CompoundComponent):
 
     def before_add(self,
                    circuit: Circuit,
-                   nodes: List[int]
+                   nodes: Tuple[Node, ...]
                    ) -> Tuple[bool, bool]:
         #                     ^add  ^current
         e = nodes[self.__emitter]
@@ -208,7 +217,7 @@ class BJT(CompoundComponent):
         self.cbe_cap = Capacitor(self.cbe, id=f"{self.id}_Cbe")
         circuit.add(self.cbe_cap, [self._b0,self._e0])
 
-        return False
+        return False, True
         # False: do not add this BJT itself
         # True: does deliver current info
 

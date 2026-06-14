@@ -19,7 +19,7 @@ class SinusoidalCurrentSource(PowerSource):
     def __init__(
         self, *,
         amplitude: float,
-        frequency: Optional[float] = None,
+        frequency: float,
         phase: float = 0, # in radians
         dc: float = 0.0,          # DC offset
         ac_source: bool = False,     # whether this source should be included in AC analysis
@@ -32,7 +32,12 @@ class SinusoidalCurrentSource(PowerSource):
             current: current in Amperes
         """
         super().__init__(ac_source=ac_source, id=id)
-        self.frequency = frequency
+        if frequency is None:
+            assert self.is_ac()
+            self.frequency = 0
+        else:
+            assert not self.is_ac()
+            self.frequency = frequency
         self.amplitude = amplitude
         self.phase = phase
         self.dc = dc
@@ -47,6 +52,7 @@ class SinusoidalCurrentSource(PowerSource):
             return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def current_at_time(self, t) -> float:
+        assert not self.is_ac()
         return self.dc + self.amplitude * np.sin(2 * np.pi * self.frequency * t + self.phase)
 
     def augments(self, ctx):

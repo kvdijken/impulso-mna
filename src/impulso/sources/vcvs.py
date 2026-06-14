@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Optional, Tuple, List
 import numpy as np
 
 from .source import PowerSource
 from ..components.component import Context
+from ..base import Node
 
 
 class VCVS(PowerSource):
@@ -11,14 +12,7 @@ class VCVS(PowerSource):
     Connect as [out-, out+, in-, in+], where current flows from out- to out+ and
       control voltage is measured from in- to in+.
     '''
-
-    # Node index mapping for clarity
-    # The VCVS has 4 nodes: output negative,
-    # output positive, input negative, input positive
-    __out_neg = 0
-    __out_pos = 1
-    __in_neg = 2
-    __in_pos = 3
+    vnodes: Tuple[Node, Node] # nodes controlling the voltage
 
     def __init__(self, *,
                  A: float,
@@ -29,6 +23,10 @@ class VCVS(PowerSource):
     def __component_typename__(self) -> str:
         return "VCVS"
 
+    def connect(self, vnodes: Tuple[Node,Node]):
+        self.vnodes = vnodes
+
+    # TODO: create test
     def __value__(self) -> str | None:
         return str(self.A) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
 
@@ -36,12 +34,13 @@ class VCVS(PowerSource):
         return True
 
     def stamp(self, ctx: Context):
-        nodes = ctx.idx_query_fn(self)
+        i, j = ctx.idx_query_fn(self)
+        p, q = ctx.idx_query_fn(self.vnodes)
         augm = ctx.augm_query_fn(self)
-        i = nodes[VCVS.__out_neg]
-        j = nodes[VCVS.__out_pos]
-        p = nodes[VCVS.__in_neg]
-        q = nodes[VCVS.__in_pos]
+#        i = nodes[VCVS.__out_neg]
+#        j = nodes[VCVS.__out_pos]
+#        p = nodes[VCVS.__in_neg]
+#        q = nodes[VCVS.__in_pos]
 
         if i is not None:
             ctx.Y[i, augm] += +1

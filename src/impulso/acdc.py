@@ -2,13 +2,21 @@ import os
 
 from typing import Dict, List, Tuple, Optional
 import numpy as np
+from numpy.typing import NDArray
 from functools import cache
 
-from .base import Analysis, TopologyError
+from .base import Analysis, TopologyError, Node
 from .components.component import Component, Context
 from .circuit import Circuit
 from .sources.source import PowerSource
 from .helperregistry import registry, StampingHelper
+
+
+
+type Voltages = Dict[Node, complex]
+type Currents = Dict[str | Component, Tuple[complex, ...]]
+type SingleFrequencySolution = Tuple[Voltages, Currents]
+type MultipleFrequencySolution = Dict[float, SingleFrequencySolution]
 
 
 class Statistics():
@@ -56,10 +64,10 @@ class Statistics():
 
 class Solver_ACDC():
 
-    nodes: Dict[Component, List[int]]  # component -> connected nodes
+    nodes: Dict[Component, Tuple[Node, ...]]  # component -> connected nodes
     components: list[Component]  # component_id -> Component instance
-    node_index: Dict[int, int] = {} # node number -> index in MNA matrix
-    ground_node: int = 0
+    node_index: Dict[Node, int] = {} # node -> index in MNA matrix
+    ground_node: Node = 0
     augm_idx: Dict[Component, int] = {} # component -> index in MNA matrix for
                                         # augmented variables (currents through
                                         # voltage sources, etc.)
@@ -99,24 +107,31 @@ class Solver_ACDC():
 
 
     @cache
-    def _get_nodes(self, comp):
-        return self.nodes.get(comp, None)
+    def _get_nodes(self, comp: Component) -> Tuple[Node, ...]:
+        return self.nodes[comp]
 
 
     @cache
-    def _get_augm_index(self, comp):
-        return self.augm_idx.get(comp, None)
+    def _get_augm_index(self, comp: Component) -> int:
+        return self.augm_idx[comp]
 
 
     @cache
     def _get_node_indices(self,
-                          comp: Component
-                          ) -> List[int]:
+                          item: Component | Tuple[Node,...]
+                          ) -> Tuple[int | None, ...]:
         '''
         Return the indices of the nodes connected to the given component in the MNA matrix.
         If a node is the ground node, return None for its index since it does not have a corresponding row/column in the MNA matrix.
         '''
-        return [self.node_index.get(n, None) for n in self._get_nodes(comp)]
+        if isinstance(item, Component):
+            nodes = self._get_nodes(item)
+            if nodes is None:
+                return ()
+            else:
+                return tuple([self.node_index.get(n, None) for n in nodes])
+        else:
+            return tuple([self.node_index.get(n, None) for n in item])
 
 
     def _reset_cache(self):
@@ -129,9 +144,8 @@ class Solver_ACDC():
     def solve(self,
               freq: float,
               show_output: bool = False,
-              stats: Statistics = None
-              ) -> Tuple[Dict[int | str, complex], # node voltages
-                         Dict[str | Component, complex]]: # currents through components
+              stats: Optional[Statistics] = None
+              ) -> SingleFrequencySolution | MultipleFrequencySolution:
         """
         Solve the circuit for the given frequency and ground node.
         This is an API method.
@@ -176,9 +190,9 @@ class Solver_ACDC():
         return n
 
 
-    def _all_nodes(self) -> List[int]:
+    def _all_nodes(self) -> List[Node]:
         """Return a list of all nodes in the circuit."""
-        return self.node_index.keys()
+        return list(self.node_index.keys())
 
 
     def _prepare_for_solving(self) -> None:
@@ -199,8 +213,7 @@ class Solver_ACDC():
     def _solve_mna(self,
                   freq: float = 0,
                   return_real: bool = False
-                  ) -> Tuple[Dict[int, complex],
-                             Dict[str | Component, complex]]:
+                  ) -> SingleFrequencySolution:
         """
         AC & DC small-signal MNA solver.
 
@@ -254,7 +267,7 @@ class Solver_ACDC():
             x_prev = self.ctx.x # no deepcopy needed as in the next line ctx.x will get newly allocated array
             self.ctx.x = self._solve_matrix_equation()
             if return_real:
-                self.ctx.x = np.real(self.ctx.x)
+                self.ctx.x = np.real(self.ctx.x) # type: ignore
             if self._has_nonlinear_components():
                 attempts += 1
                 if attempts >= check_for_convergence_after:
@@ -286,7 +299,7 @@ class Solver_ACDC():
         return voltages, currents
 
 
-    def _print_voltages(self, voltages: Dict[int, complex]):
+    def _print_voltages(self, voltages: Dict[Node, complex]):
         print("Node voltages:")
         for node, voltage in voltages.items():
             print(f"Node {node}: {voltage} V")
@@ -326,7 +339,7 @@ class Solver_ACDC():
         return currents
 
 
-    def _extract_node_voltages(self) -> Dict[int, complex]: # dict node id -> voltage
+    def _extract_node_voltages(self) -> Dict[Node, complex]: # dict node id -> voltage
         '''
         '''
         voltages = {node: self.ctx.x[i] for node, i in self.node_index.items()}
@@ -334,13 +347,13 @@ class Solver_ACDC():
         return voltages
 
 
-    def _solve_matrix_equation(self):
+    def _solve_matrix_equation(self) -> NDArray[np.complex128] :
         '''
         '''
         if self._stats:
             self._stats.solves += 1
         try:
-            return np.linalg.solve(self.ctx.Y, self.ctx.z)
+            return np.linalg.solve(self.ctx.Y, self.ctx.z) # type: ignore
         except np.linalg.LinAlgError as e:
             if self._stats:
                 self._stats.singulars += 1
@@ -360,7 +373,7 @@ class Solver_ACDC():
         return np.zeros((N,N), dtype=complex)
 
 
-    def _assign_node_indices(self) -> Tuple[int, Dict[int,int]]:
+    def _assign_node_indices(self) -> Tuple[int, Dict[Node,int]]:
 
         def node_key(x: str | int) -> str:
             if isinstance(x, int):
@@ -377,7 +390,7 @@ class Solver_ACDC():
             # without nodes, that should not be included
             # in the node administration
             try:
-                directive = comp.is_directive()
+                directive = comp.is_directive() # pyright: ignore[reportAttributeAccessIssue]
             except AttributeError:
                 directive = False
             if not directive:
@@ -418,9 +431,8 @@ class Solver_ACDC():
 
 def solve_dc(circuit: Circuit,
              show_output: bool = False,
-             stats: Statistics = None
-             ) -> Tuple[Dict[int | str, complex], # node voltages
-                        Dict[str | Component, complex]]: # currents through components
+             stats: Optional[Statistics] = None
+             ) -> SingleFrequencySolution | MultipleFrequencySolution:
     '''
     Convenience function to solve a circuit for DC analysis.
     '''
@@ -432,14 +444,13 @@ def solve_dc(circuit: Circuit,
 def solve_ac(circuit: Circuit,
              freq: float | List[float],
              show_output: bool = False,
-             stats: Statistics = None
-             ) -> Tuple[Dict[int | str, complex], # node voltages
-                        Dict[str | Component, complex]]: # currents through components
+             stats: Optional[Statistics] = None
+            ) -> SingleFrequencySolution | MultipleFrequencySolution:
     '''
     Convenience function to solve a circuit for AC analysis.
     '''
     all_sources = circuit.all_of_type(PowerSource)
-    ac_sources = [src for src in all_sources if src.is_ac()]
+    ac_sources = [src for src in all_sources if src.is_ac()] # type: ignore
     if not ac_sources:
         raise TopologyError("No AC sources found in the circuit. The results may be meaningless.")
 
@@ -454,7 +465,8 @@ def solve_ac(circuit: Circuit,
             print("\nPerforming DC operating point analysis:")
         if len(non_linears) > 0:
             # First do a operating point analysis
-            _, idc = solver.solve(freq=0, show_output=show_output, stats=_stats)
+            solution: SingleFrequencySolution = solver.solve(freq=0, show_output=show_output, stats=_stats) # type: ignore
+            _, idc = solution
             for comp in non_linears:
                 comp.set_admittance_for_ac(idc[comp])
 
@@ -469,7 +481,7 @@ def solve_ac(circuit: Circuit,
             if show_output:
                 print("\nPerforming frequency range AC analysis:")
             first = True
-            for f in freq:
+            for f in freq: # type: ignore
                 results[f] = solver.solve(freq=f, show_output=show_output and first, stats=_stats)
                 first = False
 

@@ -70,24 +70,35 @@ class CircuitItem(abc.ABC):
 
 
 class Context():
-    ground_node: int
+    ground_node: Node
     analysis_type: Analysis
     x: NDArray[np.complex128] # previous solution vector (node voltages)
     Y: NDArray[np.complex128] # augmented admittance matrix
     z: NDArray[np.complex128] # RHS vector
 
+    t: float # time
+    dt: float # timestep
+    s: Optional[complex] # complex frequency
+
     # query index into admittance matrix for a given circuit item
-    idx_query_fn: Callable[[CircuitItem |     # query circuit item
-                            int |             # query node
-                            list[int] |       # query list of nodes
-                            Tuple[int, ...]], # query tuple of nodes
-                           Tuple[int, ...]]   # returns list of indices into admittance matrix
+#    idx_query_fn: Callable[[CircuitItem |      # query circuit item
+#                            int |              # query node
+#                            list[int] |        # query list of nodes
+#                            Tuple[Node, ...]], # query tuple of nodes
+#                            Tuple[int, ...]]   # returns list of indices into admittance matrix
+    idx_query_fn: Callable[[CircuitItem |      # query circuit item
+                            Tuple[Node, ...]], # query list of nodes
+                            Tuple[int |
+                                  None, ...]]  # returns tuple of indices into admittance matrix
+                                               # For every node which has no index into matrix
+                                               # (eg. ground node) it returns None in the tuple
 
     # query augmentation index for a given circuit item (if it augments the system)
     augm_query_fn: Callable[[CircuitItem], int]
 
     # query nodes of a circuit item (e.g. component)
-    nodes_query_fn: Callable[[CircuitItem], Tuple[int, ...]]
+    nodes_query_fn: Callable[[CircuitItem],
+                             Tuple[Node, ...]]
 
     # This dataclass can be extended with additional fields as needed.
     #
@@ -131,12 +142,12 @@ class Component(CircuitItem):
         return True
 
     @abc.abstractmethod
-    def current(self, ctx: Context) -> complex:
+    def current(self, ctx: Context) -> Tuple[complex, ...]:
         pass
 
     def before_add(self,
                    circuit: Circuit,
-                   nodes: List[Node]
+                   nodes: Tuple[Node, ...]
                    ) -> bool:
         """
         Hook called before adding to circuit. Can be used to modify the circuit.

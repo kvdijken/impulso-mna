@@ -1,3 +1,10 @@
+## [2.2.1] -
+
+- NPNLike renamed to BJTLike
+- typing improvements
+
+
+
 ## [2.2.0] - 2026-06-12
 
 - extensive output of statistics. Statistics are collected in a Statistics

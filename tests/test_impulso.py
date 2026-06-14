@@ -304,7 +304,9 @@ class Test_DC:
         circuit.add(R3,[2,3])
         circuit.add(R4,[3,0])
         circuit.add(I2,[0,3])
-        circuit.add(VCVS1,[2,1,3,2])
+        circuit.add(VCVS1,[2,1])
+        VCVS1.connect((3,2))
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         V12 = voltages[1] - voltages[2]
         V3 = voltages[3]
@@ -973,7 +975,7 @@ class Test_transient:
         assert(within(IR1,0.001,0.1))
 
 
-Test_Circuit().test_1()
+Test_DC().test_8()
 # Test_transient().test_1()
 # Test_AC().test_5()
 # Test_DC().test_11()

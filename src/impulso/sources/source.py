@@ -57,7 +57,7 @@ class VoltageSource(PowerSource):
     @abc.abstractmethod
     def current(self,
                 x: Dict[int, float], # solution vector
-                idx_query_fn: callable # function to query indices
+                idx_query_fn: Callable # function to query indices
                 ) -> complex:
         pass
 

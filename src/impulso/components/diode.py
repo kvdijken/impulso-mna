@@ -197,7 +197,7 @@ class Diode(Component, Stamper):
         # exp(vd / (n*vt)) >> 1, so i_dc ≈ Is * exp(vd / (n*vt))   ( this is a simplification)
         # i_dc = Is * exp(vd / (n*vt))
         # enter this in (1)
-        self.admittance_ac = i_dc / (self.n * self.vt)
+        self.admittance_ac = i_dc / self.nvt
 
 
     def current(self, ctx: Context) -> complex:

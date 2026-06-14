@@ -2,7 +2,7 @@ from typing import Optional
 
 from ..base import Analysis
 from .source import VoltageSource
-from ..components.component import Context, Stamper, HasAdmittance
+from ..components.component import Context, Stamper, HasAdmittance, LARGE_CONDUCTANCE
 
 
 class DCVoltageSource(VoltageSource, Stamper, HasAdmittance):
@@ -13,9 +13,10 @@ class DCVoltageSource(VoltageSource, Stamper, HasAdmittance):
     def __component_typename__(self) -> str:
         return "DCVS"
 
+    # TODO: create test
     def admittance(self, s: Optional[complex] = None) -> complex:
         """Calculate admittance (1/impedance) for AC analysis."""
-        pass
+        return LARGE_CONDUCTANCE
 
     def stamp(self, ctx: Context):
         i, j = ctx.idx_query_fn(self)

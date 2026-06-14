@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Optional, Sequence, Iterable
+from typing import Dict, List, Optional, Sequence, Iterable, Type
 from collections import defaultdict
 
 from .base import TopologyError, Node
@@ -16,17 +16,21 @@ class Circuit:
     Supports arbitrary topologies with resistors and voltage sources.
     """
 
-    nodes: Dict[Component, List[Node]]  # component -> connected nodes
+    nodes: Dict[Component, Tuple[Node, ...]]  # component -> connected nodes
     components: list[Component]  # component_id -> Component instance
 
 
-    def __init__(self, ground_node =0):
+    def __init__(self, ground_node=0):
         """Initialize an empty circuit."""
         self.components = []
         self.component_not_added = {}
         self.nodes = {}
-        self.ground_node = ground_node
+        self.ground_node = self._proper_node(ground_node)
         self._prepared = False
+
+
+    def _proper_node(self, node: str | int) -> Node:
+        return node
 
 
     def __getitem__(self, id: str) -> Optional[Component]:
@@ -111,15 +115,17 @@ class Circuit:
                 raise ValueError(f"Component {comp.id} must be connected to at least 2 nodes, got {len(nodes)}")
 
 
+        # convert to the proper Node type
+        _nodes: Tuple[Node,...] = tuple([self._proper_node(n) for n in nodes])
         try:
-            do_add = comp.before_add(self, nodes)
+            do_add = comp.before_add(self, _nodes)
         except AttributeError:
             do_add = True
 
         if do_add:
             check()
             self.components.append(comp)
-            self.nodes[comp] = nodes
+            self.nodes[comp] = _nodes
         else:
              self.component_not_added[comp.id] = comp
 
@@ -216,9 +222,9 @@ class Circuit:
 
         return _nodes_int + _nodes_str
 
-    def all_of_type(self, _type: CircuitItem) -> List[CircuitItem]:
-        all = [c for c in self.components if isinstance(c, _type)]
-        return all
+    def all_of_type(self, _type: Type[CircuitItem]) -> Sequence[CircuitItem]:
+        result = [c for c in self.components if isinstance(c, _type)]
+        return result
 
     def validate(self):
         if not self.ground_node in self.all_nodes():

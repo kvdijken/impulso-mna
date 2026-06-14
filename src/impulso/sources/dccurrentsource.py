@@ -31,8 +31,9 @@ class DCCurrentSource(PowerSource, Stamper):
     def __component_typename__(self) -> str:
         return "DCCS"
 
+    # TODO: test
     def __value__(self) -> str | None:
-        return Quantity(self.current,"A").render(form="si",spacer="")
+        return Quantity(self._current,"A").render(form="si",spacer="")
 
     def set_current(self, current: float):
         self._current = current
