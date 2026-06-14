@@ -19,6 +19,8 @@ type Voltages = Dict[Node, Voltage]
 type Currents = Dict[str | Component, Current]
 type SingleFrequencySolution = Tuple[Voltages, Currents]
 type MultipleFrequencySolution = Dict[float, SingleFrequencySolution]
+#                                     ^^^ frequency
+#                                            ^^^ single frequency solution
 
 type Times = List[float]
 type VoltagesSeries = Dict[Node, NDArray]
