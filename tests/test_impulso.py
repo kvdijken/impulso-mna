@@ -68,6 +68,7 @@ class Test_Circuit:
     def test_1(self):
         # Test if a circuit with no components can be simulated
         circuit = Circuit()
+        print(circuit)
         with pytest.raises(TopologyError):
             result = solve_dc(circuit)
 
@@ -79,6 +80,7 @@ class Test_Circuit:
         circuit.add(V1,[0, 1])
         circuit.add(R1,[1, 0])
         circuit.add(R2,[2, 3])
+        print(circuit)
         with pytest.raises(np.linalg.LinAlgError):
             result = solve_dc(circuit)
 
@@ -91,6 +93,7 @@ class Test_Circuit:
         circuit.add(V1,[0, 1])
         circuit.add(R1,[1, 0])
         circuit.add(R2,[2, 0])
+        print(circuit)
         nodes, comps = solve_dc(circuit)
         VR2 = nodes[2]
         assert(np.abs(VR2) < 1e-6)
@@ -103,6 +106,7 @@ class Test_Circuit:
         V1 = DCVoltageSource(voltage=1)
         with pytest.raises(TypeError):
             circuit.add(V1, 1) # should be a list of nodes, not a single node
+        print(circuit)
 
     def test_5(self):
         # test if adding a component with a duplicate ID is caught
@@ -112,12 +116,14 @@ class Test_Circuit:
         circuit.add(V1, [0, 1])
         with pytest.raises(TopologyError):
             circuit.add(V2, [1, 2])
+        print(circuit)
 
     def test_6(self):
         # test if adding a component that is not an instance of Component is caught
         circuit = Circuit()
         with pytest.raises(TypeError):
             circuit.add("not a component", [0, 1])
+        print(circuit)
 
     def test_7(self):
         # test if a circuit without a component connected to ground is caught
@@ -128,6 +134,7 @@ class Test_Circuit:
         circuit.add(R1, [1, 2])
         with pytest.raises(TopologyError):
             circuit.validate()
+        print(circuit)
 
     def test_8(self):
         # test if a circuit with a component connected to ground is valid
@@ -137,6 +144,7 @@ class Test_Circuit:
         circuit.add(V1, [0, 1])
         circuit.add(R1, [1, 2])
         circuit.validate()
+        print(circuit)
 
     def test_10(self):
         # test if we can add a component with only one node
@@ -147,6 +155,7 @@ class Test_Circuit:
         V2 = DCVoltageSource(voltage=1)
         with pytest.raises(ValueError):
             circuit.add(V2, [0]) # should raise an error
+        print(circuit)
 
     def test_11(self):
         # Test if a CCVS with illegal controlling component is caught
@@ -175,6 +184,7 @@ class Test_Circuit:
         L1 = Inductor(inductance=1e-3, id='L1')
         with pytest.raises(TypeError):
             CCVS1.connect(L1) # should not be able to connect to an inductor
+        print(circuit)
 
 
 class Test_DC:
@@ -187,6 +197,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         result = solve_dc(circuit)
         IR1 = result[1][R1.id]
         assert(within(IR1, 0.001, 0.1))
@@ -199,6 +210,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         IV1 = currents[V1]
@@ -214,6 +226,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[0,1])
+        print(circuit)
         result = solve_dc(circuit)
         IR1 = result[1][R1.id]
         assert(within(IR1, -0.001, 0.1))
@@ -226,6 +239,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         result = solve_dc(circuit)
         VR1 = result[0][1]
         assert(within(VR1, 1.0, 0.1))
@@ -240,6 +254,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
+        print(circuit)
         result = solve_dc(circuit)
         VR1 = result[0][2]
         assert(within(VR1, 2.0, 0.1))
@@ -254,6 +269,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[2,1])
         circuit.add(R1,[2,0])
+        print(circuit)
         result = solve_dc(circuit)
         VR1 = result[0][2]
         assert(VR1<1e-6)
@@ -268,6 +284,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
+        print(circuit)
         result = solve_dc(circuit)
         VR1 = result[0][2]
         assert(VR1<1e-6)
@@ -283,6 +300,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         result = solve_dc(circuit)
         IR1_1 = result[1][R1.id]
         IR1_2 = result[1][R1]
@@ -334,6 +352,7 @@ class Test_DC:
         circuit.add(R4,[3,0])
         circuit.add(I2,[0,3])
         CCVS1.connect(R3)
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         V12 = voltages[1] - voltages[2]
@@ -359,6 +378,7 @@ class Test_DC:
         circuit.add(R4,[4,0])
         circuit.add(I2,[0,4])
         CCVS1.connect(V1)
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         V12 = voltages[1] - voltages[2]
         print_currents_voltages(circuit, voltages, currents)
@@ -385,6 +405,7 @@ class Test_DC:
         circuit.add(R4,[4,0])
         circuit.add(I2,[0,4])
         CCCS1.connect(R3)
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         c12 = currents[CCCS1]
@@ -410,6 +431,7 @@ class Test_DC:
         circuit.add(R4,[4,0])
         circuit.add(I2,[0,4])
         CCCS1.connect(V1)
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         c12 = currents[CCCS1]
         print_currents_voltages(circuit, voltages, currents)
@@ -423,6 +445,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
         circuit.add(V2,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         for c in currents.keys():
             if not isinstance(c,Component):
@@ -440,6 +463,7 @@ class Test_DC:
         circuit.add(I1,[0,1])
         circuit.add(R1,[1,2])
         circuit.add(V2,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         for c in currents.keys():
             if not isinstance(c,Component):
@@ -457,6 +481,7 @@ class Test_DC:
         circuit.add(R1,[0,1])
         circuit.add(V1,[1,2])
         circuit.add(R2,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[1], -0.5, 0.1))
@@ -473,6 +498,7 @@ class Test_DC:
         circuit.add(R1,[0,1])
         circuit.add(V1,[2,1])
         circuit.add(R2,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[1], 0.5, 0.1))
@@ -489,6 +515,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(I1,[2,1])
         circuit.add(R1,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[1], 1.0, 0.1))
@@ -506,6 +533,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
         circuit.add(V2,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[1], 1.0, 0.1))
@@ -522,6 +550,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,2])
         circuit.add(V2,[0,2])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(voltages[1], 1.0, 0.1))
@@ -545,6 +574,7 @@ class Test_DC:
         circuit.add(R1,[out,neg])
         circuit.add(R2,[neg,0])
         circuit.add(OA1,[pos,neg,out]) # order is pos, neg, out
+        print(circuit)
 
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
@@ -565,6 +595,7 @@ class Test_DC:
         circuit.add(R1,[1,0])
         circuit.add(cccs1,[1,0])
         cccs1.connect(R1)
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(currents[cccs1], 0.002, 0.1))
@@ -575,6 +606,7 @@ class Test_DC:
         circuit = Circuit()
         circuit.add(v1,[0,1])
         circuit.add(cs1,[1,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(currents[cs1], 1, 0.1))
@@ -601,6 +633,7 @@ class Test_DC:
         circuit.add(cccs1, [collector, emitter])
         cccs1.connect(v0)
 
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
 
@@ -622,6 +655,7 @@ class Test_DC:
         circuit.add(Rc, [1,4])
         circuit.add(Re, [5,0])
         circuit.add(Vcc, [0,1])
+        print(circuit)
 
         v, i = solve_dc(circuit)
         print_currents_voltages(circuit, v, i)
@@ -637,6 +671,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
         circuit.add(L1,[2, 0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         # The voltage at node 1 should be 1 volt, as the inductor should not affect the DC voltage.
         assert(within(np.abs(voltages[1]), 1.0, 0.1))
@@ -657,6 +692,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
         circuit.add(C1,[2, 0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         # Voltage at top of resistor should be 1 volt, as the capacitor is an open the DC voltage.
@@ -679,6 +715,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         assert(within(np.abs(voltages[2]), 1.0, 0.1))
         assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
@@ -693,6 +730,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
         circuit.add(W1,[2, 0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         assert(within(np.abs(voltages[1]), 1.0, 0.1))
         assert(within(np.abs(currents[R1.id]), 0.001, 0.1))
@@ -709,6 +747,7 @@ class Test_DC:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
         circuit.add(W1,[2, 0])
+        print(circuit)
         voltages, currents = solve_dc(circuit)
         print_currents_voltages(circuit, voltages, currents)
         assert(within(np.abs(voltages[1]), 1.0, 0.1))
@@ -729,7 +768,9 @@ class Test_DC:
         circuit.add(R1,[1,0])
         circuit.add(R2,[1,2])
         circuit.add(R3,[3,0])
-        circuit.add(VCCS1,[2,3,1,0]) # order is (out-, out+, in-, in+)
+        circuit.add(VCCS1,[2,3]) # order is (out-, out+, in-, in+)
+        VCCS1.connect((1,0))
+        print(circuit)
         _, currents = solve_dc(circuit)
         assert(within(np.abs(currents[R3]), 2.5, 0.1))
 
@@ -745,7 +786,9 @@ class Test_DC:
         circuit.add(R2,[1,2])
         circuit.add(R1,[2,0])
         circuit.add(R3,[3,0])
-        circuit.add(VCCS1,[2,3,2,0])
+        circuit.add(VCCS1,[2,3])
+        VCCS1.connect((2,0))
+        print(circuit)
         _, currents = solve_dc(circuit)
         assert(within(np.abs(currents[R3]), 0.001, 0.1))
 
@@ -761,7 +804,9 @@ class Test_DC:
         circuit.add(R1,[1,0])
         circuit.add(R2,[1,2])
         circuit.add(R3,[2,0])
-        circuit.add(VCCS1,[2,0,0,1])
+        circuit.add(VCCS1,[2,0])
+        VCCS1.connect((0,1))
+        print(circuit)
         _, currents = solve_dc(circuit)
         print('AC_test_10, currents[R3]=',currents[R3])
         assert(within(np.abs(currents[R3]), 0.9984, 0.001))
@@ -776,6 +821,7 @@ class Test_DC:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         result = solve_dc(circuit)
         IR1_1 = result[1][R1.id]
         IR1_2 = result[1][R1]
@@ -794,6 +840,7 @@ class Test_AC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
+        print(circuit)
         _, currents = solve_ac(circuit,freq=1e3)
         IR1 = np.abs(currents[R1])
         assert(IR1 < 1e-6)
@@ -808,6 +855,7 @@ class Test_AC:
         circuit.add(V1,[0,1])
         circuit.add(V2,[1,2])
         circuit.add(R1,[2,0])
+        print(circuit)
         _, currents = solve_ac(circuit,freq=1e3)
         IR1 = np.abs(currents[R1])
         assert(within(IR1, 0.002, 0.1))
@@ -819,6 +867,7 @@ class Test_AC:
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(R1,[1,0])
+        print(circuit)
         with pytest.raises(TopologyError):
             voltages, currents = solve_ac(circuit,freq=1e3)
 
@@ -829,6 +878,7 @@ class Test_AC:
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(D1,[1,0])
+        print(circuit)
         voltages, currents = solve_ac(circuit,freq=1e3)
         IV1 = currents[V1]
         ID1 = currents[D1]
@@ -847,6 +897,7 @@ class Test_AC:
         circuit = Circuit()
         circuit.add(V1,[0,1])
         circuit.add(D1,[1,0])
+        print(circuit)
         voltages, currents = solve_ac(circuit,freq=1e3)
         V_D1 = voltages[1]
         I_V1 = currents[V1]
@@ -869,6 +920,7 @@ class Test_AC:
         circuit.add(L1,[1,0])
         circuit.add(L2,[2,0])
         circuit.add_instruction(K1)
+        print(circuit)
         voltages, currents = solve_ac(circuit,freq=1e3)
         V_L1 = voltages[1]
         V_L2 = voltages[2]
@@ -893,6 +945,7 @@ class Test_AC:
         circuit.add(L2,[2,0])
         circuit.add(R1,[2,0])
         circuit.add_instruction(K1)
+        print(circuit)
         voltages, currents = solve_ac(circuit,freq=1e3)
         V_L1 = voltages[1]
         V_L2 = voltages[2]
@@ -915,6 +968,7 @@ class Test_AC:
         circuit.add(L1,[1,0])
         circuit.add(L2,[2,0])
         circuit.add_instruction(K1)
+        print(circuit)
         voltages, currents = solve_ac(circuit,freq=1e3)
         V_L1 = voltages[1]
         V_L2 = voltages[2]
@@ -936,6 +990,7 @@ class Test_transient:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 0])
+        print(circuit)
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)
         VR1 = nodes[1][0]
         assert(within(VR1,1,0.1))
@@ -953,6 +1008,7 @@ class Test_transient:
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 2])
         circuit.add(C1,[2, 0])
+        print(circuit)
         time, nodes, comps = solve_transient(circuit,t_stop=0.01, dt=1e-4)
         v = np.abs(nodes[2])
         # The voltage across the capacitor should be v*(1-exp(-t/t_rc))
@@ -970,12 +1026,13 @@ class Test_transient:
         R1 = Resistor(resistance=1e3, id='R1')
         circuit.add(V1,[0,1])
         circuit.add(R1,[1, 0])
+        print(circuit)
         time, nodes, comps = solve_transient(circuit,t_stop=1, dt=1e-3)
         IR1 = comps[R1.id][0]
         assert(within(IR1,0.001,0.1))
 
 
-Test_DC().test_8()
+Test_DC().test_32()
 # Test_transient().test_1()
 # Test_AC().test_5()
 # Test_DC().test_11()

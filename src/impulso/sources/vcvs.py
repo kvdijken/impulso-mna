@@ -9,8 +9,8 @@ from ..base import Node
 class VCVS(PowerSource):
     '''
     Voltage Controlled Voltage Source
-    Connect as [out-, out+, in-, in+], where current flows from out- to out+ and
-      control voltage is measured from in- to in+.
+    Connect as [out-, out+], where current flows from out- to out+
+    Connect to voltage controlling nodes with the connect() method.
     '''
     vnodes: Tuple[Node, Node] # nodes controlling the voltage
 

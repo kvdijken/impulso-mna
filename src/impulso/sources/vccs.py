@@ -7,8 +7,8 @@ from ..base import Node
 class VCCS(PowerSource):
     """
     Voltage controlled current source.
-    Connect as [out-, out+, in-, in+], where current flows from out- to out+ and
-      control voltage is measured from in- to in+.
+    Connect as [out-, out+, in-, in+], where current flows from out- to out+
+    Connect to voltage controlling nodes with the connect() method.
 
     Current flows from nodes[0] → nodes[1].
     Control voltage is defined as V(vnodes[1]) - V(vnodes[0]).
@@ -46,26 +46,27 @@ class VCCS(PowerSource):
 
     def stamp(self, ctx: Context):
         gm = self.gm
-        nodes = ctx.idx_query_fn(self)
-        i, j, p, q = nodes
+        i, j = ctx.idx_query_fn(self)
+        in_neg, in_pos = ctx.idx_query_fn(self.vnodes)
 
         if i is not None:
-            if p is not None:
+            if in_neg is not None:
                 # Yip
-                ctx.Y[i,p] -= gm
-            if q is not None:
+                ctx.Y[i,in_neg] -= gm
+            if in_pos is not None:
                 # Yiq
-                ctx.Y[i,q] += gm
+                ctx.Y[i,in_pos] += gm
         if j is not None:
-            if p is not None:
+            if in_neg is not None:
                 # Yjp
-                ctx.Y[j,p] += gm
-            if q is not None:
+                ctx.Y[j,in_neg] += gm
+            if in_pos is not None:
                 #Yjq
-                ctx.Y[j,q] -= gm
+                ctx.Y[j,in_pos] -= gm
 
     def current(self, ctx: Context) -> complex:
-        _, _, in_neg, in_pos = ctx.idx_query_fn(self)
+        in_neg, in_pos = ctx.idx_query_fn(self.vnodes)
+#        _, _, in_neg, in_pos = ctx.idx_query_fn(self)
         if in_neg is None:
             v_neg = 0
         else:
