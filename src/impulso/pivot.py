@@ -38,12 +38,19 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
         component_currents: dict component -> list of currents over frequencies
     '''
 
+    def unwrap(p: NDArray) -> NDArray:
+        return np.unwrap(p, period=360 if deg else 2*np.pi)
+
+
     def output_scalars_in_scalars_out(c: List[complex]) -> NDArray:
         match to_return:
             case 'M':
                 return np.abs(c)
             case 'P':
-                return np.angle(c, deg=deg)
+                if unwrap_phase:
+                    return unwrap(np.angle(c, deg=deg))
+                else:
+                    return np.angle(c, deg=deg)
             case 'MP':
                 raise RuntimeError
             case 'R':
@@ -59,7 +66,10 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
     def output_scalars_in_tuples_out(c: List[complex]) -> Tuple[NDArray, NDArray]:
         match to_return:
             case 'MP':
-                return (np.abs(c), np.angle(c, deg=deg))
+                if unwrap_phase:
+                    return (np.abs(c), unwrap(np.angle(c, deg=deg)))
+                else:
+                    return (np.abs(c), np.angle(c, deg=deg))
             case _:
                 raise RuntimeError
 
@@ -69,7 +79,10 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
             case 'M':
                 return np.abs(c)
             case 'P':
-                return np.angle(c, deg=deg)
+                if unwrap_phase:
+                    return unwrap(np.angle(c, deg=deg))
+                else:
+                    return np.angle(c, deg=deg)
             case 'MP':
                 raise RuntimeError
             case 'R':
@@ -85,31 +98,12 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
     def output_tuples_in_tuples_out(c: List[Tuple[complex,...]]) -> Tuple[NDArray, NDArray]:
         match to_return:
             case 'MP':
-                return (np.abs(c), np.angle(c, deg=deg))
+                if unwrap_phase:
+                    return (np.abs(c), unwrap(np.angle(c, deg=deg)))
+                else:
+                    return (np.abs(c), np.angle(c, deg=deg))
             case _:
                 raise RuntimeError
-
-
-    def unwrap(arr: NDArray) -> NDArray:
-        if to_return == 'P':
-            return np.unwrap(arr, period=360 if deg else 2*np.pi)
-        elif to_return == 'MP':
-            raise RuntimeError
-#            mag = arr[0]
-#            phase = arr[1]
-#            return np.array(mag), np.unwrap(phase, period=360 if deg else 2*np.pi)
-        else:
-            return arr
-
-    def tuple_unwrap(arr: Tuple[NDArray, NDArray]) -> NDArray | Tuple[NDArray, NDArray]:
-        if to_return == 'P':
-            return np.unwrap(arr, period=360 if deg else 2*np.pi)
-        elif to_return == 'MP':
-            mag = arr[0]
-            phase = arr[1]
-            return np.array(mag), np.unwrap(phase, period=360 if deg else 2*np.pi)
-        else:
-            return arr
 
     assert to_return in ['M', 'P', 'MP', 'R', 'I', 'C'], "to_return must be one of 'M', 'P', 'MP', 'R', 'I', or 'C'"
     freqs = list(data.keys())
@@ -127,9 +121,9 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
     for node in voltage_nodes:
         f_ = [data[f][0][node] for f in freqs]
         if to_return == 'MP':
-            v_ = tuple_unwrap(output_scalars_in_tuples_out(f_))
+            v_ = output_scalars_in_tuples_out(f_)
         else:
-            v_ = unwrap(output_scalars_in_scalars_out(f_))
+            v_ = output_scalars_in_scalars_out(f_)
         voltages[node] = v_
 
     # Determine which component currents to return
@@ -142,7 +136,6 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
         current_components = list(components)
 
     # Collect the requested currents
-    # TODO: implement unwrap for currents
     currents = {}
     for comp in current_components:
         f_ = [data[f][1][comp] for f in freqs]
