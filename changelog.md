@@ -1,4 +1,4 @@
-## [2.2.1] -
+## [2.2.1] - 2026-06-14
 
 - NPNLike renamed to BJTLike
 - typing improvements
