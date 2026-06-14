@@ -200,7 +200,7 @@ class Circuit:
     def add_instruction(self, instruction: Component):
 #        assert(isinstance(instruction, MutualInductance))
         try:
-            do_add = instruction.before_add(self, [])
+            do_add = instruction.before_add(self, ())
         except AttributeError:
             do_add = True
         if do_add:

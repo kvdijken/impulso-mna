@@ -18,6 +18,10 @@ type Currents = Dict[str | Component, Tuple[complex, ...]]
 type SingleFrequencySolution = Tuple[Voltages, Currents]
 type MultipleFrequencySolution = Dict[float, SingleFrequencySolution]
 
+type Times = List[float]
+type VoltagesSeries = Dict[Node, List[complex]]
+type CurrentsSeries = Dict[str | Component, List[complex]]
+type TimeSeriesSolution = Tuple[Times, VoltagesSeries, CurrentsSeries]
 
 class Statistics():
 
