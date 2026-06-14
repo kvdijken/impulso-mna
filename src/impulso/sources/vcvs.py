@@ -26,7 +26,6 @@ class VCVS(PowerSource):
     def connect(self, vnodes: Tuple[Node,Node]):
         self.vnodes = vnodes
 
-    # TODO: create test
     def __value__(self) -> str | None:
         return str(self.A) + "*(V(" + str(self.vnodes[1]) + ")-V(" + str(self.vnodes[0]) + "))"
 
@@ -37,10 +36,6 @@ class VCVS(PowerSource):
         i, j = ctx.idx_query_fn(self)
         p, q = ctx.idx_query_fn(self.vnodes)
         augm = ctx.augm_query_fn(self)
-#        i = nodes[VCVS.__out_neg]
-#        j = nodes[VCVS.__out_pos]
-#        p = nodes[VCVS.__in_neg]
-#        q = nodes[VCVS.__in_pos]
 
         if i is not None:
             ctx.Y[i, augm] += +1
