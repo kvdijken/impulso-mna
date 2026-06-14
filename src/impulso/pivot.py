@@ -19,10 +19,6 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
                           deg: bool = True,
                           unwrap_phase: bool = True
                           ) -> TimeSeriesSolution:
-#          ) -> Tuple[list[float], # frequencies
-#                     Dict[int | str, List[complex]], # node voltages over frequencies
-#                     Dict[str | Component, List[complex]] # component currents over frequencies
-#                    ]:
     '''
     Pivot the results of an AC sweep and select the desired node voltages and component currents.
     Args:
