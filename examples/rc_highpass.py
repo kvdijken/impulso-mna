@@ -19,7 +19,7 @@ circuit.add(R1, [2, 0])
 print(circuit)
 
 f_ = np.logspace(1, 6, 1000)
-results = ac_sweep(circuit, f_, show_output=True)
+results = ac_sweep(circuit, f_, show_output=True) # type: ignore
 
 vout = []
 for f in f_:

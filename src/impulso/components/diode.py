@@ -81,6 +81,9 @@ class Diode(Component, Stamper):
         # harder to converge.
         self._simple_limiter = True # set to False to use the more sophisticated limiter instead of simple clipping
 
+    def set_diode_limiter(self, limit: float) -> None:
+        self.DIODE_LIMITER_NVT = limit
+        
     def __component_typename__(self) -> str:
         return "D"
 

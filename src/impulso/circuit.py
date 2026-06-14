@@ -20,7 +20,7 @@ class Circuit:
     components: list[Component]  # component_id -> Component instance
 
 
-    def __init__(self, ground_node=0):
+    def __init__(self, ground_node: Node = 0):
         """Initialize an empty circuit."""
         self.components = []
         self.component_not_added = {}
@@ -197,14 +197,9 @@ class Circuit:
         self.shunt(array, nodes)
 
 
-    def add_instruction(self, instruction: Component):
-#        assert(isinstance(instruction, MutualInductance))
-        try:
-            do_add = instruction.before_add(self, ())
-        except AttributeError:
-            do_add = True
-        if do_add:
-            self.components.append(instruction)
+    def add_instruction(self, instruction: CircuitItem):
+        # TODO: solve the type ignore
+        self.components.append(instruction) # type: ignore
         return self
 
 

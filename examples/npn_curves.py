@@ -38,7 +38,7 @@ def main():
             for vce in vce_:
                 c = circuit(ib/1000,vce)
                 v, i = solve_dc(c,stats=stats)
-                ic.append(-np.real(i['Q1'][collector])*1000)
+                ic.append(-np.real(i['Q1'][collector])*1000) # type: ignore
             plt.plot(vce_, ic, 'k', lw=0.75, label=f"Ib={ib:.2f}mA")
 
     plt.grid()

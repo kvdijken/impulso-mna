@@ -25,7 +25,7 @@ plt.plot(time, np.real(voltages[2]),'k')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.suptitle('Sinusoidal Voltage Source with RC Load')
-plt.title(f'R={Quantity(R1.resistance,"Ω").render()}, C={Quantity(C1.capacitance,"F").render()}, Initial capacitor voltage={Quantity(C1.initial_voltage,"V").render()}')
+plt.title(f'R={Quantity(R1.resistance,"Ω").render()}, C={Quantity(C1.capacitance,"F").render()}, Initial capacitor voltage={Quantity(C1.initial_voltage,"V").render()}') # type: ignore
 plt.grid()
 plt.show()
 

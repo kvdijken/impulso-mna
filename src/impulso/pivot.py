@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Union, TypeVar, Optional
+from typing import List, Tuple, Dict, Union, TypeVar, Optional, Any, Sequence
 from collections import defaultdict
 from bisect import bisect_left, bisect_right
 from typing import Dict, Hashable, Literal, Tuple, TypeVar
@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 
 from .base import Node
 from .components.component import Component
-from .acdc import MultipleFrequencySolution, Times, VoltagesSeries, CurrentsSeries, TimeSeriesSolution
+from .acdc import MultipleFrequencySolution, Times, Voltage, Voltages, Current, Currents, VoltagesSeries, CurrentsSeries, TimeSeriesSolution
 
 
 
@@ -162,7 +162,6 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
 
 K = TypeVar('K', bound=Hashable)
 
-NodeType = Union[int, str]
 ComponentType = Union[str, "Component"]
 
 def _pivot_generic(data: List[Dict[K, complex]]) -> Dict[K, List[complex]]:
@@ -185,8 +184,8 @@ def _pivot_generic(data: List[Dict[K, complex]]) -> Dict[K, List[complex]]:
     return dict(out)
 
 
-def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that node]
-            )-> Dict[NodeType, List[complex]]: # node -> list of voltages
+def v_pivot(data: list[Voltages] # list[node -> voltage at that node]
+            )-> Dict[Node, List[Voltage]]: # node -> list of voltages
     """Pivot node-voltage history data into per-node voltage traces.
 
     Parameters
@@ -203,8 +202,8 @@ def v_pivot(data: list[Dict[NodeType, complex]] # list[node -> voltage at that n
     return _pivot_generic(data)  # type: ignore[return-value]
 
 
-def i_pivot(data: list[Dict[ComponentType, complex]] # list[component -> component current]
-            )-> Dict[ComponentType, List[complex]]: # component -> list of currents
+def i_pivot(data: list[Currents] # list[component -> component current]
+            )-> Dict[Component, List[Current]]: # component -> list of currents
     """Pivot component-current history data into per-component current traces.
 
     Parameters
@@ -221,7 +220,7 @@ def i_pivot(data: list[Dict[ComponentType, complex]] # list[component -> compone
     return _pivot_generic(data)  # type: ignore[return-value]
 
 
-def transpose_dicts(data:List[Dict[K,float]]) -> Dict[K,List[float]]:
+def transpose_dicts(data:List[Dict[K,Any]]) -> Dict[K,List[Any]]:
     '''
     Transpose a list of key–value mappings into
     a mapping of keys to value sequences.
@@ -332,7 +331,7 @@ def realify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]
     return [v.real for v in data]
 
 
-def imagify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]] | List[float]:
+def imagify(data: Dict[K, List[Any]] | List[Any]) -> Dict[K, List[float]] | List[float]:
     """Convert complex values to their imaginary parts.
 
     Parameters
@@ -351,7 +350,11 @@ def imagify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]
     return [v.imag for v in data]
 
 
-def magify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]] | List[float]:
+type _Any = float | Voltage | Current
+
+def magify(data: Dict[K, List[_Any]] |
+                 Sequence[_Any]
+            ) -> Dict[K, List[float]] | List[float]:
     """Convert complex values to their magnitudes.
 
     Parameters
@@ -366,6 +369,6 @@ def magify(data: Dict[K, List[complex]] | List[complex]) -> Dict[K, List[float]]
         If given a list, returns a list of magnitudes.
     """
     if isinstance(data, dict):
-        return {k: [abs(v) for v in lst] for k, lst in data.items()}
-    return list(map(np.abs, data))
+        return {k: [abs(v) for v in lst] for k, lst in data.items()} # type: ignore
+    return list(map(np.abs, data)) # type: ignore
 

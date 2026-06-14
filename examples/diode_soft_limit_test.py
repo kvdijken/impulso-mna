@@ -25,13 +25,13 @@ print(circuit)
 # Perform a DC sweep from 0V to 1V
 v1_ = np.linspace(0, 1, 1000)
 voltages, currents = dc_sweep(circuit, V1, v1_, show_output=True)
-id_ = magify(i_pivot(currents)['D1'])
-iv1_ = magify(i_pivot(currents)['V1'])
+id_ = magify(i_pivot(currents)['D1']) # type: ignore
+iv1_ = magify(i_pivot(currents)['V1']) # type: ignore
 
 # Plot the I-V curve
 plt.figure()
-plt.plot(v1_, id_,'k', label='Diode Current')
-plt.plot(v1_, iv1_,'r--', label='Voltage Source Current')
+plt.plot(v1_, id_,'k', label='Diode Current') # type: ignore
+plt.plot(v1_, iv1_,'r--', label='Voltage Source Current') # type: ignore
 plt.title('Diode I-V Curve')
 plt.xlabel('Voltage (V)')
 plt.ylabel('Current (A)')

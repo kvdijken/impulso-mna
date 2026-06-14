@@ -15,11 +15,11 @@ print(circuit)
 
 voltages, currents = solve_dc(circuit, show_output=True)
 
-v2 = voltages[2]
+v2 = voltages[2] # type: ignore
 print("Voltage 2:", np.real(v2))
 
-id = currents['D1']
+id = currents['D1'] # type: ignore
 print("Diode current:", np.real(id))
 
-ir = currents['R1']
+ir = currents['R1'] # type: ignore
 print("Resistor current:", np.real(ir))

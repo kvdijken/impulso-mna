@@ -27,6 +27,6 @@ plt.plot(t, np.real(v[1]),'k',label='Voltage at node 1')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.suptitle('Resonating LC Tank Circuit')
-plt.title(f'L={Quantity(l1,"H").render()}, C={Quantity(c1,"F").render()}, Initial current={Quantity(L1.initial_current,"A").render()}')
+plt.title(f'L={Quantity(l1,"H").render()}, C={Quantity(c1,"F").render()}, Initial current={Quantity(L1.initial_current,"A").render()}') # type: ignore
 plt.grid()
 plt.show()

@@ -48,7 +48,7 @@ fig, axL = plt.subplots()
 axR = axL.twinx()
 axL.plot(t, v[OUT], 'k', label=f'V({OUT})')
 #axR.plot(t, [6], 'r', label='V(6)')
-axR.plot(t,emitter_current(i[Q3]), 'r')
+axR.plot(t,emitter_current(i[Q3]), 'r') # type: ignore
 axL.grid()
 axL.set_xlabel('Time (s)')
 axL.set_ylabel('Voltage (V)')

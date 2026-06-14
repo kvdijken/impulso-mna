@@ -5,6 +5,7 @@ import time
 import sys
 
 import numpy as np
+from numpy.typing import NDArray
 
 from .components.component import *
 from .sources.source import *
@@ -204,8 +205,8 @@ def solve_transient(circuit: Circuit,
                     dt: float,
                     show_output: bool = False,
                     stats: Optional[Statistics] = None
-                    ) -> Tuple[np.ndarray,          # time
-                               Dict[int,            # node
+                    ) -> Tuple[NDArray,          # time
+                               Dict[Node,            # node
                                     List[float]],   # voltage over time
                                Dict[str|Component, # component
                                     List[float]     # current over time
@@ -215,6 +216,6 @@ def solve_transient(circuit: Circuit,
         time, _v, _c = solver.solve(t_stop, dt, show_output=show_output, stats=_stats)
         _v = transpose_dicts(_v)
         _c = transpose_dicts(_c)
-    return time, _v, _c
+    return time, _v, _c # type: ignore
 
 
