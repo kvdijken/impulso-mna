@@ -1,8 +1,8 @@
-from typing import List, Tuple, Dict, Iterable, Any
+from typing import List, Tuple, Dict, Iterable, Any, Optional
 
 from .base import Analysis
 from .circuit import Circuit
-from .acdc import solve_ac, solve_dc, Statistics, Statistics
+from .acdc import solve_ac, solve_dc, Statistics, Statistics, MultipleFrequencySolution, Voltages, Currents
 from .components.component import Component, Context
 from .sources.dcvoltagesource import DCVoltageSource
 from .sources.dccurrentsource import DCCurrentSource
@@ -13,10 +13,11 @@ from .sources.dccurrentsource import DCCurrentSource
 def ac_sweep(circuit: Circuit,
              freqs: List[float],
              show_output: bool = False,
-             stats: Statistics = None # if not None, this function will not own the stats and not print them
-            ) -> dict[float, # frequency
-                      Tuple[Dict[int | str, complex], # node voltages
-                            Dict[str | Component, complex]]]: # currents through components
+             stats: Optional[Statistics] = None # if not None, this function will not own the stats and not print them
+             ) -> MultipleFrequencySolution:
+#            ) -> dict[float, # frequency
+#                      Tuple[Dict[int | str, complex], # node voltages
+#                            Dict[str | Component, complex]]]: # currents through components
     """
     Run AC sweep over multiple frequencies.
 
@@ -28,7 +29,7 @@ def ac_sweep(circuit: Circuit,
                         freqs,
                         show_output=show_output,
                         stats=_stats)
-    return result
+    return result # pyright: ignore[reportReturnType]
 
 
 def iter_with_last(iterable):
@@ -50,9 +51,9 @@ def dc_sweep(circuit: Circuit,
              dc_source: DCVoltageSource | DCCurrentSource,
              dc_range: Iterable[float],
              show_output: bool = False,
-             stats: Statistics = None # if not None, this function will not own the stats and not print them
-             )  -> Tuple[List[Any], # where Any is Dict[int | str, complex] (these are voltages)
-                         List[Any]]: # where Any is Dict[str | Component, complex] (these are currents)
+             stats: Optional[Statistics] = None # if not None, this function will not own the stats and not print them
+             )  -> Tuple[List[Voltages],
+                         List[Currents]]:
     '''
     Run DC sweep over multiple values of a voltage or current source.
 

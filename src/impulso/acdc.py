@@ -12,16 +12,19 @@ from .sources.source import PowerSource
 from .helperregistry import registry, StampingHelper
 
 
-
-type Voltages = Dict[Node, complex]
-type Currents = Dict[str | Component, Tuple[complex, ...]]
+type Voltage = complex
+type Current = Tuple[complex, ...] # One component can carry multiple currents
+                                   # Though only compound components
+type Voltages = Dict[Node, Voltage]
+type Currents = Dict[str | Component, Current]
 type SingleFrequencySolution = Tuple[Voltages, Currents]
 type MultipleFrequencySolution = Dict[float, SingleFrequencySolution]
 
 type Times = List[float]
-type VoltagesSeries = Dict[Node, List[complex]]
-type CurrentsSeries = Dict[str | Component, List[complex]]
+type VoltagesSeries = Dict[Node, NDArray]
+type CurrentsSeries = Dict[str | Component, NDArray]
 type TimeSeriesSolution = Tuple[Times, VoltagesSeries, CurrentsSeries]
+
 
 class Statistics():
 

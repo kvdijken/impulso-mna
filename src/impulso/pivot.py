@@ -4,6 +4,7 @@ from bisect import bisect_left, bisect_right
 from typing import Dict, Hashable, Literal, Tuple, TypeVar
 
 import numpy as np
+from numpy.typing import NDArray
 
 from .base import Node
 from .components.component import Component
@@ -41,22 +42,70 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
         component_currents: dict component -> list of currents over frequencies
     '''
 
-    def output(c: List[complex]):
+    def output_scalars_in_scalars_out(c: List[complex]) -> NDArray:
         match to_return:
             case 'M':
                 return np.abs(c)
             case 'P':
                 return np.angle(c, deg=deg)
             case 'MP':
-                return (np.abs(c), np.angle(c, deg=deg))
+                raise RuntimeError
             case 'R':
                 return np.real(c)
             case 'I':
                 return np.imag(c)
             case 'C':
-                return c
+                return np.array(c)
+            case _:
+                return np.array(c)
 
-    def unwrap(arr):
+
+    def output_scalars_in_tuples_out(c: List[complex]) -> Tuple[NDArray, NDArray]:
+        match to_return:
+            case 'MP':
+                return (np.abs(c), np.angle(c, deg=deg))
+            case _:
+                raise RuntimeError
+
+
+    def output_tuples_in_scalars_out(c: List[Tuple[complex, ...]]) -> NDArray:
+        match to_return:
+            case 'M':
+                return np.abs(c)
+            case 'P':
+                return np.angle(c, deg=deg)
+            case 'MP':
+                raise RuntimeError
+            case 'R':
+                return np.real(c)
+            case 'I':
+                return np.imag(c)
+            case 'C':
+                return np.array(c)
+            case _:
+                return np.array(c)
+
+
+    def output_tuples_in_tuples_out(c: List[Tuple[complex,...]]) -> Tuple[NDArray, NDArray]:
+        match to_return:
+            case 'MP':
+                return (np.abs(c), np.angle(c, deg=deg))
+            case _:
+                raise RuntimeError
+
+
+    def unwrap(arr: NDArray) -> NDArray:
+        if to_return == 'P':
+            return np.unwrap(arr, period=360 if deg else 2*np.pi)
+        elif to_return == 'MP':
+            raise RuntimeError
+#            mag = arr[0]
+#            phase = arr[1]
+#            return np.array(mag), np.unwrap(phase, period=360 if deg else 2*np.pi)
+        else:
+            return arr
+
+    def tuple_unwrap(arr: Tuple[NDArray, NDArray]) -> NDArray | Tuple[NDArray, NDArray]:
         if to_return == 'P':
             return np.unwrap(arr, period=360 if deg else 2*np.pi)
         elif to_return == 'MP':
@@ -78,26 +127,34 @@ def freq_pivot_and_select(data: MultipleFrequencySolution,
         voltage_nodes = list(set(voltage_nodes) & set(first_voltages.keys()))
 
     # Collect the requested voltages
-    voltages = {
-        node: unwrap(np.array(output(
-            [data[f][0][node] for f in freqs]
-            ))) for node in voltage_nodes
-    }
+    voltages = {}
+    for node in voltage_nodes:
+        f_ = [data[f][0][node] for f in freqs]
+        if to_return == 'MP':
+            v_ = tuple_unwrap(output_scalars_in_tuples_out(f_))
+        else:
+            v_ = unwrap(output_scalars_in_scalars_out(f_))
+        voltages[node] = v_
 
     # Determine which component currents to return
     if current_components is None:
+        # Returns currents for all components
         current_components = list(first_currents.keys())
     else:
         assert set(current_components) - set(first_currents.keys()) == set(), "Some specified current components are not present in the data"
-        current_components = list(set(current_components) & set(first_currents.keys()))
+        components = set(current_components) & set(first_currents.keys())
+        current_components = list(components)
 
     # Collect the requested currents
-    currents = {
-        comp: output(np.array(
-            [data[f][1][comp] for f in freqs]
-            ))
-               for comp in current_components
-    }
+    # TODO: implement unwrap for currents
+    currents = {}
+    for comp in current_components:
+        f_ = [data[f][1][comp] for f in freqs]
+        if to_return == 'MP':
+            i_ = output_tuples_in_tuples_out(f_)
+        else:
+            i_ = output_tuples_in_scalars_out(f_)
+        currents[comp] = i_
 
     return freqs, voltages, currents
 

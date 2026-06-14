@@ -127,7 +127,7 @@ class Solver_Transient(Solver_ACDC):
               t_stop: float,
               dt: float,
               show_output: bool = False,
-              stats: Statistics = None # if not None, this function will not own the stats and not print them
+              stats: Optional[Statistics] = None # if not None, this function will not own the stats and not print them
               ) -> Tuple[np.ndarray, List[Dict[int, float]], List[Dict[str | Component, float]]]:
         '''              ^time       ^node voltages          ^component currents
         '''
@@ -164,8 +164,8 @@ class Solver_Transient(Solver_ACDC):
 
             # Prepare history with the initial voltages for all nodes
             # now at t=0
-            self.ctx.voltage_history = [voltage.copy()]
-            self.ctx.current_history = [current.copy()]
+            self.ctx.voltage_history = [voltage.copy()] # pyright: ignore[reportAttributeAccessIssue]
+            self.ctx.current_history = [current.copy()] # pyright: ignore[reportAttributeAccessIssue]
 
             self._reset_cache() # clear cache after initial conditions have been set and solved for,
                                 # so that we don't accidentally use cached values from the IC solve
@@ -180,8 +180,8 @@ class Solver_Transient(Solver_ACDC):
                             progress.update(t)
                         if os.environ.get("IMPULSO_DEBUG", '0') == '1':
                             print(f"Time: {t} s\n")
-                        self.ctx.voltage_history.append(voltage.copy())
-                        self.ctx.current_history.append(current.copy())
+                        self.ctx.voltage_history.append(voltage.copy()) # pyright: ignore[reportAttributeAccessIssue]
+                        self.ctx.current_history.append(current.copy()) # pyright: ignore[reportAttributeAccessIssue]
                         for comp in self.components:
                             comp.update_state(self.ctx)
                 except np.linalg.LinAlgError as e:
@@ -193,8 +193,8 @@ class Solver_Transient(Solver_ACDC):
                     # results up until the point where the error occurred.
                     if show_output:
                         print(f"Linear algebra error at time {self.ctx.t}: {e}")
-                    times = times[:len(self.ctx.voltage_history)]
-        return times, self.ctx.voltage_history, self.ctx.current_history
+                    times = times[:len(self.ctx.voltage_history)] # pyright: ignore[reportAttributeAccessIssue]
+        return times, self.ctx.voltage_history, self.ctx.current_history # pyright: ignore[reportReturnType, reportAttributeAccessIssue]
 
 
 
@@ -203,7 +203,7 @@ def solve_transient(circuit: Circuit,
                     t_stop: float,
                     dt: float,
                     show_output: bool = False,
-                    stats: Statistics = None
+                    stats: Optional[Statistics] = None
                     ) -> Tuple[np.ndarray,          # time
                                Dict[int,            # node
                                     List[float]],   # voltage over time

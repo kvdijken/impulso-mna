@@ -42,7 +42,7 @@ results = solve_ac(circuit,freqs,show_output=True)
 
 freqs, node_voltages, _c = freq_pivot_and_select(results,
                                             voltage_nodes=['Q1_C'],
-                                            current_components=[],
+                                            current_components=[Q1],
                                             to_return='MP')
 vout = node_voltages['Q1_C'][0]
 phase = node_voltages['Q1_C'][1]
@@ -53,6 +53,8 @@ plt.title('Frequency response of NPN transistor amplifier')
 axL.plot(freqs,vout,'k')
 axL.grid()
 axR.plot(freqs,phase,'k--')
+# Collector current:
+#axR.plot(freqs,_c[Q1][1][:,2],'r')
 axL.set_xscale('log')
 axL.set_xlabel('Frequency (Hz)')
 axL.set_ylabel('Voltage at Q1_C (V)')
