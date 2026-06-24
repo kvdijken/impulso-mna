@@ -42,7 +42,7 @@ class CircuitItem(abc.ABC):
 
     def __repr__(self) -> str:
         try:
-            value = self.__value__() + self.id
+            value = self.__value__()
             _type_name = self.__component_typename__()
             if value is None:
                 return _type_name
