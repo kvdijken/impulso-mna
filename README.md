@@ -7,7 +7,7 @@
 
 **impulso-mna** is a Python package for circuit simulation based on **Modified Nodal Analysis (MNA)**. It provides a flexible and extensible framework for DC, AC, and transient analysis of electrical circuits, with a strong focus on clarity, composability, and performance.
 
-The package is now in version 2.2.0.
+The package is now in version 2.2.2.
 
 The package is installed as `impulso-mna` but imported as:
 

@@ -10,7 +10,7 @@ include = ["src/impulso"]
 
 [project]
 name = "impulso_mna"
-version = "2.3.0"
+version = "2.2.2"
 authors = [
   { name="kvdijken", email="sla_nippers_0x@icloud.com" },
 ]
