@@ -1,7 +1,9 @@
-## [2.3.0] = 2026
+## [2.2.2] = 2026
 
 - print single frequency or frequency range for AC analysis
-
+- corrected bug in SinusoidalCurrentSource where only the amplitude was
+  returned as the current, not the time-dependent part.
+  
 
 ## [2.2.1] - 2026-06-14
 

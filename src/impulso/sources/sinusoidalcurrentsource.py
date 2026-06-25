@@ -60,6 +60,14 @@ class SinusoidalCurrentSource(PowerSource):
         return False
 
     def stamp(self, ctx: Context):
+        i = self.current(ctx)
+        p, q = ctx.idx_query_fn(self)
+        if p is not None:
+            ctx.z[p] -= i # amps
+        if q is not None:
+            ctx.z[q] += i # amps
+
+    def current(self, ctx: Context) -> complex:
         if ctx.analysis_type == Analysis.AC:
             if self.ac_source:
                 # In AC analysis, we treat the sinusoidal current source as a phasor with magnitude equal to the amplitude and phase equal to the specified phase.
@@ -75,15 +83,7 @@ class SinusoidalCurrentSource(PowerSource):
                 i = self.dc
             else:
                 i = self.current_at_time(ctx.t)
+        return i
 
-        p, q = ctx.idx_query_fn(self)
-        i = self.amplitude
-        if p is not None:
-            ctx.z[p] -= i # amps
-        if q is not None:
-            ctx.z[q] += i # amps
-
-    def current(self, ctx: Context) -> complex:
-        return self.amplitude
 
 
