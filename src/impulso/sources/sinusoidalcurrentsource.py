@@ -46,10 +46,11 @@ class SinusoidalCurrentSource(PowerSource):
         return "SINCS"
 
     def __value__(self) -> str | None:
+        base = "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="")
         if self.ac_source:
-            return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", AC}"
+            return base + ", AC}"
         else:
-            return "{A=" + Quantity(self.amplitude,"A").render(form="si",spacer="") + ", phi=" + str(self.phase) + " rad, DC=" + Quantity(self.dc,"A").render(form="si",spacer="") + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
+            return base + ", f=" + Quantity(self.frequency,"Hz").render(form="si",spacer="") + "}"
 
     def current_at_time(self, t) -> float:
         assert not self.is_ac()
