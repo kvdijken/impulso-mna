@@ -59,9 +59,7 @@ class SinusoidalCurrentSource(PowerSource):
         return False
 
     def stamp(self, ctx: Context):
-        ac_analysis = ctx.analysis_type == Analysis.AC
-
-        if ac_analysis:
+        if ctx.analysis_type == Analysis.AC:
             if self.ac_source:
                 # In AC analysis, we treat the sinusoidal current source as a phasor with magnitude equal to the amplitude and phase equal to the specified phase.
                 i = self.amplitude * np.exp(1j * self.phase)
